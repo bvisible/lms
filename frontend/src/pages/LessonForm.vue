@@ -84,6 +84,7 @@ import {
 	createResource,
 	FormControl,
 	usePageMeta,
+	toast,
 } from 'frappe-ui'
 import {
 	computed,
@@ -97,8 +98,8 @@ import { sessionStore } from '../stores/session'
 import EditorJS from '@editorjs/editorjs'
 import LessonHelp from '@/components/LessonHelp.vue'
 import { ChevronRight } from 'lucide-vue-next'
-import { createToast, getEditorTools, enablePlyr } from '@/utils'
-import { capture } from '@/telemetry'
+import { getEditorTools, enablePlyr } from '@/utils'
+import { capture, startRecording, stopRecording } from '@/telemetry'
 import { useOnboarding } from 'frappe-ui/frappe'
 
 const { brand } = sessionStore()
@@ -130,6 +131,7 @@ onMounted(() => {
 		window.location.href = '/login'
 	}
 	capture('lesson_form_opened')
+	startRecording()
 	editor.value = renderEditor('content')
 	instructorEditor.value = renderEditor('instructor-notes')
 	window.addEventListener('keydown', keyboardShortcut)
@@ -140,7 +142,6 @@ const renderEditor = (holder) => {
 	return new EditorJS({
 		holder: holder,
 		tools: getEditorTools(true),
-		autofocus: true,
 		defaultBlock: 'markdown',
 		onChange: async (api, event) => {
 			enablePlyr()
@@ -225,6 +226,7 @@ const keyboardShortcut = (e) => {
 onBeforeUnmount(() => {
 	clearInterval(autoSaveInterval)
 	window.removeEventListener('keydown', keyboardShortcut)
+	stopRecording()
 })
 
 const newLessonResource = createResource({
@@ -382,8 +384,10 @@ const saveLesson = (e) => {
 		showSuccessMessage = true
 	}
 	editor.value.save().then((outputData) => {
+		outputData = removeEmptyBlocks(outputData)
 		lesson.content = JSON.stringify(outputData)
 		instructorEditor.value.save().then((outputData) => {
+			outputData = removeEmptyBlocks(outputData)
 			lesson.instructor_content = JSON.stringify(outputData)
 			if (lessonDetails.data?.lesson) {
 				editCurrentLesson()
@@ -392,6 +396,14 @@ const saveLesson = (e) => {
 			}
 		})
 	})
+}
+
+const removeEmptyBlocks = (outputData) => {
+	let blocks = outputData.blocks.filter((block) => {
+		return Object.keys(block.data).length > 0 || block.type == 'paragraph'
+	})
+	outputData.blocks = blocks
+	return outputData
 }
 
 const createNewLesson = () => {
@@ -410,14 +422,14 @@ const createNewLesson = () => {
 								updateOnboardingStep('create_first_lesson')
 
 							capture('lesson_created')
-							showToast('Success', 'Lesson created successfully', 'check')
+							toast.success(__('Lesson created successfully'))
 							lessonDetails.reload()
 						},
 					}
 				)
 			},
 			onError(err) {
-				showToast('Error', err.message, 'x')
+				toast.error(err.messages?.[0] || err)
 			},
 		}
 	)
@@ -434,11 +446,11 @@ const editCurrentLesson = () => {
 			},
 			onSuccess() {
 				showSuccessMessage
-					? showToast('Success', 'Lesson updated successfully', 'check')
+					? toast.success(__('Lesson updated successfully'))
 					: ''
 			},
 			onError(err) {
-				showToast('Error', err.message, 'x')
+				toast.error(err.message)
 			},
 		}
 	)
@@ -451,20 +463,6 @@ const validateLesson = () => {
 	if (!lesson.content) {
 		return 'Content is required'
 	}
-}
-
-const showToast = (title, text, icon) => {
-	createToast({
-		title: title,
-		text: text,
-		icon: icon,
-		iconClasses:
-			icon == 'check'
-				? 'bg-surface-green-3 text-ink-white rounded-md p-px'
-				: 'bg-surface-red-5 text-ink-white rounded-md p-px',
-		position: icon == 'check' ? 'bottom-right' : 'top-center',
-		timeout: icon == 'check' ? 5 : 10,
-	})
 }
 
 const breadcrumbs = computed(() => {
@@ -662,6 +660,57 @@ iframe {
 .plyr--video {
 	border: 1px solid theme('colors.gray.200');
 	border-radius: 8px;
+}
+
+.ce-popover__container {
+	border-radius: 12px;
+	padding: 8px;
+}
+
+.cdx-search-field {
+	border: none;
+}
+
+.cdx-search-field__input {
+	font-weight: 400;
+	font-size: 13px;
+}
+
+.cdx-search-field__input::before {
+	font-weight: 400;
+}
+
+.cdx-search-field__input:focus {
+	--tw-ring-color: theme('colors.gray.100');
+}
+
+.ce-popover-item__title {
+	font-size: 13px;
+	font-weight: 400;
+}
+
+.ce-popover-item__icon svg {
+	width: 15px;
+	height: 15px;
+}
+
+.ce-popover--opened > .ce-popover__container {
+	max-height: unset;
+}
+
+.cdx-search-field__icon svg {
+	width: 15px;
+	height: 15px;
+}
+
+.cdx-search-field__icon {
+	margin-right: 5px;
+}
+
+.cdx-block.embed-tool {
+	position: relative;
+	display: inline-block;
+	width: 100%;
 }
 
 :root {

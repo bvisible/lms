@@ -6,7 +6,7 @@
 		}"
 	>
 		<template #body>
-			<div class="p-5 text-base max-h-[75vh] overflow-y-auto">
+			<div class="p-5 text-base">
 				<div class="text-lg text-ink-gray-9 font-semibold mb-5">
 					{{
 						assignmentID === 'new'
@@ -14,7 +14,7 @@
 							: __('Edit Assignment')
 					}}
 				</div>
-				<div class="space-y-4">
+				<div class="space-y-4 max-h-[75vh] overflow-y-auto">
 					<FormControl
 						v-model="assignment.title"
 						:label="__('Title')"
@@ -37,7 +37,7 @@
 							@change="(val) => (assignment.question = val)"
 							:editable="true"
 							:fixedMenu="true"
-							editorClass="prose-sm max-w-none border-b border-x bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
+							editorClass="prose-sm max-w-none border-b border-x bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem] max-h-[18rem] overflow-y-auto"
 						/>
 					</div>
 				</div>
@@ -64,9 +64,9 @@
 	</Dialog>
 </template>
 <script setup lang="ts">
-import { Button, Dialog, FormControl, TextEditor } from 'frappe-ui'
+import { Button, Dialog, FormControl, TextEditor, toast } from 'frappe-ui'
 import { computed, reactive, watch } from 'vue'
-import { showToast } from '@/utils'
+import { escapeHTML } from '@/utils'
 
 const show = defineModel()
 const assignments = defineModel<Assignments>('assignments')
@@ -114,41 +114,54 @@ watch(
 	{ flush: 'post' }
 )
 
-const saveAssignment = () => {
-	if (props.assignmentID == 'new') {
-		assignments.value.insert.submit(
-			{
-				...assignment,
-			},
-			{
-				onSuccess() {
-					show.value = false
-					showToast(
-						__('Success'),
-						__('Assignment created successfully'),
-						'check'
-					)
-				},
-			}
-		)
-	} else {
-		assignments.value.setValue.submit(
-			{
-				...assignment,
-				name: props.assignmentID,
-			},
-			{
-				onSuccess() {
-					show.value = false
-					showToast(
-						__('Success'),
-						__('Assignment updated successfully'),
-						'check'
-					)
-				},
-			}
-		)
+watch(show, (newVal) => {
+	if (newVal && props.assignmentID === 'new') {
+		assignment.title = ''
+		assignment.type = ''
+		assignment.question = ''
 	}
+})
+
+const validateTitle = () => {
+	assignment.title = escapeHTML(assignment.title.trim())
+}
+
+const saveAssignment = () => {
+	validateTitle()
+	if (props.assignmentID == 'new') {
+		createAssignment()
+	} else {
+		updateAssignment()
+	}
+}
+
+const createAssignment = () => {
+	assignments.value.insert.submit(
+		{
+			...assignment,
+		},
+		{
+			onSuccess() {
+				show.value = false
+				toast.success(__('Assignment created successfully'))
+			},
+		}
+	)
+}
+
+const updateAssignment = () => {
+	assignments.value.setValue.submit(
+		{
+			...assignment,
+			name: props.assignmentID,
+		},
+		{
+			onSuccess() {
+				show.value = false
+				toast.success(__('Assignment updated successfully'))
+			},
+		}
+	)
 }
 
 const assignmentOptions = computed(() => {

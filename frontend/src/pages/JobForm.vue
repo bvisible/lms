@@ -9,8 +9,8 @@
 			</Button>
 		</header>
 		<div class="py-5">
-			<div class="container border-b mb-4 pb-4">
-				<div class="text-lg font-semibold mb-4">
+			<div class="container border-b mb-4 pb-5">
+				<div class="text-lg font-semibold mb-4 text-ink-gray-9">
 					{{ __('Job Details') }}
 				</div>
 				<div class="grid grid-cols-2 gap-5">
@@ -20,6 +20,22 @@
 							:label="__('Title')"
 							:required="true"
 						/>
+						<FormControl
+							v-model="job.type"
+							:label="__('Type')"
+							type="select"
+							:options="jobTypes"
+							:required="true"
+						/>
+						<FormControl
+							v-model="job.work_mode"
+							:label="__('Work Mode')"
+							type="select"
+							:options="workModes"
+							:required="true"
+						/>
+					</div>
+					<div class="space-y-4">
 						<FormControl
 							v-model="job.location"
 							:label="__('City')"
@@ -31,17 +47,8 @@
 							:label="__('Country')"
 							:required="true"
 						/>
-					</div>
-					<div>
 						<FormControl
-							v-model="job.type"
-							:label="__('Type')"
-							type="select"
-							:options="jobTypes"
-							class="mb-4"
-							:required="true"
-						/>
-						<FormControl
+							v-if="jobName != 'new'"
 							v-model="job.status"
 							:label="__('Status')"
 							type="select"
@@ -51,8 +58,8 @@
 					</div>
 				</div>
 			</div>
-			<div class="container border-b mb-4 pb-4">
-				<div class="text-lg font-semibold mb-4">
+			<div class="container border-b mb-4 pb-5">
+				<div class="text-lg font-semibold mb-4 text-ink-gray-9">
 					{{ __('Company Details') }}
 				</div>
 				<div class="grid grid-cols-2 gap-5">
@@ -145,12 +152,13 @@ import {
 	TextEditor,
 	FileUploader,
 	usePageMeta,
+	toast,
 } from 'frappe-ui'
 import { computed, onMounted, reactive, inject } from 'vue'
 import { FileText, X } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
-import { getFileSize, showToast } from '../utils'
+import { escapeHTML, getFileSize, validateFile } from '@/utils'
 
 const user = inject('$user')
 const router = useRouter()
@@ -224,6 +232,7 @@ const job = reactive({
 	location: '',
 	country: '',
 	type: 'Full Time',
+	work_mode: 'On-site',
 	status: 'Open',
 	company_name: '',
 	company_website: '',
@@ -239,6 +248,7 @@ onMounted(() => {
 })
 
 const saveJob = () => {
+	validateJobFields()
 	if (jobDetail.data) {
 		editJobDetails()
 	} else {
@@ -259,7 +269,7 @@ const createNewJob = () => {
 				})
 			},
 			onError(err) {
-				showToast('Error', err.messages?.[0] || err, 'x')
+				toast.error(err.messages?.[0] || err)
 			},
 		}
 	)
@@ -278,10 +288,18 @@ const editJobDetails = () => {
 				})
 			},
 			onError(err) {
-				showToast('Error', err.messages?.[0] || err, 'x')
+				toast.error(err.messages?.[0] || err)
 			},
 		}
 	)
+}
+
+const validateJobFields = () => {
+	Object.keys(job).forEach((key) => {
+		if (key != 'description' && typeof job[key] === 'string') {
+			job[key] = escapeHTML(job[key])
+		}
+	})
 }
 
 const saveImage = (file) => {
@@ -292,19 +310,20 @@ const removeImage = () => {
 	job.image = null
 }
 
-const validateFile = (file) => {
-	let extension = file.name.split('.').pop().toLowerCase()
-	if (!['jpg', 'jpeg', 'png'].includes(extension)) {
-		return 'Only image file is allowed.'
-	}
-}
-
 const jobTypes = computed(() => {
 	return [
 		{ label: 'Full Time', value: 'Full Time' },
 		{ label: 'Part Time', value: 'Part Time' },
 		{ label: 'Contract', value: 'Contract' },
 		{ label: 'Freelance', value: 'Freelance' },
+	]
+})
+
+const workModes = computed(() => {
+	return [
+		{ label: 'On site', value: 'On-site' },
+		{ label: 'Hybrid', value: 'Hybrid' },
+		{ label: 'Remote', value: 'Remote' },
 	]
 })
 

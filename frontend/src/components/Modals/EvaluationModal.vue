@@ -66,9 +66,9 @@
 	</Dialog>
 </template>
 <script setup>
-import { Dialog, createResource, Select, FormControl } from 'frappe-ui'
+import { Dialog, createResource, Select, FormControl, toast } from 'frappe-ui'
 import { reactive, watch, inject } from 'vue'
-import { createToast, formatTime } from '@/utils/'
+import { formatTime } from '@/utils/'
 
 const user = inject('$user')
 const dayjs = inject('$dayjs')
@@ -90,7 +90,7 @@ const props = defineProps({
 	},
 })
 
-let evaluation = reactive({
+const evaluation = reactive({
 	course: '',
 	date: '',
 	start_time: '',
@@ -139,29 +139,14 @@ function submitEvaluation(close) {
 			close()
 		},
 		onError(err) {
-			let message = err.messages?.[0] || err
-			let unavailabilityMessage
-
-			if (typeof message === 'string') {
-				unavailabilityMessage = message?.includes('unavailable')
-			} else {
-				unavailabilityMessage = false
-			}
-
-			createToast({
-				title: unavailabilityMessage ? __('Evaluator is Unavailable') : '',
-				text: message,
-				icon: unavailabilityMessage ? 'alert-circle' : 'x',
-				iconClasses: 'bg-yellow-600 text-ink-white rounded-md p-px',
-				position: 'top-center',
-				timeout: 10,
-			})
+			console.log(err.messages?.[0] || err)
+			toast.warning(__(err.messages?.[0] || err), { duration: 10000 })
 		},
 	})
 }
 
 const getCourses = () => {
-	let courses = []
+	const courses = []
 	for (const course of props.courses) {
 		if (course.evaluator) {
 			courses.push({
@@ -171,7 +156,7 @@ const getCourses = () => {
 		}
 	}
 
-	if (courses.length == 1) {
+	if (courses.length === 1) {
 		evaluation.course = courses[0].value
 	}
 

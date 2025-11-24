@@ -16,13 +16,14 @@
  "field_order": [
   "title",
   "video_link",
+  "tags",
   "column_break_3",
   "instructors",
-  "tags",
-  "column_break_htgn",
-  "image",
   "category",
   "status",
+  "column_break_htgn",
+  "image",
+  "card_gradient",
   "section_break_7",
   "published",
   "published_on",
@@ -42,11 +43,14 @@
   "paid_course",
   "enable_certification",
   "paid_certificate",
-  "evaluator",
   "column_break_acoj",
+  "section_break_vqbh",
   "course_price",
   "currency",
   "amount_usd",
+  "column_break_sflq",
+  "evaluator",
+  "timezone",
   "tab_4_tab",
   "statistics_section",
   "enrollments",
@@ -98,8 +102,7 @@
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
-   "label": "Preview Image",
-   "reqd": 1
+   "label": "Preview Image"
   },
   {
    "fieldname": "tags",
@@ -272,6 +275,26 @@
    "fieldtype": "Link",
    "label": "Evaluator",
    "options": "Course Evaluator"
+  },
+  {
+   "fieldname": "card_gradient",
+   "fieldtype": "Select",
+   "label": "Color",
+   "options": "Red\nBlue\nGreen\nAmber\nCyan\nOrange\nPink\nPurple\nTeal\nViolet\nYellow\nGray"
+  },
+  {
+   "fieldname": "section_break_vqbh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_sflq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "paid_certificate",
+   "fieldname": "timezone",
+   "fieldtype": "Data",
+   "label": "Timezone"
   }
  ],
  "is_published_field": "published",
@@ -290,8 +313,8 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2025-03-13 16:01:19.105212",
- "modified_by": "Administrator",
+ "modified": "2025-10-13 15:08:11.734204",
+ "modified_by": "sayali@frappe.io",
  "module": "LMS",
  "name": "LMS Course",
  "owner": "Administrator",
@@ -319,8 +342,21 @@
    "role": "Course Creator",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Moderator",
+   "share": 1,
+   "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

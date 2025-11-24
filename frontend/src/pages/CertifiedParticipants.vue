@@ -3,7 +3,7 @@
 		class="sticky flex items-center justify-between top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
 	>
 		<Breadcrumbs :items="breadcrumbs" />
-		<router-link :to="{ name: 'Batches' }">
+		<router-link :to="{ name: 'Batches', query: { certification: true } }">
 			<Button>
 				<template #prefix>
 					<GraduationCap class="h-4 w-4 stroke-1.5" />
@@ -12,10 +12,7 @@
 			</Button>
 		</router-link>
 	</header>
-	<div
-		v-if="participants.data?.length"
-		class="mx-auto w-full max-w-4xl pt-6 pb-10"
-	>
+	<div class="mx-auto w-full max-w-4xl pt-6 pb-10">
 		<div class="flex flex-col md:flex-row justify-between mb-4 px-3">
 			<div class="text-xl font-semibold text-ink-gray-7 mb-4 md:mb-0">
 				{{ memberCount }} {{ __('certified members') }}
@@ -41,7 +38,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="divide-y">
+		<div v-if="participants.data?.length" class="divide-y">
 			<template v-for="participant in participants.data">
 				<router-link
 					:to="{
@@ -92,6 +89,7 @@
 				</router-link>
 			</template>
 		</div>
+		<EmptyState v-else type="Certified Members" />
 		<div
 			v-if="!participants.list.loading && participants.hasNextPage"
 			class="flex justify-center mt-5"
@@ -99,22 +97,6 @@
 			<Button @click="participants.next()">
 				{{ __('Load More') }}
 			</Button>
-		</div>
-	</div>
-	<div
-		v-else
-		class="flex flex-col items-center justify-center text-sm text-ink-gray-5 mt-48"
-	>
-		<BookOpen class="size-10 mx-auto stroke-1 text-ink-gray-4" />
-		<div class="text-lg font-medium mb-1">
-			{{ __('No certified members') }}
-		</div>
-		<div class="leading-5 w-2/5 text-center">
-			{{
-				__(
-					'No certified members found. Please check again later or get certified yourself.'
-				)
-			}}
 		</div>
 	</div>
 </template>
@@ -130,8 +112,9 @@ import {
 	usePageMeta,
 } from 'frappe-ui'
 import { computed, inject, onMounted, ref } from 'vue'
-import { BookOpen, GraduationCap } from 'lucide-vue-next'
+import { GraduationCap } from 'lucide-vue-next'
 import { sessionStore } from '../stores/session'
+import EmptyState from '@/components/EmptyState.vue'
 
 const currentCategory = ref('')
 const filters = ref({})
@@ -141,22 +124,25 @@ const memberCount = ref(0)
 const dayjs = inject('$dayjs')
 
 onMounted(() => {
+	setFiltersFromQuery()
 	updateParticipants()
 })
 
 const participants = createListResource({
 	doctype: 'LMS Certificate',
 	url: 'lms.lms.api.get_certified_participants',
-	cache: ['certified_participants'],
 	start: 0,
-	pageLength: 30,
+	cache: ['certified_participants'],
+	pageLength: 100,
 })
 
-const count = call('lms.lms.api.get_count_of_certified_members').then(
-	(data) => {
+const getMemberCount = () => {
+	call('lms.lms.api.get_count_of_certified_members', {
+		filters: filters.value,
+	}).then((data) => {
 		memberCount.value = data
-	}
-)
+	})
+}
 
 const categories = createListResource({
 	doctype: 'LMS Certificate',
@@ -171,6 +157,9 @@ const categories = createListResource({
 
 const updateParticipants = () => {
 	updateFilters()
+	getMemberCount()
+	setQueryParams()
+
 	participants.update({
 		filters: filters.value,
 	})
@@ -189,6 +178,33 @@ const updateFilters = () => {
 	} else {
 		delete filters.value.member_name
 	}
+}
+
+const setQueryParams = () => {
+	let queries = new URLSearchParams(location.search)
+	let filterKeys = {
+		category: currentCategory.value,
+		name: nameFilter.value,
+	}
+
+	Object.keys(filterKeys).forEach((key) => {
+		if (filterKeys[key]) {
+			queries.set(key, filterKeys[key])
+		} else {
+			queries.delete(key)
+		}
+	})
+	history.replaceState(
+		{},
+		'',
+		`${location.pathname}${queries.size > 0 ? `?${queries.toString()}` : ''}`
+	)
+}
+
+const setFiltersFromQuery = () => {
+	let queries = new URLSearchParams(location.search)
+	nameFilter.value = queries.get('name') || ''
+	currentCategory.value = queries.get('category') || ''
 }
 
 const breadcrumbs = computed(() => [

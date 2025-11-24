@@ -2,7 +2,12 @@
 	<div v-if="batch.data" class="border-2 rounded-md p-5 lg:w-72">
 		<div
 			v-if="batch.data.seat_count && seats_left > 0"
-			class="text-xs bg-green-100 text-green-700 float-right px-2 py-0.5 rounded-md"
+			class="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-md"
+			:class="
+				batch.data.amount || batch.data.courses.length
+					? 'float-right'
+					: 'w-fit mb-4'
+			"
 		>
 			{{ seats_left }}
 			<span v-if="seats_left > 1">
@@ -51,7 +56,7 @@
 		</div>
 		<div v-if="!readOnlyMode">
 			<router-link
-				v-if="isModerator || isStudent"
+				v-if="canAccessBatch"
 				:to="{
 					name: 'Batch',
 					params: {
@@ -60,8 +65,12 @@
 				}"
 			>
 				<Button variant="solid" class="w-full mt-4">
+					<template #prefix>
+						<LogIn v-if="isStudent" class="size-4 stroke-1.5" />
+						<Settings v-else class="size-4 stroke-1.5" />
+					</template>
 					<span>
-						{{ isModerator ? __('Manage Batch') : __('Visit Batch') }}
+						{{ isStudent ? __('Visit Batch') : __('Manage Batch') }}
 					</span>
 				</Button>
 			</router-link>
@@ -80,6 +89,9 @@
 				"
 			>
 				<Button v-if="!isStudent" class="w-full mt-4" variant="solid">
+					<template #prefix>
+						<CreditCard class="size-4 stroke-1.5" />
+					</template>
 					<span>
 						{{ __('Register Now') }}
 					</span>
@@ -95,6 +107,9 @@
 				"
 				@click="enrollInBatch()"
 			>
+				<template #prefix>
+					<GraduationCap class="size-4 stroke-1.5" />
+				</template>
 				{{ __('Enroll Now') }}
 			</Button>
 			<router-link
@@ -107,6 +122,9 @@
 				}"
 			>
 				<Button class="w-full mt-2">
+					<template #prefix>
+						<Pencil class="size-4 stroke-1.5" />
+					</template>
 					<span>
 						{{ __('Edit') }}
 					</span>
@@ -117,9 +135,18 @@
 </template>
 <script setup>
 import { inject, computed } from 'vue'
-import { Badge, Button, createResource } from 'frappe-ui'
-import { BookOpen, Clock, Globe } from 'lucide-vue-next'
-import { formatNumberIntoCurrency, formatTime, showToast } from '@/utils'
+import { Button, createResource, toast } from 'frappe-ui'
+import {
+	BookOpen,
+	Clock,
+	CreditCard,
+	Globe,
+	GraduationCap,
+	LogIn,
+	Pencil,
+	Settings,
+} from 'lucide-vue-next'
+import { formatNumberIntoCurrency, formatTime } from '@/utils'
 import DateRange from '@/components/Common/DateRange.vue'
 import { useRouter } from 'vue-router'
 
@@ -151,11 +178,7 @@ const enrollInBatch = () => {
 		{},
 		{
 			onSuccess(data) {
-				showToast(
-					__('Success'),
-					__('You have been enrolled in this batch'),
-					'check'
-				)
+				toast.success(__('You have been enrolled in this batch'))
 				router.push({
 					name: 'Batch',
 					params: {
@@ -180,5 +203,13 @@ const isStudent = computed(() => {
 
 const isModerator = computed(() => {
 	return user.data?.is_moderator
+})
+
+const isEvaluator = computed(() => {
+	return user.data?.is_evaluator
+})
+
+const canAccessBatch = computed(() => {
+	return isModerator.value || isStudent.value || isEvaluator.value
 })
 </script>

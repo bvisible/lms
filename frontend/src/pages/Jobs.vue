@@ -28,13 +28,14 @@
 			<div
 				class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:items-center justify-between w-full md:w-4/5 mx-auto p-5"
 			>
-				<div
-					v-if="jobCount"
-					class="text-xl font-semibold text-ink-gray-7 mb-4 md:mb-0"
-				>
+				<div class="text-xl font-semibold text-ink-gray-7 mb-4 md:mb-0">
 					{{ __('{0} Open Jobs').format(jobCount) }}
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+
+				<div
+					class="grid grid-cols-1 gap-2 md:grid-cols-4"
+					:class="user.data ? 'md:grid-cols-3' : 'md:grid-cols-2'"
+				>
 					<FormControl
 						type="text"
 						:placeholder="__('Search')"
@@ -50,6 +51,7 @@
 						</template>
 					</FormControl>
 					<Link
+						v-if="user.data"
 						doctype="Country"
 						v-model="country"
 						:placeholder="__('Country')"
@@ -61,6 +63,14 @@
 						:options="jobTypes"
 						class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
 						:placeholder="__('Type')"
+						@change="updateJobs"
+					/>
+					<FormControl
+						v-model="workMode"
+						type="select"
+						:options="workModes"
+						class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
+						:placeholder="__('Work Mode')"
 						@change="updateJobs"
 					/>
 				</div>
@@ -79,21 +89,7 @@
 					</router-link>
 				</div>
 			</div>
-			<div
-				v-else
-				class="flex flex-col items-center justify-center text-sm text-ink-gray-5 mt-56"
-			>
-				<Laptop class="size-10 mx-auto stroke-1 text-ink-gray-4" />
-				<div class="text-lg font-medium mb-1">
-					{{ __('No jobs found') }}
-				</div>
-				<div class="leading-5 w-2/5 text-center">
-					{{ __('There are no jobs available at the moment.') }}
-				</div>
-				<div class="leading-5 w-1/5 text-center">
-					{{ __('Post a new job or check again later.') }}
-				</div>
-			</div>
+			<EmptyState v-else type="Job Openings" />
 		</div>
 	</div>
 </template>
@@ -106,14 +102,16 @@ import {
 	FormControl,
 	usePageMeta,
 } from 'frappe-ui'
-import { Laptop, Plus, Search } from 'lucide-vue-next'
+import { Plus, Search } from 'lucide-vue-next'
 import { sessionStore } from '../stores/session'
 import { inject, computed, ref, onMounted, watch } from 'vue'
 import JobCard from '@/components/JobCard.vue'
 import Link from '@/components/Controls/Link.vue'
+import EmptyState from '@/components/EmptyState.vue'
 
 const user = inject('$user')
 const jobType = ref(null)
+const workMode = ref(null)
 const { brand } = sessionStore()
 const searchQuery = ref('')
 const country = ref(null)
@@ -127,8 +125,10 @@ onMounted(() => {
 	if (queries.has('type')) {
 		jobType.value = queries.get('type')
 	}
+	if (queries.has('work_mode')) {
+		workMode.value = queries.get('work_mode')
+	}
 	updateJobs()
-	getJobCount()
 })
 
 const jobs = createResource({
@@ -157,6 +157,12 @@ const updateFilters = () => {
 		delete filters.value.type
 	}
 
+	if (workMode.value) {
+		filters.value.work_mode = workMode.value
+	} else {
+		delete filters.value.work_mode
+	}
+
 	if (searchQuery.value) {
 		orFilters.value = {
 			job_title: ['like', `%${searchQuery.value}%`],
@@ -174,20 +180,12 @@ const updateFilters = () => {
 	}
 }
 
-const getJobCount = () => {
-	call('frappe.client.get_count', {
-		doctype: 'Job Opportunity',
-		filters: {
-			status: 'Open',
-			disabled: 0,
-		},
-	}).then((data) => {
-		jobCount.value = data
-	})
-}
-
 watch(country, (val) => {
 	updateJobs()
+})
+
+watch(jobs, () => {
+	jobCount.value = jobs.data?.length || 0
 })
 
 const jobTypes = computed(() => {
@@ -197,6 +195,15 @@ const jobTypes = computed(() => {
 		{ label: __('Part Time'), value: 'Part Time' },
 		{ label: __('Contract'), value: 'Contract' },
 		{ label: __('Freelance'), value: 'Freelance' },
+	]
+})
+
+const workModes = computed(() => {
+	return [
+		'',
+		{ label: 'On site', value: 'On-site' },
+		{ label: 'Hybrid', value: 'Hybrid' },
+		{ label: 'Remote', value: 'Remote' },
 	]
 })
 

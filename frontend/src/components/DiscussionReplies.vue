@@ -32,13 +32,13 @@
 						"
 						:options="[
 							{
-								label: 'Edit',
+								label: __('Edit'),
 								onClick() {
 									reply.editable = true
 								},
 							},
 							{
-								label: 'Delete',
+								label: __('Delete'),
 								onClick() {
 									deleteReply(reply)
 								},
@@ -93,12 +93,11 @@
 	</div>
 </template>
 <script setup>
-import { createResource, TextEditor, Button, Dropdown } from 'frappe-ui'
-import { timeAgo } from '../utils'
+import { createResource, TextEditor, Button, Dropdown, toast } from 'frappe-ui'
+import { timeAgo } from '@/utils'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { ChevronLeft, MoreHorizontal } from 'lucide-vue-next'
-import { ref, inject, onMounted } from 'vue'
-import { createToast } from '../utils'
+import { ref, inject, onMounted, onUnmounted } from 'vue'
 
 const showTopics = defineModel('showTopics')
 const newReply = ref('')
@@ -192,14 +191,7 @@ const postReply = () => {
 				replies.reload()
 			},
 			onError(err) {
-				createToast({
-					title: 'Error',
-					text: err.messages?.[0] || err,
-					icon: 'x',
-					iconClasses: 'bg-surface-red-5 text-ink-white rounded-md p-px',
-					position: 'top-center',
-					timeout: 10,
-				})
+				toast.error(err.messages?.[0] || err)
 			},
 		}
 	)
@@ -259,4 +251,10 @@ const deleteReply = (reply) => {
 		}
 	)
 }
+
+onUnmounted(() => {
+	socket.off('publish_message')
+	socket.off('update_message')
+	socket.off('delete_message')
+})
 </script>

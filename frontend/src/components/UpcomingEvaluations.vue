@@ -1,13 +1,12 @@
 <template>
-	<div>
+	<div v-if="!forHome || (forHome && upcoming_evals.data?.length)">
 		<div class="flex items-center justify-between mb-4">
 			<div class="text-lg text-ink-gray-9 font-semibold">
 				{{ __('Upcoming Evaluations') }}
 			</div>
 			<Button
 				v-if="
-					!upcoming_evals.data?.length ||
-					upcoming_evals.length == courses.length
+					upcoming_evals.data?.length != evaluationCourses.length && !forHome
 				"
 				@click="openEvalModal"
 			>
@@ -15,11 +14,14 @@
 			</Button>
 		</div>
 		<div v-if="upcoming_evals.data?.length">
-			<div class="grid grid-cols-3 gap-4">
+			<div
+				class="grid gap-4"
+				:class="forHome ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-3'"
+			>
 				<div v-for="evl in upcoming_evals.data">
 					<div class="border text-ink-gray-7 rounded-md p-3">
 						<div class="flex justify-between mb-3">
-							<span class="font-semibold text-ink-gray-9 leading-5">
+							<span class="text-lg font-semibold text-ink-gray-9 leading-5">
 								{{ evl.course_title }}
 							</span>
 							<Menu
@@ -97,8 +99,8 @@
 				</div>
 			</div>
 		</div>
-		<div v-else class="text-sm italic text-ink-gray-5">
-			{{ __('Please schedule an evaluation to get certified.') }}
+		<div v-else class="text-ink-gray-5">
+			{{ __('Schedule an evaluation to get certified.') }}
 		</div>
 	</div>
 	<EvaluationModal
@@ -118,14 +120,13 @@ import {
 	HeadsetIcon,
 	EllipsisVertical,
 } from 'lucide-vue-next'
-import { inject, ref, getCurrentInstance } from 'vue'
-import { formatTime } from '../utils'
+import { inject, ref, getCurrentInstance, computed } from 'vue'
+import { formatTime } from '@/utils'
 import { Button, createResource, call } from 'frappe-ui'
 import EvaluationModal from '@/components/Modals/EvaluationModal.vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
 const dayjs = inject('$dayjs')
-const user = inject('$user')
 const showEvalModal = ref(false)
 const app = getCurrentInstance()
 const { $dialog } = app.appContext.config.globalProperties
@@ -143,12 +144,15 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
+	forHome: {
+		type: Boolean,
+		default: false,
+	},
 })
 
 const upcoming_evals = createResource({
 	url: 'lms.lms.utils.get_upcoming_evals',
 	params: {
-		student: user.data.name,
 		courses: props.courses.map((course) => course.course),
 		batch: props.batch,
 	},
@@ -162,6 +166,12 @@ function openEvalModal() {
 const openEvalCall = (evl) => {
 	window.open(evl.google_meet_link, '_blank')
 }
+
+const evaluationCourses = computed(() => {
+	return props.courses.filter((course) => {
+		return course.evaluator != ''
+	})
+})
 
 const cancelEvaluation = (evl) => {
 	$dialog({

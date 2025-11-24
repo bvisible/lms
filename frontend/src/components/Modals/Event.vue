@@ -66,7 +66,11 @@
 							</template>
 							{{ __('View Certificate') }}
 						</Button>
-						<Button v-else @click="openCallLink(event.venue)" class="w-full">
+						<Button
+							v-else-if="userIsEvaluator()"
+							@click="openCallLink(event.venue)"
+							class="w-full"
+						>
 							<template #prefix>
 								<Video class="h-4 w-4 stroke-1.5" />
 							</template>
@@ -76,28 +80,38 @@
 						</Button>
 					</div>
 				</div>
-				<Tabs :tabs="tabs" v-model="tabIndex" class="border-l w-1/2">
-					<template #default="{ tab }">
+				<Tabs :tabs="tabs" as="div" v-model="tabIndex" class="border-l w-1/2">
+					<template #tab-panel="{ tab }">
 						<div
 							v-if="tab.label == 'Evaluation'"
 							class="flex flex-col space-y-4 p-5"
 						>
 							<div class="flex items-center justify-between">
-								<Rating v-model="evaluation.rating" :label="__('Rating')" />
+								<Rating
+									v-model="evaluation.rating"
+									:label="__('Rating')"
+									:disabled="!userIsEvaluator()"
+								/>
 								<FormControl
 									type="select"
 									:options="statusOptions"
 									v-model="evaluation.status"
 									:label="__('Status')"
 									class="w-1/2"
+									:disabled="!userIsEvaluator()"
 								/>
 							</div>
 							<Textarea
 								v-model="evaluation.summary"
 								:label="__('Summary')"
 								:rows="7"
+								:disabled="!userIsEvaluator()"
 							/>
-							<Button variant="solid" @click="saveEvaluation()">
+							<Button
+								v-if="userIsEvaluator()"
+								variant="solid"
+								@click="saveEvaluation()"
+							>
 								{{ __('Save') }}
 							</Button>
 						</div>
@@ -106,11 +120,13 @@
 								type="checkbox"
 								v-model="certificate.published"
 								:label="__('Published')"
+								:disabled="!userIsEvaluator()"
 							/>
 							<Link
 								v-model="certificate.template"
 								:label="__('Template')"
 								doctype="Print Format"
+								:disabled="!userIsEvaluator()"
 								:filters="{
 									doc_type: 'LMS Certificate',
 								}"
@@ -118,14 +134,20 @@
 							<FormControl
 								type="date"
 								v-model="certificate.issue_date"
+								:disabled="!userIsEvaluator()"
 								:label="__('Issue Date')"
 							/>
 							<FormControl
 								type="date"
 								v-model="certificate.expiry_date"
+								:disabled="!userIsEvaluator()"
 								:label="__('Expiry Date')"
 							/>
-							<Button variant="solid" @click="saveCertificate()">
+							<Button
+								v-if="userIsEvaluator()"
+								variant="solid"
+								@click="saveCertificate()"
+							>
 								{{ __('Save') }}
 							</Button>
 						</div>
@@ -144,6 +166,7 @@ import {
 	Tabs,
 	Tooltip,
 	Textarea,
+	toast,
 } from 'frappe-ui'
 import {
 	User,
@@ -157,14 +180,17 @@ import {
 	ClipboardList,
 } from 'lucide-vue-next'
 import { inject, reactive, watch, ref, computed } from 'vue'
-import { formatTime, showToast } from '@/utils'
+import { formatTime } from '@/utils'
 import Rating from '@/components/Controls/Rating.vue'
 import Link from '@/components/Controls/Link.vue'
 
 const show = defineModel()
+const user = inject('$user')
 const dayjs = inject('$dayjs')
 const tabIndex = ref(0)
 const showCertification = ref(false)
+const evaluation = reactive({})
+const certificate = reactive({})
 
 const props = defineProps({
 	event: {
@@ -173,9 +199,15 @@ const props = defineProps({
 	},
 })
 
-const evaluation = reactive({})
+watch(user, () => {
+	if (userIsEvaluator()) {
+		defaultTemplate.reload()
+	}
+})
 
-const certificate = reactive({})
+const userIsEvaluator = () => {
+	return user.data && user.data.name == props.event.evaluator
+}
 
 const defaultTemplate = createResource({
 	url: 'frappe.client.get_value',
@@ -189,7 +221,6 @@ const defaultTemplate = createResource({
 			},
 		}
 	},
-	auto: true,
 	onSuccess(data) {
 		certificate.template = data.value
 	},
@@ -252,7 +283,10 @@ const saveEvaluation = () => {
 				} else {
 					show.value = false
 				}
-				showToast(__('Success'), __('Evaluation saved successfully'), 'check')
+				toast.success(__('Evaluation saved successfully'))
+			},
+			onError(err) {
+				toast.warning(__(err.messages?.[0] || err))
 			},
 		}
 	)
@@ -275,6 +309,9 @@ const certificateResource = createResource({
 	auto: false,
 	onSuccess(data) {
 		certificate.name = data
+	},
+	onError(err) {
+		toast.warning(__(err.messages?.[0] || err))
 	},
 })
 
@@ -307,7 +344,10 @@ const saveCertificate = () => {
 		{},
 		{
 			onSuccess: () => {
-				showToast(__('Success'), __('Certificate saved successfully'), 'check')
+				toast.success(__('Certificate saved successfully'))
+			},
+			onError(err) {
+				toast.error(__(err.messages?.[0] || err))
 			},
 		}
 	)

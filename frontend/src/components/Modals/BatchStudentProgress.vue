@@ -11,10 +11,16 @@
 					<Avatar :image="student.user_image" size="3xl" />
 					<div class="space-y-1">
 						<div class="flex items-center space-x-2">
-							<div class="text-xl font-semibold">
+							<div class="text-xl font-semibold text-ink-gray-9">
 								{{ student.full_name }}
 							</div>
-							<Badge :theme="student.progress === 100 ? 'green' : 'red'">
+							<Badge
+								v-if="
+									Object.keys(student.assessments).length ||
+									Object.keys(student.courses).length
+								"
+								:theme="student.progress === 100 ? 'green' : 'red'"
+							>
 								{{ student.progress }}% {{ __('Complete') }}
 							</Badge>
 						</div>
@@ -26,8 +32,13 @@
 
 				<div class="space-y-8">
 					<!-- Assessments -->
-					<div class="space-y-2 text-sm">
-						<div class="flex items-center border-b pb-1 font-medium">
+					<div
+						v-if="Object.keys(student.assessments).length"
+						class="space-y-2 text-sm"
+					>
+						<div
+							class="flex items-center border-b pb-1 font-medium text-ink-gray-9"
+						>
 							<span class="flex-1">
 								{{ __('Assessment') }}
 							</span>
@@ -73,8 +84,13 @@
 					</div>
 
 					<!-- Courses -->
-					<div class="space-y-2 text-sm">
-						<div class="flex items-center border-b pb-1 font-medium">
+					<div
+						v-if="Object.keys(student.courses).length"
+						class="space-y-2 text-sm"
+					>
+						<div
+							class="flex items-center border-b pb-1 font-medium text-ink-gray-9"
+						>
 							<span class="flex-1">
 								{{ __('Courses') }}
 							</span>

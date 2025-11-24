@@ -44,9 +44,9 @@
 	</div>
 </template>
 <script setup>
-import { FormControl, createResource } from 'frappe-ui'
-import { ref } from 'vue'
-import { showToast, convertToTitleCase } from '@/utils'
+import { FormControl, createResource, toast } from 'frappe-ui'
+import { ref, watch } from 'vue'
+import { convertToTitleCase } from '@/utils'
 import { CircleAlert } from 'lucide-vue-next'
 
 const moderator = ref(false)
@@ -66,10 +66,9 @@ const roles = createResource({
 	url: 'lms.lms.utils.get_roles',
 	makeParams(values) {
 		return {
-			name: props.profile.data?.name,
+			name: values.member,
 		}
 	},
-	auto: true,
 	onSuccess(data) {
 		let roles = [
 			'moderator',
@@ -82,6 +81,16 @@ const roles = createResource({
 		}
 	},
 })
+
+watch(
+	() => props.profile,
+	(newValue) => {
+		roles.reload({
+			member: newValue.data?.name,
+		})
+	},
+	{ immediate: true }
+)
 
 const updateRole = createResource({
 	url: 'lms.lms.api.save_role',
@@ -97,12 +106,15 @@ const updateRole = createResource({
 const changeRole = (role) => {
 	updateRole.submit(
 		{
-			role: convertToTitleCase(role.split('_').join(' ')),
+			role:
+				role == 'lms_student'
+					? 'LMS Student'
+					: convertToTitleCase(role.split('_').join(' ')),
 			value: eval(role).value,
 		},
 		{
 			onSuccess(data) {
-				showToast('Success', 'Role updated successfully', 'check')
+				toast.success(__('Role updated successfully'))
 			},
 		}
 	)

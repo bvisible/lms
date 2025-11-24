@@ -18,7 +18,7 @@
 	>
 		<template #body-content>
 			<div class="flex flex-col gap-4">
-				<p>
+				<p class="text-ink-gray-9">
 					{{
 						__(
 							'Submit your resume to proceed with your application for this position. Upon submission, it will be shared with the job poster.'
@@ -29,6 +29,7 @@
 					<FileUploader
 						:fileTypes="['.pdf']"
 						:validateFile="validateFile"
+						:uploadArgs="{ private: 1 }"
 						@success="
 							(file) => {
 								resume = file
@@ -51,7 +52,7 @@
 						<FileText class="h-5 w-5 stroke-1.5 text-ink-gray-7" />
 					</div>
 					<div class="flex flex-col">
-						<span>
+						<span class="text-ink-gray-9">
 							{{ resume.file_name }}
 						</span>
 						<span class="text-sm text-ink-gray-4 mt-1">
@@ -64,10 +65,10 @@
 	</Dialog>
 </template>
 <script setup>
-import { Dialog, FileUploader, Button, createResource } from 'frappe-ui'
+import { Dialog, FileUploader, Button, createResource, toast } from 'frappe-ui'
 import { FileText } from 'lucide-vue-next'
 import { ref, inject } from 'vue'
-import { createToast, getFileSize } from '@/utils/'
+import { getFileSize } from '@/utils/'
 
 const resume = ref(null)
 const show = defineModel()
@@ -95,7 +96,7 @@ const jobApplication = createResource({
 			doc: {
 				doctype: 'LMS Job Application',
 				user: user.data?.name,
-				resume: resume.value?.file_name,
+				resume: resume.value?.file_url,
 				job: props.job,
 			},
 		}
@@ -112,24 +113,12 @@ const submitResume = (close) => {
 				}
 			},
 			onSuccess() {
-				createToast({
-					title: 'Success',
-					text: 'Your application has been submitted',
-					icon: 'check',
-					iconClasses: 'bg-surface-green-3 text-ink-white rounded-md p-px',
-				})
+				toast.success('Your application has been submitted successfully')
 				application.value.reload()
 				close()
 			},
 			onError(err) {
-				createToast({
-					title: 'Error',
-					text: err.messages?.[0] || err,
-					icon: 'x',
-					iconClasses: 'bg-surface-red-5 text-ink-white rounded-md p-px',
-					position: 'top-center',
-					timeout: 10,
-				})
+				toast.error(err.messages?.[0] || err)
 			},
 		}
 	)

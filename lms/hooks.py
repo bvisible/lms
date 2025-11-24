@@ -21,7 +21,7 @@ app_license = "AGPL"
 # include js, css files in header of web template
 web_include_css = "lms.bundle.css"
 # web_include_css = "/assets/lms/css/lms.css"
-web_include_js = ["website.bundle.js"]
+web_include_js = []
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "lms/public/scss/website"
@@ -116,6 +116,7 @@ scheduler_events = {
 		"lms.lms.doctype.lms_certificate_request.lms_certificate_request.schedule_evals",
 		"lms.lms.api.update_course_statistics",
 		"lms.lms.doctype.lms_certificate_request.lms_certificate_request.mark_eval_as_completed",
+		"lms.lms.doctype.lms_live_class.lms_live_class.update_attendance",
 	],
 	"daily": [
 		"lms.job.doctype.job_opportunity.job_opportunity.update_job_openings",
@@ -193,7 +194,6 @@ jinja = {
 		"lms.lms.utils.get_instructors",
 		"lms.lms.utils.get_lesson_index",
 		"lms.lms.utils.get_lesson_url",
-		"lms.page_renderers.get_profile_url",
 		"lms.lms.utils.is_instructor",
 		"lms.lms.utils.get_palette",
 	],
@@ -229,10 +229,7 @@ lms_markdown_macro_renderers = {
 	"PDF": "lms.plugins.pdf_renderer",
 }
 
-# page_renderer to manage profile pages
 page_renderer = [
-	"lms.page_renderers.ProfileRedirectPage",
-	"lms.page_renderers.ProfilePage",
 	"lms.page_renderers.SCORMRenderer",
 ]
 
@@ -242,6 +239,8 @@ profile_url_prefix = "/users/"
 signup_form_template = "lms.plugins.show_custom_signup"
 
 on_login = "lms.lms.user.on_login"
+
+get_site_info = "lms.activation.get_site_info"
 
 add_to_apps_screen = [
 	{
