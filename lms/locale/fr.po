@@ -5919,7 +5919,7 @@ msgstr ""
 #: lms/lms/doctype/lms_course_review/lms_course_review.json
 #: lms/lms/workspace/lms/lms.json lms/templates/reviews.html:143
 msgid "Review"
-msgstr "Révoir"
+msgstr "Revoir"
 
 #: lms/templates/reviews.html:100
 msgid "Review the course"
