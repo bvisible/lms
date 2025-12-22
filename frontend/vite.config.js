@@ -69,4 +69,10 @@ export default defineConfig({
 			'plyr',
 		],
 	},
+	build: {
+		rollupOptions: {
+			// Ignore Frappe bench-specific imports that don't exist in standalone builds
+			external: [/common_site_config\.json/],
+		},
+	},
 })
