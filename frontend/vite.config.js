@@ -72,7 +72,10 @@ export default defineConfig({
 	build: {
 		rollupOptions: {
 			// Ignore Frappe bench-specific imports that don't exist in standalone builds
-			external: [/common_site_config\.json/],
+			external: [
+				/common_site_config\.json/,
+				/\.\.\/\.\.\/\.\.\/frappe\//,  // Frappe core dependencies
+			],
 		},
 	},
 })
