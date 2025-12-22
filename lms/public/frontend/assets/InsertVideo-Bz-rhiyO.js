@@ -1,0 +1,2 @@
+import{d as n,bH as s,bI as a,bJ as d}from"./index-CC9ZVruP.js";import"../../../frappe/frappe/public/js/lib/posthog.js";import"../../../../sites/common_site_config.json";const u=n({__name:"InsertVideo",props:{editor:{}},setup(e){const o=e;function r(){o.editor.chain().focus().selectAndUploadVideo().run()}return(t,i)=>s(t.$slots,"default",a(d({onClick:r})))}});export{u as default};
+//# sourceMappingURL=InsertVideo-Bz-rhiyO.js.map

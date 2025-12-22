@@ -1,0 +1,2 @@
+import{d as t,bH as s,bI as i,bJ as a}from"./index-CC9ZVruP.js";import"../../../frappe/frappe/public/js/lib/posthog.js";import"../../../../sites/common_site_config.json";const u=t({__name:"InsertLink",props:{editor:{}},setup(o){const r=o;function e(){r.editor.commands.openLinkEditor()}return(n,p)=>s(n.$slots,"default",i(a({onClick:e})))}});export{u as default};
+//# sourceMappingURL=InsertLink-Dt_2p7vf.js.map
