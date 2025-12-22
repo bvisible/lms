@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "serve": "vite preview",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 vite build --base=/assets/lms/frontend/ && yarn copy-html-entry",
+    "build": "[ -f ../lms/public/frontend/index.html ] && echo 'Assets already built - skipping (use build:force to rebuild)' || (NODE_OPTIONS=--max-old-space-size=4096 vite build --base=/assets/lms/frontend/ && yarn copy-html-entry)",
+    "build:force": "NODE_OPTIONS=--max-old-space-size=4096 vite build --base=/assets/lms/frontend/ && yarn copy-html-entry",
     "copy-html-entry": "cp ../lms/public/frontend/index.html ../lms/www/lms.html"
   },
   "dependencies": {
@@ -33,7 +34,7 @@
     "dayjs": "^1.11.6",
     "dompurify": "^3.2.6",
     "feather-icons": "^4.28.0",
-    "frappe-ui": "^0.1.216",
+    "frappe-ui": "0.1.216",
     "highlight.js": "^11.11.1",
     "lucide-vue-next": "^0.383.0",
     "markdown-it": "^14.0.0",

@@ -2938,7 +2938,7 @@ fraction.js@^5.3.4:
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-5.3.4.tgz#8c0fcc6a9908262df4ed197427bdeef563e0699a"
   integrity sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==
 
-frappe-ui@^0.1.216:
+frappe-ui@0.1.216:
   version "0.1.216"
   resolved "https://registry.yarnpkg.com/frappe-ui/-/frappe-ui-0.1.216.tgz#2297192cfcf13db7f9d4e374782fac1d42d54634"
   integrity sha512-rBBa5CZdRaYGllxU95uz1luVddZlZQXWxoPB7InxKqt5W/t7ZDqAudm6Crbo1kBy3Hp7VPNNbB43jVKJhlcrPQ==

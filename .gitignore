@@ -4,12 +4,15 @@
 *.swp
 tags
 lms/docs/current
-lms/public/dist
 __pycache__/
 *.py[cod]
 *$py.class
 node_modules
 package-lock.json
-lms/public/frontend
-lms/www/lms.html
 frappe-ui
+
+# Ignore public folder EXCEPT frontend (pre-built assets)
+lms/public/*
+!lms/public/frontend/
+!lms/public/js/
+!lms/public/.gitkeep
