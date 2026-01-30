@@ -74,7 +74,7 @@
 				}}
 			</div>
 			<router-link
-				:to="{ name: 'CourseForm', params: { courseName: 'new' } }"
+				:to="{ name: 'Courses', query: { newCourse: '1' } }"
 				class="mt-4"
 			>
 				<Button>
@@ -222,12 +222,12 @@ const props = defineProps<{
 }>()
 
 const createdCourses = createResource({
-	url: 'lms.lms.utils.get_created_courses',
+	url: 'lms.lms.api.get_created_courses',
 	auto: true,
 })
 
 const createdBatches = createResource({
-	url: 'lms.lms.utils.get_created_batches',
+	url: 'lms.lms.api.get_created_batches',
 	auto: true,
 })
 

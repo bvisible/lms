@@ -144,6 +144,7 @@
 						</span>
 					</div>
 				</div>
+
 				<div v-if="dayjs().isSameOrAfter(dayjs(batch.data.start_date))">
 					<div class="text-ink-gray-7 font-semibold mb-2">
 						{{ __('Feedback') }}
@@ -247,6 +248,7 @@ import DateRange from '@/components/Common/DateRange.vue'
 import BulkCertificates from '@/components/Modals/BulkCertificates.vue'
 import BatchFeedback from '@/components/BatchFeedback.vue'
 import dayjs from 'dayjs/esm'
+import { getLmsRoute } from '@/utils/basePath'
 
 const user = inject('$user')
 const showAnnouncementModal = ref(false)
@@ -356,7 +358,9 @@ const isStudent = computed(() => {
 })
 
 const redirectToLogin = () => {
-	window.location.href = `/login?redirect-to=/lms/batches/${props.batchName}`
+	window.location.href = `/login?redirect-to=${getLmsRoute(
+		`batches/${props.batchName}`
+	)}`
 }
 
 const openAnnouncementModal = () => {

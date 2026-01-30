@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from lms.lms.utils import has_course_instructor_role, has_course_moderator_role
+from lms.lms.utils import has_course_instructor_role, has_moderator_role
 
 
 class LMSQuestion(Document):
@@ -39,6 +39,8 @@ def validate_correct_options(question):
 
 	if len(correct_options) > 1:
 		question.multiple = 1
+	else:
+		question.multiple = 0
 
 	if not len(correct_options):
 		frappe.throw(_("At least one option must be correct for this question."))
@@ -95,7 +97,7 @@ def get_correct_options(question):
 
 @frappe.whitelist()
 def get_question_details(question):
-	if not has_course_instructor_role() or not has_course_moderator_role():
+	if not has_course_instructor_role() or not has_moderator_role():
 		return
 
 	fields = ["question", "type", "name"]

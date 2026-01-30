@@ -319,13 +319,14 @@
 		</div>
 	</div>
 	<InlineLessonMenu
-		v-if="lesson.data"
+		v-if="lesson.data?.name"
 		v-model="showInlineMenu"
 		:lesson="lesson.data?.name"
 		v-model:notes="notes"
 		@updateNotes="updateNotes"
 	/>
 	<VideoStatistics
+		v-if="showStatsDialog"
 		v-model="showStatsDialog"
 		:lessonName="lesson.data?.name"
 		:lessonTitle="lesson.data?.title"
@@ -342,6 +343,7 @@ import {
 	TabButtons,
 	Tooltip,
 	usePageMeta,
+	toast,
 } from 'frappe-ui'
 import {
 	computed,
@@ -377,6 +379,7 @@ import CourseOutline from '@/components/CourseOutline.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import Notes from '@/components/Notes/Notes.vue'
 import InlineLessonMenu from '@/components/Notes/InlineLessonMenu.vue'
+import { getLmsRoute } from '@/utils/basePath'
 
 const user = inject('$user')
 const socket = inject('$socket')
@@ -731,6 +734,7 @@ const updateVideoTime = (video) => {
 }
 
 const startTimer = () => {
+	if (!lesson.data?.membership) return
 	let timerInterval = setInterval(() => {
 		timer.value++
 		if (timer.value == 30) {
@@ -798,6 +802,10 @@ const enrollStudent = () => {
 			onSuccess() {
 				window.location.reload()
 			},
+			onError(err) {
+				toast.error(__(err.messages?.[0] || err))
+				console.error(err)
+			},
 		}
 	)
 }
@@ -864,6 +872,7 @@ const scrollDiscussionsIntoView = () => {
 }
 
 const updateNotes = () => {
+	if (!user.data) return
 	notes.update({
 		filters: {
 			lesson: lesson.data?.name,
@@ -896,7 +905,9 @@ watch(allowDiscussions, () => {
 })
 
 const redirectToLogin = () => {
-	window.location.href = `/login?redirect-to=/lms/courses/${props.courseName}`
+	window.location.href = `/login?redirect-to=${getLmsRoute(
+		`courses/${props.courseName}`
+	)}`
 }
 
 usePageMeta(() => {

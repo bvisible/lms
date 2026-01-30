@@ -15,7 +15,10 @@
 				{{ __(title) }}
 			</div>
 			<Button size="sm" v-if="allowEdit" @click="openChapterModal()">
-				{{ __('Add Chapter') }}
+				<template #prefix>
+					<Plus class="size-4 stroke-1.5" />
+				</template>
+				{{ __('Add') }}
 			</Button>
 		</div>
 		<div
@@ -95,8 +98,8 @@
 													name: allowEdit ? 'LessonForm' : 'Lesson',
 													params: {
 														courseName: courseName,
-														chapterNumber: lesson.number.split('.')[0],
-														lessonNumber: lesson.number.split('.')[1],
+														chapterNumber: lesson.number.split('-')[0],
+														lessonNumber: lesson.number.split('-')[1],
 													},
 												}"
 											>
@@ -174,6 +177,7 @@ import {
 	FilePenLine,
 	HelpCircle,
 	MonitorPlay,
+	Plus,
 	Trash2,
 } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
@@ -389,8 +393,8 @@ const redirectToChapter = (chapter) => {
 
 const isActiveLesson = (lessonNumber) => {
 	return (
-		route.params.chapterNumber == lessonNumber.split('.')[0] &&
-		route.params.lessonNumber == lessonNumber.split('.')[1]
+		route.params.chapterNumber == lessonNumber.split('-')[0] &&
+		route.params.lessonNumber == lessonNumber.split('-')[1]
 	)
 }
 </script>

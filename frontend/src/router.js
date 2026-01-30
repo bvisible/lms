@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { usersStore } from './stores/user'
 import { sessionStore } from './stores/session'
 import { useSettings } from './stores/settings'
+import { getLmsBasePath } from './utils/basePath'
 
 const routes = [
 	{
@@ -12,12 +13,12 @@ const routes = [
 	{
 		path: '/courses',
 		name: 'Courses',
-		component: () => import('@/pages/Courses.vue'),
+		component: () => import('@/pages/Courses/Courses.vue'),
 	},
 	{
 		path: '/courses/:courseName',
 		name: 'CourseDetail',
-		component: () => import('@/pages/CourseDetail.vue'),
+		component: () => import('@/pages/Courses/CourseDetail.vue'),
 		props: true,
 	},
 	{
@@ -29,7 +30,7 @@ const routes = [
 	{
 		path: '/courses/:courseName/certification',
 		name: 'CourseCertification',
-		component: () => import('@/pages/CourseCertification.vue'),
+		component: () => import('@/pages/Courses/CourseCertification.vue'),
 		props: true,
 	},
 	{
@@ -116,12 +117,6 @@ const routes = [
 		path: '/job-openings/:job/applications',
 		name: 'JobApplications',
 		component: () => import('@/pages/JobApplications.vue'),
-		props: true,
-	},
-	{
-		path: '/courses/:courseName/edit',
-		name: 'CourseForm',
-		component: () => import('@/pages/CourseForm.vue'),
 		props: true,
 	},
 	{
@@ -244,6 +239,11 @@ const routes = [
 		props: true,
 	},
 	{
+		path: '/search',
+		name: 'Search',
+		component: () => import('@/pages/Search/Search.vue'),
+	},
+	{
 		path: '/data-import',
 		name: 'DataImportList',
 		component: () => import('@/pages/DataImport.vue'),
@@ -263,14 +263,14 @@ const routes = [
 ]
 
 let router = createRouter({
-	history: createWebHistory('/lms'),
+	history: createWebHistory(`/${getLmsBasePath()}`),
 	routes,
 })
 
 router.beforeEach(async (to, from, next) => {
 	const { userResource } = usersStore()
 	let { isLoggedIn } = sessionStore()
-	const { allowGuestAccess } = useSettings()
+	const { settings } = useSettings()
 
 	try {
 		if (isLoggedIn) {
@@ -283,8 +283,8 @@ router.beforeEach(async (to, from, next) => {
 	if (!isLoggedIn) {
 		if (to.name == 'Home') router.push({ name: 'Courses' })
 
-		await allowGuestAccess.promise
-		if (!allowGuestAccess.data) {
+		await settings.promise
+		if (!settings.data.allow_guest_access) {
 			window.location.href = '/login'
 			return
 		}

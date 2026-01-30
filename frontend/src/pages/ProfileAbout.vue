@@ -56,11 +56,13 @@
 					</template>
 					<template #body-main>
 						<div class="w-[250px] text-base">
-							<img
-								:src="badge.badge_image"
-								:alt="badge.badge"
-								class="bg-surface-gray-2 rounded-t-md h-[200px] mx-auto"
-							/>
+							<div class="bg-surface-gray-2 rounded-t-md py-5">
+								<img
+									:src="badge.badge_image"
+									:alt="badge.badge"
+									class="h-[200px] mx-auto"
+								/>
+							</div>
 							<div class="p-5">
 								<div class="text-2xl font-semibold mb-2">
 									{{ badge.badge }}
@@ -120,6 +122,7 @@ import { X, LinkedinIcon, Twitter } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import { decodeEntities } from '@/utils'
 import DOMPurify from 'dompurify'
+import { getLmsRoute } from '@/utils/basePath'
 
 const dayjs = inject('$dayjs')
 const { branding } = sessionStore()
@@ -156,7 +159,9 @@ const badges = createResource({
 const shareOnSocial = (badge, medium) => {
 	let shareUrl
 	const url = encodeURIComponent(
-		`${window.location.origin}/lms/badges/${badge.badge}/${props.profile.data?.email}`
+		`${window.location.origin}${getLmsRoute(
+			`badges/${badge.badge}/${props.profile.data?.email}`
+		)}`
 	)
 	const summary = `I am happy to announce that I earned the ${
 		badge.badge

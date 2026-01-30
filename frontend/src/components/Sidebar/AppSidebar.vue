@@ -9,11 +9,21 @@
 		>
 			<UserDropdown :isCollapsed="sidebarStore.isSidebarCollapsed" />
 			<div class="flex flex-col" v-if="sidebarSettings.data">
-				<div v-for="link in sidebarLinks" class="mx-2 my-0.5">
-					<SidebarLink
-						:link="link"
-						:isCollapsed="sidebarStore.isSidebarCollapsed"
-					/>
+				<div v-for="link in sidebarLinks" class="mx-2 my-2.5">
+					<div
+						v-if="!link.hideLabel"
+						class="mb-2 mt-3 flex cursor-pointer gap-1.5 px-1 text-base font-medium text-ink-gray-5 transition-all duration-300 ease-in-out"
+					>
+						<span>{{ __(link.label) }}</span>
+					</div>
+					<nav class="space-y-1">
+						<div v-for="item in link.items">
+							<SidebarLink
+								:link="item"
+								:isCollapsed="sidebarStore.isSidebarCollapsed"
+							/>
+						</div>
+					</nav>
 				</div>
 			</div>
 			<div
@@ -173,6 +183,7 @@
 			:currentStep="currentStep"
 		/>
 	</div>
+	<CommandPalette v-model="settingsStore.isCommandPaletteOpen" />
 	<PageModal
 		v-model="showPageModal"
 		v-model:reloadSidebar="sidebarSettings"
@@ -181,20 +192,15 @@
 </template>
 
 <script setup>
-import UserDropdown from '@/components/Sidebar/UserDropdown.vue'
-import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
-import SidebarLink from '@/components/Sidebar/SidebarLink.vue'
 import { getSidebarLinks } from '@/utils'
 import { usersStore } from '@/stores/user'
 import { sessionStore } from '@/stores/session'
 import { useSidebar } from '@/stores/sidebar'
 import { useSettings } from '@/stores/settings'
-import { Button, call, createResource, Tooltip } from 'frappe-ui'
+import { Button, call, createResource, Tooltip, toast } from 'frappe-ui'
 import PageModal from '@/components/Modals/PageModal.vue'
-import { capture } from '@/telemetry'
 import LMSLogo from '@/components/Icons/LMSLogo.vue'
 import { useRouter } from 'vue-router'
-import InviteIcon from '@/components/Icons/InviteIcon.vue'
 import {
 	ref,
 	onMounted,
@@ -217,7 +223,6 @@ import {
 	Users,
 	BookText,
 	Zap,
-	Check,
 } from 'lucide-vue-next'
 import {
 	TrialBanner,
@@ -227,20 +232,27 @@ import {
 	showHelpModal,
 	minimize,
 	IntermediateStepModal,
+	useTelemetry,
 } from 'frappe-ui/frappe'
+import InviteIcon from '@/components/Icons/InviteIcon.vue'
+import UserDropdown from '@/components/Sidebar/UserDropdown.vue'
+import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
+import SidebarLink from '@/components/Sidebar/SidebarLink.vue'
+import CommandPalette from '@/components/CommandPalette/CommandPalette.vue'
 
 const { user } = sessionStore()
 const { userResource } = usersStore()
 let sidebarStore = useSidebar()
 const socket = inject('$socket')
 const unreadCount = ref(0)
-const sidebarLinks = ref(getSidebarLinks())
+const sidebarLinks = ref(null)
+const { capture } = useTelemetry()
 const showPageModal = ref(false)
 const isModerator = ref(false)
 const isInstructor = ref(false)
 const pageToEdit = ref(null)
+const { sidebarSettings, activeTab, isSettingsOpen, programs } = useSettings()
 const settingsStore = useSettings()
-const { sidebarSettings } = settingsStore
 const showOnboarding = ref(false)
 const showIntermediateModal = ref(false)
 const currentStep = ref({})
@@ -255,29 +267,48 @@ const iconProps = {
 }
 
 onMounted(() => {
-	addNotifications()
-	setSidebarLinks()
 	setUpOnboarding()
+	addKeyboardShortcut()
+	updateSidebarLinks()
 	socket.on('publish_lms_notifications', (data) => {
 		unreadNotifications.reload()
 	})
 })
 
-const setSidebarLinks = () => {
+const updateSidebarLinksVisibility = () => {
 	sidebarSettings.reload(
 		{},
 		{
 			onSuccess(data) {
 				Object.keys(data).forEach((key) => {
 					if (!parseInt(data[key])) {
-						sidebarLinks.value = sidebarLinks.value.filter(
-							(link) => link.label.toLowerCase().split(' ').join('_') !== key
-						)
+						sidebarLinks.value.forEach((link) => {
+							link.items = link.items.filter(
+								(item) => item.label.toLowerCase().split(' ').join('_') !== key
+							)
+						})
 					}
 				})
 			},
 		}
 	)
+}
+
+const addKeyboardShortcut = () => {
+	window.addEventListener('keydown', (e) => {
+		if (
+			e.key === 'k' &&
+			(e.ctrlKey || e.metaKey) &&
+			!e.target.classList.contains('ProseMirror')
+		) {
+			toggleCommandPalette()
+			e.preventDefault()
+		}
+	})
+}
+
+const toggleCommandPalette = () => {
+	settingsStore.isCommandPaletteOpen = !settingsStore.isCommandPaletteOpen
 }
 
 const unreadNotifications = createResource({
@@ -294,140 +325,18 @@ const unreadNotifications = createResource({
 	},
 	onSuccess(data) {
 		unreadCount.value = data
-		sidebarLinks.value = sidebarLinks.value.map((link) => {
-			if (link.label === 'Notifications') {
-				link.count = data
-			}
-			return link
-		})
+		updateUnreadCount()
 	},
 	auto: user ? true : false,
 })
 
-const addNotifications = () => {
-	if (user) {
-		sidebarLinks.value.push({
-			label: 'Notifications',
-			icon: 'Bell',
-			to: 'Notifications',
-			activeFor: ['Notifications'],
-			count: unreadCount.value,
+const updateUnreadCount = () => {
+	sidebarLinks.value?.forEach((link) => {
+		link.items.forEach((item) => {
+			if (item.label === 'Notifications') {
+				item.count = unreadCount.value || 0
+			}
 		})
-	}
-}
-
-const addQuizzes = () => {
-	if (!isInstructor.value && !isModerator.value) return
-
-	const quizzesLinkExists = sidebarLinks.value.some(
-		(link) => link.label === 'Quizzes'
-	)
-	if (quizzesLinkExists) return
-
-	sidebarLinks.value.splice(4, 0, {
-		label: 'Quizzes',
-		icon: 'CircleHelp',
-		to: 'Quizzes',
-		activeFor: ['Quizzes', 'QuizForm', 'QuizSubmissionList', 'QuizSubmission'],
-	})
-}
-
-const addAssignments = () => {
-	if (!isInstructor.value && !isModerator.value) return
-
-	const assignmentsLinkExists = sidebarLinks.value.some(
-		(link) => link.label === 'Assignments'
-	)
-	if (assignmentsLinkExists) return
-
-	sidebarLinks.value.splice(5, 0, {
-		label: 'Assignments',
-		icon: 'Pencil',
-		to: 'Assignments',
-		activeFor: [
-			'Assignments',
-			'AssignmentForm',
-			'AssignmentSubmissionList',
-			'AssignmentSubmission',
-		],
-	})
-}
-
-const addProgrammingExercises = () => {
-	if (!isInstructor.value && !isModerator.value) return
-	const programmingExercisesLinkExists = sidebarLinks.value.some(
-		(link) => link.label === 'Programming Exercises'
-	)
-	if (programmingExercisesLinkExists) return
-
-	sidebarLinks.value.splice(3, 0, {
-		label: 'Programming Exercises',
-		icon: 'Code',
-		to: 'ProgrammingExercises',
-		activeFor: [
-			'ProgrammingExercises',
-			'ProgrammingExerciseForm',
-			'ProgrammingExerciseSubmissions',
-			'ProgrammingExerciseSubmission',
-		],
-	})
-}
-
-const addPrograms = async () => {
-	const programsLinkExists = sidebarLinks.value.some(
-		(link) => link.label === 'Programs'
-	)
-	if (programsLinkExists) return
-
-	let canAddProgram = await checkIfCanAddProgram()
-	if (!canAddProgram) return
-	let activeFor = ['Programs', 'ProgramDetail']
-	let index = 2
-
-	sidebarLinks.value.splice(index, 0, {
-		label: 'Programs',
-		icon: 'Route',
-		to: 'Programs',
-		activeFor: activeFor,
-	})
-}
-
-const addContactUsDetails = () => {
-	if (!settingsStore.contactUsEmail?.data && !settingsStore.contactUsURL?.data)
-		return
-
-	const contactUsLinkExists = sidebarLinks.value.some(
-		(link) => link.label === 'Contact Us'
-	)
-	if (contactUsLinkExists) return
-
-	sidebarLinks.value.push({
-		label: 'Contact Us',
-		icon: settingsStore.contactUsURL?.data ? 'Headset' : 'Mail',
-		to: settingsStore.contactUsURL?.data
-			? settingsStore.contactUsURL.data
-			: settingsStore.contactUsEmail?.data,
-	})
-}
-
-const checkIfCanAddProgram = async () => {
-	if (isModerator.value || isInstructor.value) {
-		return true
-	}
-	const programs = await call('lms.lms.utils.get_programs')
-	return programs.enrolled.length > 0 || programs.published.length > 0
-}
-
-const addHome = () => {
-	const homeLinkExists = sidebarLinks.value.some(
-		(link) => link.label === 'Home'
-	)
-	if (homeLinkExists) return
-	sidebarLinks.value.unshift({
-		label: 'Home',
-		icon: 'Home',
-		to: 'Home',
-		activeFor: ['Home'],
 	})
 }
 
@@ -437,21 +346,13 @@ const openPageModal = (link) => {
 }
 
 const deletePage = (link) => {
-	createResource({
-		url: 'lms.lms.api.delete_sidebar_item',
-		makeParams(values) {
-			return {
-				webpage: link.web_page,
-			}
-		},
-	}).submit(
-		{},
-		{
-			onSuccess() {
-				sidebarSettings.reload()
-			},
-		}
-	)
+	call('lms.lms.api.delete_documents', {
+		doctype: 'LMS Sidebar Item',
+		documents: [link.name],
+	}).then(() => {
+		sidebarSettings.reload()
+		toast.success(__('Page deleted successfully'))
+	})
 }
 
 const toggleSidebar = () => {
@@ -505,9 +406,13 @@ const steps = reactive([
 			minimize.value = true
 			let course = await getFirstCourse()
 			if (course) {
-				router.push({ name: 'CourseForm', params: { courseName: course } })
+				router.push({
+					name: 'CourseDetail',
+					params: { courseName: course },
+					hash: '#settings',
+				})
 			} else {
-				router.push({ name: 'CourseForm' })
+				router.push({ name: 'Courses', query: { newCourse: '1' } })
 			}
 		},
 	},
@@ -522,11 +427,12 @@ const steps = reactive([
 			let course = await getFirstCourse()
 			if (course) {
 				router.push({
-					name: 'CourseForm',
+					name: 'CourseDetail',
 					params: { courseName: course },
+					hash: '#settings',
 				})
 			} else {
-				router.push({ name: 'Courses' })
+				router.push({ name: 'Courses', query: { newCourse: '1' } })
 			}
 		},
 	},
@@ -548,8 +454,8 @@ const steps = reactive([
 		completed: false,
 		onClick: () => {
 			minimize.value = true
-			settingsStore.activeTab = 'Members'
-			settingsStore.isSettingsOpen = true
+			activeTab.value = 'Members'
+			isSettingsOpen.value = true
 		},
 	},
 	{
@@ -683,19 +589,25 @@ const setUpOnboarding = () => {
 	}
 }
 
-watch(userResource, () => {
-	addContactUsDetails()
+watch(userResource, async () => {
+	await userResource.promise
 	if (userResource.data) {
 		isModerator.value = userResource.data.is_moderator
 		isInstructor.value = userResource.data.is_instructor
-		addHome()
-		addPrograms()
-		addProgrammingExercises()
-		addQuizzes()
-		addAssignments()
+		await programs.reload()
 		setUpOnboarding()
 	}
+	updateSidebarLinks()
 })
+
+watch(settingsStore.settings, () => {
+	updateSidebarLinks()
+})
+
+const updateSidebarLinks = () => {
+	sidebarLinks.value = getSidebarLinks()
+	updateSidebarLinksVisibility()
+}
 
 const redirectToWebsite = () => {
 	window.open('https://frappe.io/learning', '_blank')
