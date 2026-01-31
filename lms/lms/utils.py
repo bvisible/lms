@@ -16,7 +16,6 @@ from frappe.utils import (
 	fmt_money,
 	format_datetime,
 	get_datetime,
-	get_frappe_version,
 	get_fullname,
 	get_time_str,
 	getdate,
@@ -598,7 +597,7 @@ def get_chart_date_range(from_date, to_date):
 
 
 def get_chart_filters(doctype, chart, datefield, from_date, to_date):
-	version = get_frappe_version()
+	version = frappe.__version__
 	if version.startswith("15.") or version.startswith("14."):
 		filters = [([chart.document_type, "docstatus", "<", 2, False])]
 		filters = filters + json.loads(chart.filters_json)
@@ -615,7 +614,7 @@ def get_chart_filters(doctype, chart, datefield, from_date, to_date):
 
 def get_chart_details(doctype, datefield, value_field, chart, from_date, to_date):
 	filters = get_chart_filters(doctype, chart, datefield, from_date, to_date)
-	version = get_frappe_version()
+	version = frappe.__version__
 	if version.startswith("15.") or version.startswith("14."):
 		return frappe.db.get_all(
 			doctype,
