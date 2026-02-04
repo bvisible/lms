@@ -12,6 +12,10 @@ export default defineConfig(async ({ mode }) => {
 		define: {
 			__VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
 		},
+		build: {
+			// Disable sourcemaps in production to reduce memory usage
+			sourcemap: isDev,
+		},
 		plugins: [
 			frappeui({
 				frappeProxy: true,
