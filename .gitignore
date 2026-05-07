@@ -10,8 +10,10 @@ __pycache__/
 *$py.class
 node_modules
 package-lock.json
-lms/public/frontend
-lms/www/lms.html
-lms/www/_lms.html
+# 2026-05-07 (NORA #28) — frontend build outputs are committed on this branch.
+# See docs/COMMIT-BUILD-PATTERN.md in neoffice-devops.
+# lms/public/frontend
+# lms/www/lms.html
+# lms/www/_lms.html
 frappe-ui
 CLAUDE.md
