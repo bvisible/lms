@@ -117,7 +117,7 @@ const subtitle = computed(() => {
 				evalSuffix
 			)
 		}
-		return __('Manage your courses and batches at a glance')
+		return __('Manage your courses and batches at a glance — auto-built')
 	} else {
 		let liveClassSuffix =
 			myLiveClasses.data?.length > 1 ? __('live classes') : __('live class')
