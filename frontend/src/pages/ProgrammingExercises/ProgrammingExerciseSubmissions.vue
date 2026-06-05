@@ -1,11 +1,11 @@
 <template>
-	<header
-		class="sticky flex items-center justify-between top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
-	>
-		<Breadcrumbs :items="breadcrumbs" />
-	</header>
+	<LayoutHeader>
+		<template #left-header>
+			<Breadcrumbs :items="breadcrumbs" />
+		</template>
+	</LayoutHeader>
 	<div class="p-6">
-		<div class="flex items-center justify-between space-x-32 mb-5">
+		<div class="flex items-center justify-between gap-x-32 mb-5">
 			<div class="text-lg font-semibold text-ink-gray-9">
 				{{
 					submissions.data?.length
@@ -13,7 +13,10 @@
 						: __('No Submissions')
 				}}
 			</div>
-			<div v-if="submissions.data?.length" class="grid grid-cols-3 gap-5">
+			<div
+				v-if="submissions.data?.length || filters"
+				class="grid grid-cols-3 gap-5"
+			>
 				<Link
 					doctype="LMS Programming Exercise"
 					v-model="filters.exercise"
@@ -31,7 +34,7 @@
 					v-model="filters.status"
 					type="select"
 					:options="[
-						{ label: __(''), value: '' },
+						{},
 						{ label: __('Passed'), value: 'Passed' },
 						{ label: __('Failed'), value: 'Failed' },
 					]"
@@ -51,7 +54,7 @@
 			}"
 		>
 			<ListHeader
-				class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
+				class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
 			>
 				<ListHeaderItem
 					:item="item"
@@ -121,7 +124,7 @@
 				</template>
 			</ListSelectBanner>
 		</ListView>
-		<EmptyState v-else type="Programming Exercise Submissions" />
+		<EmptyStateLayout v-else name="Programming Exercise Submissions" />
 		<div
 			v-if="submissions.data && submissions.hasNextPage"
 			class="flex justify-center my-5"
@@ -160,7 +163,8 @@ import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
 import { Trash2 } from 'lucide-vue-next'
 import Link from '@/components/Controls/Link.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
+import LayoutHeader from '@/components/Layouts/LayoutHeader.vue'
 
 const { brand } = sessionStore()
 const dayjs = inject('$dayjs') as any

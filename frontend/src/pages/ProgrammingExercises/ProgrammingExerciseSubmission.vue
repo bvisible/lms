@@ -20,7 +20,7 @@
 		</Button>
 	</div>
 	<div class="grid grid-cols-2 h-[calc(100vh_-_3rem)]">
-		<div class="border-r py-5 px-8 h-full">
+		<div class="border-e py-5 px-8 h-full">
 			<div class="font-semibold mb-2 text-ink-gray-9">
 				{{ __('Problem Statement') }}
 			</div>
@@ -34,7 +34,7 @@
 				<div class="font-semibold text-ink-gray-9">
 					{{ exercise.doc?.language }}
 				</div>
-				<div class="space-x-2">
+				<div class="flex items-center gap-x-2">
 					<Badge
 						v-if="submission.doc?.status"
 						:theme="submission.doc.status == 'Passed' ? 'green' : 'red'"
@@ -49,11 +49,14 @@
 						"
 						variant="solid"
 						@click="submitCode"
+						:loading="running"
+						:disabled="running"
+						class="text-ink-gray-9"
 					>
 						<template #prefix>
 							<Play class="size-3" />
 						</template>
-						{{ __('Run') }}
+						{{ running ? __('Running') : __('Run') }}
 					</Button>
 				</div>
 			</div>
@@ -93,7 +96,7 @@
 								{{ __('Test {0}').format(index + 1) }} -
 							</span>
 							<span
-								class="font-semibold ml-2 mr-1"
+								class="font-semibold ms-2 me-1"
 								:class="
 									testCase.status === 'Passed'
 										? 'text-ink-green-3'
@@ -172,8 +175,9 @@ const { brand } = sessionStore()
 const { settings } = useSettings()
 const router = useRouter()
 const fromLesson = ref(false)
-const falconURL = ref<string>('https://falcon.frappe.io/')
+const falconURL = ref<string>('https://falcon.frappe.io')
 const falconError = ref<string | null>(null)
+const running = ref<boolean>(false)
 
 const props = withDefaults(
 	defineProps<{
@@ -300,7 +304,7 @@ const loadFalcon = () => {
 	}
 	return new Promise((resolve, reject) => {
 		const script = document.createElement('script')
-		script.src = `${falconURL.value}static/livecode.js`
+		script.src = `${falconURL.value}/static/livecode.js`
 		script.onload = resolve
 		script.onerror = reject
 		document.head.appendChild(script)
@@ -308,8 +312,10 @@ const loadFalcon = () => {
 }
 
 const submitCode = async () => {
+	running.value = true
 	await runCode()
 	createSubmission()
+	running.value = false
 }
 
 const runCode = async () => {
@@ -406,6 +412,7 @@ const execute = (stdin = ''): Promise<string> => {
 
 		setTimeout(() => {
 			if (!hasExited) {
+				running.value = false
 				error.value = true
 				errorMessage.value = 'Execution timed out.'
 				reject('Execution timed out.')

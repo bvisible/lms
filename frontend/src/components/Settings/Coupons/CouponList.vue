@@ -2,7 +2,7 @@
 	<div class="flex min-h-0 flex-col text-base">
 		<div class="flex items-center justify-between mb-5">
 			<div>
-				<div class="text-xl font-semibold mb-1 text-ink-gray-9">
+				<div class="text-xl font-semibold mb-2 text-ink-gray-9">
 					{{ __(label) }}
 				</div>
 				<div class="text-ink-gray-6 leading-5">
@@ -17,7 +17,7 @@
 			</Button>
 		</div>
 
-		<div v-if="coupons.data?.length" class="overflow-y-scroll">
+		<div v-if="coupons.data?.length" class="overflow-y-auto">
 			<ListView
 				:columns="columns"
 				:rows="coupons.data"
@@ -31,7 +31,7 @@
 				}"
 			>
 				<ListHeader
-					class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
+					class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
 				>
 				</ListHeader>
 				<ListRows>
@@ -78,9 +78,12 @@
 				</ListSelectBanner>
 			</ListView>
 		</div>
-		<div v-else class="text-center text-ink-gray-6 italic mt-40">
-			{{ __('No coupons created yet.') }}
-		</div>
+		<EmptyStateLayout
+			v-else
+			name="Coupons"
+			:description="__('Add one to get started.')"
+			:icon="Ticket"
+		/>
 	</div>
 </template>
 <script setup lang="ts">
@@ -100,8 +103,9 @@ import {
 	toast,
 } from 'frappe-ui'
 import { computed, getCurrentInstance, inject, ref } from 'vue'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2, Ticket } from 'lucide-vue-next'
 import type { Coupon, Coupons } from './types'
+import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
 
 const dayjs = inject('$dayjs') as typeof import('dayjs')
 const app = getCurrentInstance()

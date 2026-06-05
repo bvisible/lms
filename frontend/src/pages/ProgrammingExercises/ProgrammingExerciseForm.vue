@@ -1,7 +1,7 @@
 <template>
 	<Dialog v-model="show" :options="{ size: '4xl' }">
 		<template #body-title>
-			<div class="flex items-center space-x-2">
+			<div class="flex items-center gap-x-2">
 				<div class="text-xl font-semibold text-ink-gray-9">
 					{{
 						props.exerciseID === 'new'
@@ -51,14 +51,14 @@
 							@change="(val: string) => (exercise.problem_statement = val)"
 							:editable="true"
 							:fixedMenu="true"
-							editorClass="prose-sm max-w-none border-b border-x bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem] max-h-[21rem] overflow-y-auto"
+							editorClass="prose-sm max-w-none border-b border-x border-outline-gray-modals bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[10rem] max-h-[21rem] overflow-y-auto"
 						/>
 					</div>
 				</div>
 			</div>
 		</template>
 		<template #actions="{ close }">
-			<div class="flex justify-end space-x-2 group">
+			<div class="flex justify-end gap-x-2 group">
 				<Button
 					v-if="exerciseID != 'new'"
 					@click="deleteExercise(close)"
@@ -71,6 +71,7 @@
 					{{ __('Delete') }}
 				</Button>
 				<router-link
+					v-if="exerciseID != 'new'"
 					:to="{
 						name: 'ProgrammingExerciseSubmission',
 						params: {
@@ -87,6 +88,7 @@
 					</Button>
 				</router-link>
 				<router-link
+					v-if="exerciseID != 'new'"
 					:to="{
 						name: 'ProgrammingExerciseSubmissions',
 						query: {
@@ -110,7 +112,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { escapeHTML } from '@/utils'
+import { sanitizeHTML } from '@/utils'
 import {
 	Badge,
 	Button,
@@ -130,6 +132,7 @@ import ChildTable from '@/components/Controls/ChildTable.vue'
 
 const show = defineModel()
 const exercises = defineModel<ProgrammingExercises>('exercises')
+const totalExercises = defineModel<number>('totalExercises')
 const isDirty = ref(false)
 const originalTestCaseCount = ref(0)
 
@@ -185,7 +188,6 @@ const setExerciseData = () => {
 const testCases = createListResource({
 	doctype: 'LMS Test Case',
 	fields: ['input', 'expected_output', 'name'],
-	cache: ['testCases', props.exerciseID],
 	parent: 'LMS Programming Exercise',
 	orderBy: 'idx',
 	onSuccess(data: TestCase[]) {
@@ -207,11 +209,11 @@ const fetchTestCases = () => {
 		},
 	})
 	testCases.reload()
-	originalTestCaseCount.value = testCases.data.length
+	originalTestCaseCount.value = testCases.data?.length
 }
 
 const validateTitle = () => {
-	exercise.value.title = escapeHTML(exercise.value.title.trim())
+	exercise.value.title = sanitizeHTML(exercise.value.title.trim())
 }
 
 watch(
@@ -223,7 +225,7 @@ watch(
 )
 
 watch(testCases, () => {
-	if (testCases.data.length !== originalTestCaseCount.value) {
+	if (testCases.data?.length !== originalTestCaseCount.value) {
 		isDirty.value = true
 	}
 })
@@ -255,6 +257,7 @@ const createNewExercise = (close: () => void) => {
 				close()
 				isDirty.value = false
 				exercises.value?.reload()
+				totalExercises.value.reload()
 				toast.success(__('Programming Exercise created successfully'))
 			},
 			onError(err: any) {

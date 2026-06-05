@@ -3,9 +3,9 @@
 		<div class="text-ink-gray-5">
 			{{ __(title) }}
 		</div>
-		<div class="flex items-center space-x-2">
+		<div class="flex items-center gap-x-2">
 			<slot name="prefix" />
-			<div class="font-semibold text-2xl">
+			<div class="font-semibold text-ink-gray-9 text-2xl">
 				{{ value }}
 			</div>
 			<slot name="suffix" />

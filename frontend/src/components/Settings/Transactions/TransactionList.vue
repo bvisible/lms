@@ -2,7 +2,7 @@
 	<div class="flex min-h-0 flex-col text-base">
 		<div class="flex items-center justify-between mb-5">
 			<div>
-				<div class="text-xl font-semibold mb-1 text-ink-gray-9">
+				<div class="text-xl font-semibold mb-2 text-ink-gray-9">
 					{{ __(label) }}
 				</div>
 				<div class="text-ink-gray-6 leading-5">
@@ -17,7 +17,7 @@
 			</Button>
 		</div>
 
-		<div class="flex items-center space-x-5 mb-4">
+		<div class="flex items-center gap-x-5 mb-4">
 			<FormControl
 				v-model="billingName"
 				:placeholder="__('Filter by Billing Name')"
@@ -39,21 +39,21 @@
 			/>
 		</div>
 
-		<div v-if="transactions.data?.length" class="overflow-y-scroll">
+		<div v-if="transactions.data?.length" class="overflow-y-auto">
 			<ListView
 				:columns="columns"
 				:rows="transactions.data"
 				row-key="name"
 				:options="{
-                    showTooltip: false,
-                    selectable: false,
-                    onRowClick: (row: { [key: string]: any }) => {
-                        openForm(row)
-                    },
-                }"
+					showTooltip: false,
+					selectable: false,
+					onRowClick: (row: { [key: string]: any }) => {
+						openForm(row)
+					},
+				}"
 			>
 				<ListHeader
-					class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
+					class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
 				>
 					<ListHeaderItem :item="item" v-for="item in columns">
 						<template #prefix="{ item }">
@@ -103,6 +103,12 @@
 				</Button>
 			</div>
 		</div>
+		<EmptyStateLayout
+			v-else
+			name="Transactions"
+			:description="__('Add one to get started.')"
+			:icon="Landmark"
+		/>
 	</div>
 </template>
 <script setup lang="ts">
@@ -117,9 +123,11 @@ import {
 	ListRowItem,
 	FormControl,
 } from 'frappe-ui'
+import Switch from '@/components/Controls/Switch.vue'
 import { computed, ref, watch } from 'vue'
-import { RefreshCw } from 'lucide-vue-next'
+import { RefreshCw, Landmark } from 'lucide-vue-next'
 import Link from '@/components/Controls/Link.vue'
+import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
 
 const billingName = ref(null)
 const paymentReceived = ref(false)

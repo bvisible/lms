@@ -1,6 +1,6 @@
 <template>
 	<div class="flex flex-col text-base h-full">
-		<div class="flex items-center space-x-2 mb-8 -ml-1.5">
+		<div class="flex items-center gap-x-2 mb-8 -ms-1.5">
 			<ChevronLeft
 				class="size-5 stroke-1.5 text-ink-gray-7 cursor-pointer"
 				@click="emit('updateStep', 'list')"
@@ -11,10 +11,11 @@
 		</div>
 		<div class="space-y-4 overflow-y-auto">
 			<div>
-				<FormControl
+				<Switch
+					size="sm"
 					v-model="data.enabled"
 					:label="__('Enabled')"
-					type="checkbox"
+					:description="__('Allow this coupon to be used for discounts.')"
 				/>
 			</div>
 			<div class="grid grid-cols-2 gap-4">
@@ -73,7 +74,7 @@
 				<CouponItems ref="couponItems" :data="data" :coupons="coupons" />
 			</div>
 		</div>
-		<div class="mt-auto space-x-2 ml-auto">
+		<div class="mt-auto flex gap-x-2 items-center ms-auto">
 			<Button variant="solid" @click="saveCoupon()">
 				{{ __('Save') }}
 			</Button>
@@ -82,6 +83,7 @@
 </template>
 <script setup lang="ts">
 import { Button, FormControl, toast } from 'frappe-ui'
+import Switch from '@/components/Controls/Switch.vue'
 import { ref } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { Coupon, Coupons } from './types'

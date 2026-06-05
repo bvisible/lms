@@ -6,7 +6,7 @@
 		}"
 	>
 		<template #body-header>
-			<div class="text-lg font-semibold">
+			<div class="text-lg font-semibold text-ink-gray-9">
 				{{
 					gatewayID === 'new'
 						? __('New Payment Gateway')
@@ -36,7 +36,7 @@
 			</div>
 		</template>
 		<template #actions="{ close }">
-			<div class="pb-5 float-right">
+			<div class="pb-5 float-end">
 				<Button variant="solid" @click="saveSettings(close)">
 					{{ __('Save') }}
 				</Button>
@@ -131,7 +131,7 @@ watch(newGateway, () => {
 		let fields = gatewayFields.data || []
 		arrangeFields(fields)
 		newGatewayFields.value = makeSections(fields)
-		prepareGatewayData()
+		prepareGatewayData(fields)
 	})
 })
 
@@ -209,13 +209,11 @@ const allGatewayOptions = computed(() => {
 	return options.map((gateway: string) => ({ label: gateway, value: gateway }))
 })
 
-const prepareGatewayData = () => {
+const prepareGatewayData = (fields: any[]) => {
 	newGatewayData.value = {}
-	if (newGatewayFields.value.length) {
-		newGatewayFields.value.forEach((field: any) => {
-			newGatewayData.value[field.fieldname] = field.default || ''
-		})
-	}
+	fields.forEach((field: any) => {
+		newGatewayData.value[field.name] = field.default || ''
+	})
 }
 
 const makeSections = (fields: any[]) => {

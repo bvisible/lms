@@ -1,107 +1,54 @@
 <template>
-	<div class="">
-		<div class="grid md:grid-cols-[75%,25%] h-screen">
-			<div class="border-r">
-				<header
-					class="sticky top-0 z-10 flex flex-col md:flex-row md:items-center justify-between border-b overflow-hidden bg-surface-white px-3 py-2.5 sm:px-5"
+	<div class="py-5">
+		<div class="mt-0">
+			<div class="w-5/6 mx-auto pt-4">
+				<div
+					class="flex justify-between cursor-pointer"
+					@click="
+						() => {
+							openInstructorEditor = !openInstructorEditor
+						}
+					"
 				>
-					<Breadcrumbs class="text-ellipsis" :items="breadcrumbs" />
-					<Button
-						variant="solid"
-						@click="saveLesson({ showSuccessMessage: true })"
-						class="mt-3 md:mt-0"
-					>
-						{{ __('Save') }}
-					</Button>
-				</header>
-				<div class="py-5">
-					<div class="w-5/6 mx-auto">
-						<FormControl
-							v-model="lesson.title"
-							label="Title"
-							class="mb-4"
-							:required="true"
-						/>
-						<FormControl
-							v-model="lesson.include_in_preview"
-							type="checkbox"
-							label="Include in Preview"
-						/>
-					</div>
-					<div class="border-t mt-4">
-						<div class="w-5/6 mx-auto pt-4">
-							<div
-								class="flex justify-between cursor-pointer"
-								@click="
-									() => {
-										openInstructorEditor = !openInstructorEditor
-									}
-								"
-							>
-								<label class="block font-medium text-ink-gray-5 mb-1">
-									{{ __('Instructor Notes') }}
-								</label>
-								<ChevronRight
-									class="stroke-2 h-5 w-5 text-ink-gray-5"
-									:class="{
-										'rotate-90 transform duration-200': openInstructorEditor,
-										'duration-200': !openInstructorEditor,
-									}"
-								/>
-							</div>
-							<div
-								v-show="openInstructorEditor"
-								id="instructor-notes"
-								class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal py-3"
-							></div>
-						</div>
-					</div>
-					<div class="border-t mt-4">
-						<div class="w-5/6 mx-auto pt-4">
-							<label class="block font-medium text-ink-gray-5 mb-1">
-								{{ __('Content') }}
-							</label>
-							<div
-								id="content"
-								class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal py-3"
-							></div>
-						</div>
-					</div>
+					<label class="block font-medium text-ink-gray-5 mb-1">
+						{{ __('Instructor Notes') }}
+					</label>
+					<ChevronRight
+						class="stroke-2 h-5 w-5 text-ink-gray-5 transform duration-200"
+						:class="{
+							'rotate-90': openInstructorEditor,
+							'rtl:rotate-180': !openInstructorEditor,
+						}"
+					/>
 				</div>
+				<div
+					v-show="openInstructorEditor"
+					id="instructor-notes"
+					class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal py-3"
+				></div>
 			</div>
-			<div class="">
-				<div class="sticky top-0 p-5">
-					<LessonHelp />
-				</div>
+		</div>
+		<div class="border-t mt-4">
+			<div class="w-5/6 mx-auto pt-4">
+				<label class="block font-medium text-ink-gray-5 mb-1">
+					{{ __('Content') }}
+				</label>
+				<div
+					id="content"
+					class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal py-3"
+				></div>
 			</div>
 		</div>
 	</div>
 </template>
 <script setup>
-import {
-	Breadcrumbs,
-	Button,
-	createResource,
-	FormControl,
-	usePageMeta,
-	toast,
-} from 'frappe-ui'
-import {
-	computed,
-	reactive,
-	onMounted,
-	inject,
-	ref,
-	onBeforeUnmount,
-} from 'vue'
-import { sessionStore } from '../stores/session'
+import { createResource, toast } from 'frappe-ui'
+import { reactive, onMounted, inject, ref, onBeforeUnmount } from 'vue'
 import EditorJS from '@editorjs/editorjs'
-import LessonHelp from '@/components/LessonHelp.vue'
 import { ChevronRight } from 'lucide-vue-next'
-import { getEditorTools, enablePlyr } from '@/utils'
+import { getEditorTools, enablePlyr, sanitizeEditorJs } from '@/utils'
 import { useOnboarding, useTelemetry } from 'frappe-ui/frappe'
 
-const { brand } = sessionStore()
 const editor = ref(null)
 const instructorEditor = ref(null)
 const user = inject('$user')
@@ -126,6 +73,16 @@ const props = defineProps({
 	},
 })
 
+const isDirty = ref(false)
+function markDirty() {
+	if (lessonDetails.data?.lesson) isDirty.value = true
+}
+
+defineExpose({
+	saveLesson: () => saveLesson({ showSuccessMessage: true }),
+	isDirty,
+})
+
 onMounted(() => {
 	if (!user.data?.is_moderator && !user.data?.is_instructor) {
 		window.location.href = '/login'
@@ -142,8 +99,12 @@ const renderEditor = (holder) => {
 		holder: holder,
 		tools: getEditorTools(true),
 		defaultBlock: 'markdown',
+		i18n: {
+			direction: document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr',
+		},
 		onChange: async (api, event) => {
 			enablePlyr()
+			markDirty()
 		},
 	})
 }
@@ -175,6 +136,8 @@ const lessonDetails = createResource({
 			addLessonContent(data)
 			addInstructorNotes(data)
 			enableAutoSave()
+			// Initial population isn't user input.
+			isDirty.value = false
 		}
 	},
 })
@@ -182,7 +145,7 @@ const lessonDetails = createResource({
 const addLessonContent = (data) => {
 	editor.value.isReady.then(() => {
 		if (data.lesson.content) {
-			editor.value.render(JSON.parse(data.lesson.content))
+			editor.value.render(sanitizeEditorJs(JSON.parse(data.lesson.content)))
 		} else if (data.lesson.body) {
 			let blocks = convertToJSON(data.lesson)
 			editor.value.render({
@@ -195,7 +158,9 @@ const addLessonContent = (data) => {
 const addInstructorNotes = (data) => {
 	instructorEditor.value.isReady.then(() => {
 		if (data.lesson.instructor_content) {
-			instructorEditor.value.render(JSON.parse(data.lesson.instructor_content))
+			instructorEditor.value.render(
+				sanitizeEditorJs(JSON.parse(data.lesson.instructor_content))
+			)
 		} else if (data.lesson.instructor_notes) {
 			let blocks = convertToJSON(data.lesson)
 			instructorEditor.value.render({
@@ -421,6 +386,7 @@ const createNewLesson = () => {
 
 							capture('lesson_created')
 							toast.success(__('Lesson created successfully'))
+							isDirty.value = false
 							lessonDetails.reload()
 						},
 					}
@@ -446,6 +412,7 @@ const editCurrentLesson = () => {
 				showSuccessMessage
 					? toast.success(__('Lesson updated successfully'))
 					: ''
+				isDirty.value = false
 			},
 			onError(err) {
 				toast.error(err.message)
@@ -462,58 +429,6 @@ const validateLesson = () => {
 		return 'Content is required'
 	}
 }
-
-const breadcrumbs = computed(() => {
-	let crumbs = [
-		{
-			label: 'Courses',
-			route: { name: 'Courses' },
-		},
-		{
-			label: lessonDetails.data?.course_title,
-			route: {
-				name: 'CourseDetail',
-				params: { courseName: props.courseName },
-				hash: '#settings',
-			},
-		},
-	]
-
-	if (lessonDetails?.data?.lesson) {
-		crumbs.push({
-			label: lessonDetails.data.lesson.title,
-			route: {
-				name: 'Lesson',
-				params: {
-					courseName: props.courseName,
-					chapterNumber: props.chapterNumber,
-					lessonNumber: props.lessonNumber,
-				},
-			},
-		})
-	}
-	crumbs.push({
-		label: lessonDetails?.data?.lesson ? 'Edit Lesson' : 'Create Lesson',
-		route: {
-			name: 'LessonForm',
-			params: {
-				courseName: props.courseName,
-				chapterNumber: props.chapterNumber,
-				lessonNumber: props.lessonNumber,
-			},
-		},
-	})
-	return crumbs
-})
-
-usePageMeta(() => {
-	return {
-		title: lessonDetails?.data?.lesson
-			? lessonDetails.data.lesson.title
-			: 'New Lesson',
-		icon: brand.favicon,
-	}
-})
 </script>
 <style>
 .embed-tool__caption,
@@ -525,8 +440,15 @@ usePageMeta(() => {
 	max-width: none;
 }
 
+.ce-toolbar__actions,
 .codex-editor--narrow .ce-toolbar__actions {
-	right: 100%;
+	right: auto;
+	left: auto;
+	inset-inline-end: 100%;
+}
+
+.codex-editor--narrow .codex-editor__redactor {
+	margin-inline: 0;
 }
 
 .ce-toolbar__content {
@@ -562,8 +484,8 @@ usePageMeta(() => {
 	border-radius: 0 0 20px 2px;
 	padding: 2px 26px;
 	padding-top: 0;
-	padding-right: 0;
-	text-align: left;
+	padding-inline-end: 0;
+	text-align: start;
 	cursor: pointer;
 	border: none !important;
 	outline: none !important;
@@ -571,7 +493,7 @@ usePageMeta(() => {
 
 .codeBoxSelectDropIcon {
 	position: absolute !important;
-	left: 10px !important;
+	inset-inline-start: 10px !important;
 	bottom: 0 !important;
 	width: unset !important;
 	height: unset !important;
@@ -632,7 +554,7 @@ iframe {
 }
 
 .tc-table {
-	border-left: 1px solid #e8e8eb;
+	border-inline-start: 1px solid #e8e8eb;
 }
 
 .ce-toolbox__button[data-tool='markdown'] {
@@ -669,14 +591,13 @@ iframe {
 	padding: 8px;
 }
 
+.ce-popover,
 .codex-editor--narrow .ce-toolbox .ce-popover,
 .codex-editor--narrow .ce-toolbar__actions .ce-popover {
-	right: unset;
-	left: initial;
-}
-
-.ce-popover {
 	border-radius: 12px;
+	right: auto;
+	left: auto;
+	inset-inline-start: 0;
 }
 
 .cdx-search-field {
@@ -706,8 +627,13 @@ iframe {
 	height: 15px;
 }
 
-.ce-popover--opened > .ce-popover__container {
-	max-height: unset;
+.ce-popover-item__icon {
+	margin-right: unset;
+	margin-inline-end: 10px;
+}
+
+.ce-popover--opened {
+	max-height: unset !important;
 }
 
 .cdx-search-field__icon svg {
@@ -716,7 +642,7 @@ iframe {
 }
 
 .cdx-search-field__icon {
-	margin-right: 5px;
+	margin-inline-end: 5px;
 }
 
 .cdx-block.embed-tool {

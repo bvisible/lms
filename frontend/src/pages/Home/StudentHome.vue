@@ -1,94 +1,30 @@
 <template>
 	<div>
-		<div v-if="myCourses.data?.length" class="mt-10">
-			<div class="flex items-center justify-between mb-3">
-				<span class="font-semibold text-lg text-ink-gray-9">
-					{{
-						myCourses.data[0].membership
-							? __('My Courses')
-							: __('Our Popular Courses')
-					}}
-				</span>
-				<router-link
-					:to="{
-						name: 'Courses',
-					}"
-				>
-					<span class="flex items-center space-x-1 text-ink-gray-5 text-xs">
-						<span>
-							{{ __('See all') }}
-						</span>
-						<MoveRight class="size-3 stroke-1.5" />
-					</span>
-				</router-link>
-			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-				<router-link
-					v-for="course in myCourses.data"
-					:to="{ name: 'CourseDetail', params: { courseName: course.name } }"
-				>
-					<CourseCard :course="course" />
-				</router-link>
-			</div>
-		</div>
-
-		<div v-if="myBatches.data?.length" class="mt-10">
-			<div class="flex items-center justify-between mb-3">
-				<span class="font-semibold text-lg text-ink-gray-9">
-					{{
-						myBatches.data?.[0].students.includes(user.data?.name)
-							? __('My Batches')
-							: __('Our Upcoming Batches')
-					}}
-				</span>
-				<router-link
-					:to="{
-						name: 'Batches',
-					}"
-				>
-					<span class="flex items-center space-x-1 text-ink-gray-5 text-xs">
-						<span>
-							{{ __('See all') }}
-						</span>
-						<MoveRight class="size-3 stroke-1.5" />
-					</span>
-				</router-link>
-			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-				<router-link
-					v-for="batch in myBatches.data"
-					:to="{ name: 'BatchDetail', params: { batchName: batch.name } }"
-				>
-					<BatchCard :batch="batch" />
-				</router-link>
-			</div>
-		</div>
-
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-5 mt-10">
+		<div class="mt-10 space-y-10">
 			<UpcomingEvaluations :forHome="true" />
 			<div v-if="myLiveClasses.data?.length">
 				<div class="font-semibold text-lg mb-3 text-ink-gray-9">
 					{{ __('Upcoming Live Classes') }}
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+				<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
 					<div
 						v-for="cls in myLiveClasses.data"
-						class="border rounded-md hover:border-outline-gray-3 p-2"
+						class="border rounded-md hover:border-outline-gray-3 p-3"
 					>
-						<div class="font-semibold text-ink-gray-9 text-lg leading-5 mb-1">
+						<div class="font-semibold text-ink-gray-9 leading-5 mb-1">
 							{{ cls.title }}
 						</div>
-						<div class="text-ink-gray-7 text-sm leading-5 mb-4">
+						<div class="text-ink-gray-5 leading-5 mb-4">
 							{{ cls.description }}
 						</div>
-						<div class="mt-auto space-y-3 text-ink-gray-7 text-sm">
-							<div class="flex items-center space-x-2">
+						<div class="mt-auto space-y-4 text-ink-gray-7">
+							<div class="flex items-center gap-x-2">
 								<Calendar class="w-4 h-4 stroke-1.5" />
 								<span>
 									{{ dayjs(cls.date).format('DD MMMM YYYY') }}
 								</span>
 							</div>
-							<div class="flex items-center space-x-2">
+							<div class="flex items-center gap-x-2">
 								<Clock class="w-4 h-4 stroke-1.5" />
 								<span>
 									{{ formatTime(cls.time) }} -
@@ -97,7 +33,7 @@
 							</div>
 							<div
 								v-if="canAccessClass(cls)"
-								class="flex items-center space-x-2 text-ink-gray-9 mt-auto"
+								class="flex items-center gap-x-2 text-ink-gray-9 mt-auto"
 							>
 								<a
 									v-if="user.data?.is_moderator || user.data?.is_evaluator"
@@ -123,7 +59,7 @@
 								:text="__('This class has ended')"
 								placement="right"
 							>
-								<div class="flex items-center space-x-2 text-ink-amber-3 w-fit">
+								<div class="flex items-center gap-x-2 text-ink-amber-3 w-fit">
 									<Info class="w-4 h-4 stroke-1.5" />
 									<span>
 										{{ __('Ended') }}
@@ -133,6 +69,70 @@
 						</div>
 					</div>
 				</div>
+			</div>
+		</div>
+
+		<div v-if="myCourses.data?.length" class="mt-10">
+			<div class="flex items-center justify-between mb-3">
+				<span class="font-semibold text-lg text-ink-gray-9">
+					{{
+						myCourses.data[0].membership
+							? __('My Courses')
+							: __('Our Popular Courses')
+					}}
+				</span>
+				<router-link
+					:to="{
+						name: 'Courses',
+					}"
+				>
+					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
+						<span>
+							{{ __('See all') }}
+						</span>
+						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
+					</span>
+				</router-link>
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+				<router-link
+					v-for="course in myCourses.data"
+					:to="{ name: 'CourseDetail', params: { courseName: course.name } }"
+				>
+					<CourseCard :course="course" />
+				</router-link>
+			</div>
+		</div>
+
+		<div v-if="myBatches.data?.length" class="mt-10">
+			<div class="flex items-center justify-between mb-3">
+				<span class="font-semibold text-lg text-ink-gray-9">
+					{{
+						myBatches.data?.[0].students?.includes(user.data?.name)
+							? __('My Batches')
+							: __('Our Upcoming Batches')
+					}}
+				</span>
+				<router-link
+					:to="{
+						name: 'Batches',
+					}"
+				>
+					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
+						<span>
+							{{ __('See all') }}
+						</span>
+						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
+					</span>
+				</router-link>
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+				<router-link
+					v-for="batch in myBatches.data"
+					:to="{ name: 'BatchDetail', params: { batchName: batch.name } }"
+				>
+					<BatchCard :batch="batch" />
+				</router-link>
 			</div>
 		</div>
 	</div>
@@ -150,7 +150,7 @@ import {
 	Video,
 } from 'lucide-vue-next'
 import CourseCard from '@/components/CourseCard.vue'
-import BatchCard from '@/components/BatchCard.vue'
+import BatchCard from '@/pages/Batches/components/BatchCard.vue'
 import UpcomingEvaluations from '@/components/UpcomingEvaluations.vue'
 
 const dayjs = inject<any>('$dayjs')

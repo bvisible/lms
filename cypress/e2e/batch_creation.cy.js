@@ -7,7 +7,7 @@ describe("Batch Creation", () => {
 
 		// Open Settings
 		cy.get("span").contains("Learning").click();
-		cy.get("span").contains("Settings").click();
+		cy.contains('[role="menuitem"]', "Settings").click();
 
 		// Add a new member
 		cy.get("[data-dismissable-layer]")
@@ -26,25 +26,28 @@ describe("Batch Creation", () => {
 		cy.get("input[placeholder='jane@doe.com']").type(randomEmail);
 		cy.get("input[placeholder='Jane']").type(randomName);
 		cy.get("button").contains("Add").click();
+		// Wait for the member modal to fully close so reka-ui restores
+		// pointer-events on the underlying Settings dialog.
+		cy.contains("Add New Member").should("not.exist");
 
-		// Open Settings
-		cy.get("span").contains("Learning").click();
-		cy.get("span").contains("Settings").click();
-
-		// Add evaluator
+		// Switch to Evaluators tab
 		cy.get("[data-dismissable-layer]")
 			.find("span")
 			.contains(/^Evaluators$/)
 			.click();
 
+		// Click "New" dropdown and select "New Evaluator"
 		cy.get("[data-dismissable-layer]")
 			.find("button")
 			.contains("New")
 			.click();
-		const randomEvaluator = `evaluator${dateNow}@example.com`;
+		cy.contains('[role="menuitem"]', "New Evaluator").click();
 
+		const randomEvaluator = `evaluator${dateNow}@example.com`;
 		cy.get("input[placeholder='jane@doe.com']").type(randomEvaluator);
+		cy.get("input[placeholder='Jane']").type("Evaluator");
 		cy.get("button").contains("Add").click();
+		cy.contains("Add New Member").should("not.exist");
 		cy.get("div").contains(randomEvaluator).should("be.visible").click();
 
 		cy.visit("/lms/batches");
@@ -52,51 +55,77 @@ describe("Batch Creation", () => {
 
 		// Create a batch
 		cy.get("button").contains("Create").click();
-		cy.get("span").contains("New Batch").click();
+		cy.contains('[role="menuitem"]', "New Batch").click();
 		cy.wait(500);
-		cy.url().should("include", "/batches/new/edit");
 		cy.get("label").contains("Title").type("Test Batch");
-
 		cy.get("label").contains("Start Date").type("2030-10-01");
 		cy.get("label").contains("End Date").type("2030-10-31");
 		cy.get("label").contains("Start Time").type("10:00");
 		cy.get("label").contains("End Time").type("11:00");
-		cy.get("label").contains("Timezone").type("IST");
-		cy.get("label").contains("Seat Count").type("10");
-		cy.get("label").contains("Published").click();
+		cy.get("label")
+			.contains("Timezone")
+			.parent()
+			.within(() => {
+				cy.get("input").click().clear().type("Asia/Kol");
+				cy.get("input")
+					.invoke("attr", "aria-controls")
+					.as("timezone_list_id");
+			});
+		cy.get("@timezone_list_id").then((timezone_list_id) => {
+			cy.get(`[id^=${timezone_list_id}`)
+				.should("be.visible")
+				.within(() => {
+					cy.get("[data-slot=item]").first().click();
+				});
+		});
+		cy.get("label")
+			.contains("Seat Count")
+			.parent()
+			.find("input")
+			.clear()
+			.type("10");
 
 		cy.get("label")
-			.contains("Short Description")
+			.contains("Description")
+			.parent()
+			.find("textarea")
 			.type("Test Batch Short Description to test the UI");
-		cy.get("div[contenteditable=true").invoke(
-			"text",
-			"Test Batch Description. I need a very big description to test the UI. This is a very big description. It contains more than once sentence. Its meant to be this long as this is a UI test. Its unbearably long and I'm not sure why I'm typing this much. I'm just going to keep typing until I feel like its long enough. I think its long enough now. I'm going to stop typing now."
-		);
 
-		/* Instructor */
+		cy.get("div.ProseMirror")
+			.click()
+			.type(
+				"Test Batch Description. I need a very big description to test the UI. This is a very big description. It contains more than once sentence. Its meant to be this long as this is a UI test. Its unbearably long and I'm not sure why I'm typing this much. I'm just going to keep typing until I feel like its long enough. I think its long enough now. I'm going to stop typing now."
+			);
+		// Instructors — frappe-ui MultiSelect. Click the trigger button;
+		// the search input lives in a popover portalled to body, so we
+		// type it outside the field wrapper.
 		cy.get("label")
 			.contains("Instructors")
 			.parent()
-			.within(() => {
-				cy.get("input").click().type("evaluator");
-				cy.get("input")
-					.invoke("attr", "aria-controls")
-					.as("instructor_list_id");
-			});
-		cy.get("@instructor_list_id").then((instructor_list_id) => {
-			cy.get(`[id^=${instructor_list_id}`)
-				.should("be.visible")
-				.within(() => {
-					cy.get("[id^=headlessui-combobox-option-").first().click();
-				});
-		});
-
+			.find("button")
+			.first()
+			.click();
+		cy.get('[data-slot="content-body"] [data-slot="input"]')
+			.should("be.visible")
+			.type(randomEvaluator);
+		cy.wait(500);
+		cy.get('[data-slot="content-body"] [role="option"]').first().click();
+		// Close the popover so it doesn't overlay the Save button.
+		cy.get("body").type("{esc}");
 		cy.button("Save").click();
+		cy.wait(1000);
+
+		// going to batch settings and publishing the batch
+		cy.url().should("include", "#settings");
+		cy.closeOnboardingModal();
+		cy.button("Publish").click();
+		cy.contains("div", "Published").should("be.visible");
+		cy.button("Unpublish").should("be.visible");
 		cy.wait(1000);
 		let batchName;
 		cy.url().then((url) => {
 			console.log(url);
-			batchName = url.split("/").pop();
+			batchName = url.split("/").pop().split("#")[0];
 			cy.wrap(batchName).as("batchName");
 		});
 		cy.wait(500);
@@ -108,14 +137,10 @@ describe("Batch Creation", () => {
 
 		cy.url().should("include", "/lms/batches");
 
-		cy.get('[id^="headlessui-radiogroup-v-"]')
-			.find("span")
-			.contains("Upcoming")
-			.should("be.visible")
-			.click();
+		cy.contains('[role="radio"]', "Upcoming").should("be.visible").click();
 
 		cy.get("@batchName").then((batchName) => {
-			cy.get(`a[href='/lms/batches/details/${batchName}'`).within(() => {
+			cy.get(`a[href='/lms/batches/${batchName}'`).within(() => {
 				cy.get("div").contains("Test Batch").should("be.visible");
 				cy.get("div")
 					.contains("Test Batch Short Description to test the UI")
@@ -126,16 +151,13 @@ describe("Batch Creation", () => {
 				cy.get("span")
 					.contains("10:00 AM - 11:00 AM")
 					.should("be.visible");
-				cy.get("span").contains("IST").should("be.visible");
+				cy.get("span").contains("Asia/Kolkata").should("be.visible");
 				cy.get("a").contains("Evaluator").should("be.visible");
-				cy.get("div")
-					.contains("10")
-					.should("be.visible")
-					.get("span")
-					.contains("Seats Left")
-					.should("be.visible");
+				cy.contains("div:visible", "10 Seats Left").should(
+					"be.visible"
+				);
 			});
-			cy.get(`a[href='/lms/batches/details/${batchName}'`).click();
+			cy.get(`a[href='/lms/batches/${batchName}'`).click();
 		});
 
 		cy.get("div").contains("Test Batch").should("be.visible");
@@ -149,26 +171,34 @@ describe("Batch Creation", () => {
 		cy.get("span:visible")
 			.contains("10:00 AM - 11:00 AM")
 			.should("be.visible");
-		cy.get("span:visible").contains("IST").should("be.visible");
+		cy.get("span:visible").contains("Asia/Kolkata").should("be.visible");
 		cy.contains("div:visible", "10 Seats Left").should("be.visible");
 
 		cy.get("p")
 			.contains(
-				"Test Batch Description. I need a very big description to test the UI. This is a very big description. It contains more than once sentence. Its meant to be this long as this is a UI test. Its unbearably long and I'm not sure why I'm typing this much. I'm just going to keep typing until I feel like its long enough. I think its long enough now. I'm going to stop typing now."
+				"Test Batch Description. I need a very big description to test the UI."
 			)
 			.should("be.visible");
-		cy.get("button:visible").contains("Manage Batch").click();
+		cy.get("button:visible").contains("Dashboard").click();
 
 		/* Add student to batch */
-		cy.get("button").contains("Students").click();
-		cy.get("button").contains("Add").click();
-		cy.get('div[role="dialog"]').first().find("button").eq(1).click();
-		cy.get("input[id^='headlessui-combobox-input-v-']").type(randomEmail);
-		cy.get("div").contains(randomEmail).click();
+		cy.closeOnboardingModal();
+		cy.get("button").contains("Enroll").click();
+		cy.get('div[role="dialog"]')
+			.first()
+			.within(() => {
+				cy.get("label")
+					.contains("Student")
+					.parent()
+					.find("input")
+					.click()
+					.type(randomEmail);
+			});
+		cy.get("[data-slot=item]").first().click();
 		cy.get("button").contains("Submit").click();
 
 		// Verify Seat Count
-		cy.get("span").contains("Details").click();
+		cy.get("button:visible").contains("Overview").click();
 		cy.contains("div:visible", "9 Seats Left").should("be.visible");
 	});
 });

@@ -31,7 +31,7 @@
 				<div
 					v-if="activeTab && data.doc"
 					:key="activeTab.label"
-					class="flex flex-1 flex-col p-8 bg-surface-modal overflow-x-auto"
+					class="flex flex-1 flex-col p-8 bg-surface-modal overflow-x-auto overflow-y-auto"
 				>
 					<component
 						v-if="activeTab.template"
@@ -42,8 +42,8 @@
 							...(activeTab.label == 'Branding'
 								? { sections: activeTab.sections }
 								: {}),
-							...(activeTab.label == 'Evaluators' ||
-							activeTab.label == 'Members' ||
+							...(activeTab.label == 'Members' ||
+							activeTab.label == 'Evaluators' ||
 							activeTab.label == 'Transactions'
 								? { 'onUpdate:show': (val) => (show = val), show }
 								: {}),
@@ -76,6 +76,7 @@ import PaymentGateways from '@/components/Settings/PaymentGateways.vue'
 import Coupons from '@/components/Settings/Coupons/Coupons.vue'
 import Transactions from '@/components/Settings/Transactions/Transactions.vue'
 import ZoomSettings from '@/components/Settings/ZoomSettings.vue'
+import GoogleMeetSettings from '@/components/Settings/GoogleMeetSettings.vue'
 import Badges from '@/components/Settings/Badges.vue'
 
 const show = defineModel()
@@ -220,6 +221,25 @@ const tabsStructure = computed(() => {
 							],
 						},
 						{
+							label: 'Jobs',
+							columns: [
+								{
+									fields: [
+										{
+											label: 'Allow Job Posting',
+											name: 'allow_job_posting',
+											type: 'checkbox',
+											description:
+												'If enabled, users can post job openings on the job board. Else only admins can post jobs.',
+										},
+									],
+								},
+								{
+									fields: [],
+								},
+							],
+						},
+						{
 							label: '',
 							columns: [
 								{
@@ -249,33 +269,63 @@ const tabsStructure = computed(() => {
 						},
 					],
 				},
-			],
-		},
-		{
-			label: 'Lists',
-			hideLabel: false,
-			items: [
 				{
-					label: 'Members',
+					label: 'Course Progress',
+					icon: 'Activity',
 					description:
-						'Add new members or manage roles and permissions of existing members',
-					icon: 'UserRoundPlus',
-					template: markRaw(Members),
-				},
-				{
-					label: 'Evaluators',
-					description: '',
-					icon: 'UserCheck',
-					description:
-						'Add new evaluators or check the slots existing evaluators',
-					template: markRaw(Evaluators),
-				},
-				{
-					label: 'Zoom Accounts',
-					description:
-						'Manage zoom accounts to conduct live classes from batches',
-					icon: 'Video',
-					template: markRaw(ZoomSettings),
+						'Control how lessons are marked complete: dwell time and enforcement toggles for video, quiz, and assignment.',
+					sections: [
+						{
+							label: 'Dwell Time',
+							columns: [
+								{
+									fields: [
+										{
+											label: 'Lesson dwell time (seconds)',
+											name: 'lesson_dwell_time',
+											type: 'number',
+											description:
+												'Seconds a learner must stay on a lesson before it auto-marks complete.',
+										},
+									],
+								},
+							],
+						},
+						{
+							label: 'Enforcement',
+							columns: [
+								{
+									fields: [
+										{
+											label: 'Enforce video completion',
+											name: 'enforce_video_completion',
+											type: 'checkbox',
+											description:
+												'When enabled, lessons that contain a video can only be marked complete by playing the video to the end. If the video fails to load, the dwell timer is used as a fallback.',
+										},
+										{
+											label: 'Enforce assignment completion',
+											name: 'enforce_assignment_completion',
+											type: 'checkbox',
+											description:
+												'When enabled, lessons with an assignment cannot be marked complete until the assignment is submitted.',
+										},
+									],
+								},
+								{
+									fields: [
+										{
+											label: 'Enforce quiz completion',
+											name: 'enforce_quiz_completion',
+											type: 'checkbox',
+											description:
+												'When enabled, lessons with a quiz cannot be marked complete until the quiz is submitted.',
+										},
+									],
+								},
+							],
+						},
+					],
 				},
 				{
 					label: 'Badges',
@@ -299,6 +349,27 @@ const tabsStructure = computed(() => {
 			],
 		},
 		{
+			label: 'Users',
+			hideLabel: false,
+			items: [
+				{
+					label: 'Members',
+					description:
+						'Add new members or manage roles and permissions of existing members',
+					icon: 'User',
+					template: markRaw(Members),
+				},
+				{
+					label: 'Evaluators',
+					description: '',
+					icon: 'UserCircle2',
+					description:
+						'Add new evaluators or check the slots of existing evaluators',
+					template: markRaw(Evaluators),
+				},
+			],
+		},
+		{
 			label: 'Payment',
 			hideLabel: false,
 			items: [
@@ -318,29 +389,62 @@ const tabsStructure = computed(() => {
 											doctype: 'Currency',
 										},
 										{
-											label: 'Payment Gateway',
-											name: 'payment_gateway',
-											type: 'Link',
-											doctype: 'Payment Gateway',
+											label: 'Show USD equivalent amount',
+											name: 'show_usd_equivalent',
+											type: 'checkbox',
+											description:
+												'If enabled, it shows the USD equivalent amount for all transactions based on the current exchange rate.',
+										},
+										{
+											label: 'Apply rounding on equivalent',
+											name: 'apply_rounding',
+											type: 'checkbox',
+											description:
+												'If enabled, it applies rounding on the USD equivalent amount.',
 										},
 									],
 								},
 								{
 									fields: [
 										{
+											label: 'Payment Gateway',
+											name: 'payment_gateway',
+											type: 'Link',
+											doctype: 'Payment Gateway',
+										},
+										{
 											label: 'Apply GST for India',
 											name: 'apply_gst',
 											type: 'checkbox',
+											description:
+												'If enabled, GST will be applied to the price for students from India.',
 										},
+									],
+								},
+							],
+						},
+						{
+							label: 'Payment Reminders',
+							columns: [
+								{
+									fields: [
 										{
-											label: 'Show USD equivalent amount',
-											name: 'show_usd_equivalent',
+											label: 'Send payment reminders for batch',
+											name: 'send_payment_reminders_for_batch',
 											type: 'checkbox',
+											description:
+												'If enabled, it sends payment reminders to students who left the payment incomplete for a batch.',
 										},
+									],
+								},
+								{
+									fields: [
 										{
-											label: 'Apply rounding on equivalent',
-											name: 'apply_rounding',
+											label: 'Send payment reminders for course',
+											name: 'send_payment_reminders_for_course',
 											type: 'checkbox',
+											description:
+												'If enabled, it sends payment reminders to students who left the payment incomplete for a course.',
 										},
 									],
 								},
@@ -369,12 +473,34 @@ const tabsStructure = computed(() => {
 			],
 		},
 		{
+			label: 'Conferencing',
+			hideLabel: false,
+			items: [
+				{
+					label: 'Zoom',
+					description:
+						'Manage zoom accounts to conduct live classes from batches',
+					icon: 'Video',
+					template: markRaw(ZoomSettings),
+				},
+				{
+					label: 'Google Meet',
+					description:
+						'Manage Google Meet accounts to conduct live classes from batches',
+					icon: 'Presentation',
+					template: markRaw(GoogleMeetSettings),
+				},
+			],
+		},
+		{
 			label: 'Customize',
 			hideLabel: false,
 			items: [
 				{
 					label: 'Branding',
 					icon: 'Blocks',
+					description:
+						'Customize the brand name and logo to make the application your own',
 					template: markRaw(BrandSettings),
 					sections: [
 						{
@@ -463,6 +589,8 @@ const tabsStructure = computed(() => {
 				{
 					label: 'Signup',
 					icon: 'LogIn',
+					description:
+						'Manage the settings related to user signup and registration',
 					sections: [
 						{
 							columns: [
@@ -498,6 +626,8 @@ const tabsStructure = computed(() => {
 				{
 					label: 'SEO',
 					icon: 'Search',
+					description:
+						'Manage the SEO settings to improve your website ranking on search engines',
 					sections: [
 						{
 							columns: [

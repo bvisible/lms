@@ -17,3 +17,4 @@ package-lock.json
 # lms/www/_lms.html
 frappe-ui
 # CLAUDE.md  # 2026-05-07 unshipped to document commit-the-build pipeline
+frappe-semgrep-rules

@@ -29,14 +29,12 @@
 							:label="__('Date')"
 							:required="true"
 						/>
-						<Tooltip :text="__('Duration of the live class in minutes')">
-							<FormControl
-								type="number"
-								v-model="liveClass.duration"
-								:label="__('Duration')"
-								:required="true"
-							/>
-						</Tooltip>
+						<FormControl
+							type="number"
+							v-model="liveClass.duration"
+							:label="__('Duration (in minutes)')"
+							:required="true"
+						/>
 					</div>
 					<div class="space-y-4">
 						<Tooltip
@@ -67,6 +65,7 @@
 							/>
 						</div>
 						<FormControl
+							v-if="props.conferencingProvider === 'Zoom'"
 							v-model="liveClass.auto_recording"
 							type="select"
 							:options="getRecordingOptions()"
@@ -84,16 +83,10 @@
 	</Dialog>
 </template>
 <script setup>
-import {
-	Dialog,
-	createResource,
-	Tooltip,
-	FormControl,
-	Autocomplete,
-	toast,
-} from 'frappe-ui'
+import { Dialog, createResource, Tooltip, FormControl, toast } from 'frappe-ui'
 import { reactive, inject, onMounted } from 'vue'
 import { getTimezones, getUserTimezone } from '@/utils/'
+import Autocomplete from '@/components/Controls/Autocomplete.vue'
 
 const liveClasses = defineModel('reloadLiveClasses')
 const show = defineModel()
@@ -105,10 +98,9 @@ const props = defineProps({
 		type: String,
 		required: true,
 	},
-	zoomAccount: {
-		type: String,
-		required: true,
-	},
+	zoomAccount: String,
+	googleMeetAccount: String,
+	conferencingProvider: String,
 })
 
 let liveClass = reactive({
@@ -165,8 +157,23 @@ const createLiveClass = createResource({
 	},
 })
 
+const createGoogleMeetLiveClass = createResource({
+	url: 'lms.lms.doctype.lms_batch.lms_batch.create_google_meet_live_class',
+	makeParams(values) {
+		return {
+			batch_name: values.batch,
+			google_meet_account: props.googleMeetAccount,
+			...values,
+		}
+	},
+})
+
 const submitLiveClass = (close) => {
-	return createLiveClass.submit(liveClass, {
+	const resource =
+		props.conferencingProvider === 'Google Meet'
+			? createGoogleMeetLiveClass
+			: createLiveClass
+	return resource.submit(liveClass, {
 		validate() {
 			validateFormFields()
 		},
@@ -177,6 +184,7 @@ const submitLiveClass = (close) => {
 		},
 		onError(err) {
 			toast.error(err.messages?.[0] || err)
+			console.error(err)
 		},
 	})
 }

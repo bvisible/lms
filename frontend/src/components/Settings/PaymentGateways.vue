@@ -2,7 +2,7 @@
 	<div class="flex min-h-0 flex-col text-base">
 		<div class="flex items-center justify-between mb-5">
 			<div>
-				<div class="text-xl font-semibold mb-1 text-ink-gray-9">
+				<div class="text-xl font-semibold mb-2 text-ink-gray-9">
 					{{ __(label) }}
 				</div>
 				<div class="text-ink-gray-6 leading-5">
@@ -17,7 +17,7 @@
 			</Button>
 		</div>
 
-		<div v-if="paymentGateways.data?.length" class="overflow-y-scroll">
+		<div v-if="paymentGateways.data?.length" class="overflow-y-auto">
 			<ListView
 				:columns="columns"
 				:rows="paymentGateways.data"
@@ -30,7 +30,7 @@
 				}"
 			>
 				<ListHeader
-					class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
+					class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
 				>
 					<ListHeaderItem :item="item" v-for="item in columns">
 						<template #prefix="{ item }">
@@ -77,6 +77,12 @@
 				</ListSelectBanner>
 			</ListView>
 		</div>
+		<EmptyStateLayout
+			v-else
+			name="Payment Gateways"
+			:description="__('Add one to get started.')"
+			:icon="DollarSign"
+		/>
 	</div>
 	<PaymentGatewayDetails
 		v-model="showForm"
@@ -88,6 +94,7 @@
 import {
 	Badge,
 	Button,
+	call,
 	createListResource,
 	FeatherIcon,
 	ListView,
@@ -97,10 +104,13 @@ import {
 	ListRow,
 	ListRowItem,
 	ListSelectBanner,
+	toast,
 } from 'frappe-ui'
 import { computed, ref } from 'vue'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2, DollarSign } from 'lucide-vue-next'
 import PaymentGatewayDetails from '@/components/Settings/PaymentGatewayDetails.vue'
+import { cleanError } from '@/utils'
+import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
 
 const showForm = ref(false)
 const currentGateway = ref(null)
@@ -126,6 +136,23 @@ const paymentGateways = createListResource({
 const openForm = (gatewayID) => {
 	currentGateway.value = gatewayID
 	showForm.value = true
+}
+
+const removeAccount = (selections, unselectAll) => {
+	call('lms.lms.api.delete_documents', {
+		doctype: 'Payment Gateway',
+		documents: Array.from(selections),
+	})
+		.then(() => {
+			paymentGateways.reload()
+			toast.success(__('Payment gateways deleted successfully'))
+			unselectAll()
+		})
+		.catch((err) => {
+			toast.error(
+				cleanError(err.messages[0]) || __('Error deleting payment gateways')
+			)
+		})
 }
 
 const columns = computed(() => {

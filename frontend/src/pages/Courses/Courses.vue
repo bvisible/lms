@@ -1,93 +1,76 @@
 <template>
-	<header
-		class="sticky flex items-center justify-between top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
-	>
-		<Breadcrumbs :items="breadcrumbs" />
-
-		<Dropdown
-			placement="right"
-			side="bottom"
-			v-if="canCreateCourse()"
-			:options="[
-				{
-					label: __('New Course'),
-					icon: 'book-open',
-					onClick() {
-						showCourseModal = true
-					},
-				},
-				{
-					label: __('Import Course'),
-					icon: 'upload',
-					onClick() {
-						router.push({
-							name: 'NewDataImport',
-							params: { doctype: 'LMS Course' },
-						})
-					},
-				},
-			]"
-		>
-			<template v-slot="{ open }">
-				<Button variant="solid">
-					<template #prefix>
-						<Plus class="h-4 w-4 stroke-1.5" />
-					</template>
-					{{ __('Create') }}
-					<template #suffix>
-						<ChevronDown
-							:class="[
-								'w-4 h-4 stroke-1.5 ml-1 transform transition-transform',
-								open ? 'rotate-180' : '',
-							]"
-						/>
-					</template>
-				</Button>
-			</template>
-		</Dropdown>
-	</header>
-	<div class="p-5 pb-10">
+	<LayoutHeader>
+		<template #left-header>
+			<Breadcrumbs :items="breadcrumbs" />
+		</template>
+		<template #right-header>
+			<Dropdown
+				placement="right"
+				side="bottom"
+				v-if="canCreateCourse()"
+				:options="courseMenu"
+			>
+				<template v-slot="{ open }">
+					<Button variant="solid">
+						<template #prefix>
+							<Plus class="size-4 stroke-1.5" />
+						</template>
+						{{ __('Create') }}
+						<template #suffix>
+							<ChevronDown
+								:class="[
+									'ms-1 size-4 transform stroke-1.5 transition-transform',
+									open ? 'rotate-180' : '',
+								]"
+							/>
+						</template>
+					</Button>
+				</template>
+			</Dropdown>
+		</template>
+	</LayoutHeader>
+	<div class="flex min-h-0 flex-1 flex-col p-5 pb-10">
 		<div
-			class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:items-center justify-between mb-5"
+			class="mb-5 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0"
 		>
-			<div class="text-lg text-ink-gray-9 font-semibold">
+			<div class="text-lg font-semibold text-ink-gray-9">
 				{{ __('All Courses') }}
 			</div>
 			<div
-				class="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:items-center lg:space-x-4"
+				class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:gap-x-4 lg:space-y-0"
 			>
 				<TabButtons :buttons="courseTabs" v-model="currentTab" class="w-fit" />
 
 				<div class="grid grid-cols-2 gap-2">
 					<FormControl
 						v-model="title"
-						:placeholder="__('Search by Title')"
+						:placeholder="__('Search')"
 						type="text"
-						class="w-full lg:min-w-0 lg:w-32 xl:w-40"
+						class="w-full"
 						@input="updateCourses()"
 					/>
-					<div class="w-full lg:min-w-0 lg:w-32 xl:w-40">
-						<Select
-							v-if="categories.length"
-							v-model="currentCategory"
-							:options="categories"
-							:placeholder="__('Category')"
-							@update:modelValue="updateCourses()"
-						/>
-					</div>
+					<Select
+						v-if="categories.length"
+						v-model="currentCategory"
+						:options="categories"
+						:placeholder="__('Category')"
+						@update:modelValue="updateCourses()"
+					/>
 				</div>
 
-				<FormControl
-					v-model="certification"
-					:label="__('Certification')"
-					type="checkbox"
-					@change="updateCourses()"
-				/>
+				<Tooltip :text="__('Only show courses that offer a certificate')">
+					<FormControl
+						type="checkbox"
+						v-model="certification"
+						:label="__('Certification')"
+						@change="updateCourses()"
+					/>
+				</Tooltip>
 			</div>
 		</div>
 		<div
 			v-if="courses.data?.length"
-			class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8"
+			class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
 		>
 			<router-link
 				v-for="course in courses.data"
@@ -96,7 +79,7 @@
 				<CourseCard :course="course" />
 			</router-link>
 		</div>
-		<EmptyState v-else-if="!courses.list.loading" type="Courses" />
+		<EmptyStateLayout v-else-if="!courses.list.loading" name="Courses" />
 		<div
 			v-if="!courses.list.loading && courses.hasNextPage"
 			class="flex justify-center mt-5"
@@ -111,6 +94,11 @@
 		v-model="showCourseModal"
 		:courses="courses"
 	/>
+
+	<CourseImportModal
+		v-if="showCourseImportModal"
+		v-model="showCourseImportModal"
+	/>
 </template>
 <script setup>
 import {
@@ -120,18 +108,21 @@ import {
 	createListResource,
 	Dropdown,
 	FormControl,
-	Select,
 	TabButtons,
+	Tooltip,
 	usePageMeta,
 } from 'frappe-ui'
+import Select from '@/components/Controls/Select.vue'
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import { ChevronDown, Plus } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import { canCreateCourse } from '@/utils'
 import CourseCard from '@/components/CourseCard.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
+import LayoutHeader from '@/components/Layouts/LayoutHeader.vue'
 import { useRouter } from 'vue-router'
 import NewCourseModal from '@/pages/Courses/NewCourseModal.vue'
+import CourseImportModal from '@/pages/Courses/CourseImportModal.vue'
 
 const user = inject('$user')
 const dayjs = inject('$dayjs')
@@ -147,11 +138,12 @@ const currentCategory = ref(null)
 const title = ref('')
 const certification = ref(false)
 const filters = ref({})
-const currentTab = ref('Live')
+const currentTab = ref('live')
 const { brand } = sessionStore()
 const courseCount = ref(0)
 const router = useRouter()
 const showCourseModal = ref(false)
+const showCourseImportModal = ref(false)
 
 onMounted(() => {
 	setFiltersFromQuery()
@@ -187,26 +179,6 @@ const setCategories = (data) => {
 	}
 }
 
-const isPersonaCaptured = async () => {
-	let persona = await call('frappe.client.get_single_value', {
-		doctype: 'LMS Settings',
-		field: 'persona_captured',
-	})
-	return persona
-}
-
-const identifyUserPersona = async () => {
-	if (user.data?.is_system_manager && !user.data?.developer_mode) {
-		let personaCaptured = await isPersonaCaptured()
-		if (personaCaptured) return
-		if (!courseCount.value) {
-			router.push({
-				name: 'PersonaForm',
-			})
-		}
-	}
-}
-
 const getCourseCount = () => {
 	if (!user.data) return
 	if (!user.data.is_moderator) return
@@ -214,7 +186,6 @@ const getCourseCount = () => {
 		doctype: 'LMS Course',
 	}).then((data) => {
 		courseCount.value = data
-		identifyUserPersona()
 	})
 }
 
@@ -267,35 +238,35 @@ const updateTabFilter = () => {
 	delete filters.value['published_on']
 	delete filters.value['upcoming']
 
-	if (currentTab.value == 'Enrolled' && user.data?.is_student) {
+	if (currentTab.value == 'enrolled' && user.data?.is_student) {
 		filters.value['enrolled'] = 1
 		delete filters.value['published']
 	} else {
 		delete filters.value['published']
 		delete filters.value['enrolled']
 
-		if (currentTab.value == 'Live') {
+		if (currentTab.value == 'live') {
 			filters.value['published'] = 1
 			filters.value['upcoming'] = 0
 			filters.value['live'] = 1
-		} else if (currentTab.value == 'Upcoming') {
+		} else if (currentTab.value == 'upcoming') {
 			filters.value['upcoming'] = 1
-		} else if (currentTab.value == 'New') {
+		} else if (currentTab.value == 'new') {
 			filters.value['published'] = 1
 			filters.value['published_on'] = [
 				'>=',
 				dayjs().add(-3, 'month').format('YYYY-MM-DD'),
 			]
-		} else if (currentTab.value == 'Created') {
+		} else if (currentTab.value == 'created') {
 			filters.value['created'] = 1
-		} else if (currentTab.value == 'Unpublished') {
+		} else if (currentTab.value == 'unpublished') {
 			filters.value['published'] = 0
 		}
 	}
 }
 
 const updateStudentFilter = () => {
-	if (!user.data || (user.data?.is_student && currentTab.value != 'Enrolled')) {
+	if (!user.data || (user.data?.is_student && currentTab.value != 'enrolled')) {
 		filters.value['published'] = 1
 	}
 }
@@ -345,12 +316,15 @@ const courseTabs = computed(() => {
 	let tabs = [
 		{
 			label: __('Live'),
+			value: 'live',
 		},
 		{
 			label: __('New'),
+			value: 'new',
 		},
 		{
 			label: __('Upcoming'),
+			value: 'upcoming',
 		},
 	]
 	if (
@@ -358,12 +332,41 @@ const courseTabs = computed(() => {
 		user.data?.is_instructor ||
 		user.data?.is_evaluator
 	) {
-		tabs.push({ label: __('Created') })
-		tabs.push({ label: __('Unpublished') })
+		tabs.push({ label: __('Created'), value: 'created' })
+		tabs.push({ label: __('Unpublished'), value: 'unpublished' })
 	} else if (user.data) {
-		tabs.push({ label: __('Enrolled') })
+		tabs.push({ label: __('Enrolled'), value: 'enrolled' })
 	}
 	return tabs
+})
+
+const courseMenu = computed(() => {
+	return [
+		{
+			label: __('New Course'),
+			icon: 'book-open',
+			onClick() {
+				showCourseModal.value = true
+			},
+		},
+		{
+			label: __('Import via Data Import Tool'),
+			icon: 'upload',
+			onClick() {
+				router.push({
+					name: 'NewDataImport',
+					params: { doctype: 'LMS Course' },
+				})
+			},
+		},
+		{
+			label: __('Import via ZIP'),
+			icon: 'folder-plus',
+			onClick() {
+				showCourseImportModal.value = true
+			},
+		},
+	]
 })
 
 const breadcrumbs = computed(() => [

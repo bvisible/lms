@@ -10,11 +10,11 @@
 				<div class="text-2xl font-semibold leading-6 text-ink-gray-9">
 					{{ __('Edit Profile') }}
 				</div>
-				<div class="space-x-2">
+				<div class="flex items-center gap-x-2">
 					<Badge v-if="isDirty" theme="orange">
 						{{ __('Not Saved') }}
 					</Badge>
-					<div class="pb-5 float-right">
+					<div class="pb-5 float-end">
 						<Button variant="solid" @click="saveProfile()">
 							{{ __('Save') }}
 						</Button>
@@ -37,10 +37,12 @@
 							<FormControl
 								v-model="profile.first_name"
 								:label="__('First Name')"
+								:required="true"
 							/>
 							<FormControl
 								v-model="profile.last_name"
 								:label="__('Last Name')"
+								:required="true"
 							/>
 							<FormControl v-model="profile.headline" :label="__('Headline')" />
 
@@ -141,7 +143,25 @@ const updateProfile = createResource({
 	},
 })
 
+const validateMandatoryFields = () => {
+	let missingFields = []
+	if (!profile.first_name) missingFields.push(__('First Name'))
+	if (!profile.last_name) missingFields.push(__('Last Name'))
+	if (!profile.image) missingFields.push(__('Profile Image'))
+	if (missingFields.length) {
+		toast.error(
+			__('Please fill the mandatory fields: {0}').format(
+				missingFields.join(', ')
+			)
+		)
+		console.error('Missing mandatory fields:', missingFields)
+	}
+	return missingFields.length
+}
+
 const saveProfile = () => {
+	let missingMandatoryFields = validateMandatoryFields()
+	if (missingMandatoryFields) return
 	profile.bio = sanitizeHTML(profile.bio)
 	updateProfile.submit(
 		{},

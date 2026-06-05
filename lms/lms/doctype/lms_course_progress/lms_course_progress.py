@@ -2,22 +2,26 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
-from lms.lms.doctype.lms_enrollment.lms_enrollment import update_program_progress
-from lms.lms.utils import get_course_progress
+from lms.lms.utils import recalculate_course_progress
 
 
 class LMSCourseProgress(Document):
+	def before_insert(self):
+		if (
+			self.member
+			and self.lesson
+			and frappe.db.exists("LMS Course Progress", {"member": self.member, "lesson": self.lesson})
+		):
+			frappe.throw(
+				_("Progress is already recorded for this lesson."),
+				frappe.UniqueValidationError,
+			)
+
+	def on_update(self):
+		recalculate_course_progress(self.course, self.member)
+
 	def after_delete(self):
-		progress = get_course_progress(self.course, self.member)
-		membership = frappe.db.get_value(
-			"LMS Enrollment",
-			{
-				"member": self.member,
-				"course": self.course,
-			},
-			"name",
-		)
-		frappe.db.set_value("LMS Enrollment", membership, "progress", progress)
-		update_program_progress(self.member)
+		recalculate_course_progress(self.course, self.member)

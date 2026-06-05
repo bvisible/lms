@@ -6,10 +6,10 @@
 					{{ label }}
 				</div>
 				<div class="text-ink-gray-6 leading-5">
-					{{ __(description) }}
+					{{ __(description || '') }}
 				</div>
 			</div>
-			<div class="flex items-center space-x-5">
+			<div class="flex items-center gap-x-5">
 				<Button @click="openForm('new')">
 					<template #prefix>
 						<Plus class="h-3 w-3 stroke-1.5" />
@@ -18,7 +18,7 @@
 				</Button>
 			</div>
 		</div>
-		<div v-if="zoomAccounts.data?.length" class="overflow-y-scroll">
+		<div v-if="zoomAccounts.data?.length" class="overflow-y-auto">
 			<ListView
 				:columns="columns"
 				:rows="zoomAccounts.data"
@@ -31,7 +31,7 @@
 				}"
 			>
 				<ListHeader
-					class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
+					class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
 				>
 					<ListHeaderItem :item="item" v-for="item in columns">
 						<template #prefix="{ item }">
@@ -88,8 +88,15 @@
 				</ListSelectBanner>
 			</ListView>
 		</div>
+		<EmptyStateLayout
+			v-else
+			name="Zoom Settings"
+			:description="__('Add one to get started.')"
+			:icon="Video"
+		/>
 	</div>
 	<ZoomAccountModal
+		v-if="showForm"
 		v-model="showForm"
 		v-model:zoomAccounts="zoomAccounts"
 		:accountID="currentAccount"
@@ -100,7 +107,6 @@ import {
 	Avatar,
 	Button,
 	Badge,
-	call,
 	createListResource,
 	FeatherIcon,
 	ListView,
@@ -112,20 +118,19 @@ import {
 	ListSelectBanner,
 	toast,
 } from 'frappe-ui'
-import { computed, inject, onMounted, ref } from 'vue'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
+import { Plus, Trash2, Video } from 'lucide-vue-next'
 import { cleanError } from '@/utils'
-import { User } from '@/components/Settings/types'
 import ZoomAccountModal from '@/components/Modals/ZoomAccountModal.vue'
+import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
 
-const user = inject<User | null>('$user')
 const showForm = ref(false)
 const currentAccount = ref<string | null>(null)
 
-const props = defineProps({
-	label: String,
-	description: String,
-})
+const props = defineProps<{
+	label: string
+	description?: string
+}>()
 
 const zoomAccounts = createListResource({
 	doctype: 'LMS Zoom Settings',
@@ -147,15 +152,6 @@ onMounted(() => {
 })
 
 const fetchZoomAccounts = () => {
-	if (!user?.data?.is_moderator && !user?.data?.is_evaluator) return
-
-	if (!user?.data?.is_moderator) {
-		zoomAccounts.update({
-			filters: {
-				member: user.data.name,
-			},
-		})
-	}
 	zoomAccounts.reload()
 }
 
@@ -164,21 +160,20 @@ const openForm = (accountID: string) => {
 	showForm.value = true
 }
 
-const removeAccount = (selections, unselectAll) => {
-	call('lms.lms.api.delete_documents', {
-		doctype: 'LMS Zoom Settings',
-		documents: Array.from(selections),
+const removeAccount = (selections: Set<string>, unselectAll: () => void) => {
+	Array.from(selections).forEach((accountID) => {
+		zoomAccounts.delete.submit(accountID, {
+			onSuccess() {
+				toast.success(__('Zoom account deleted successfully'))
+				fetchZoomAccounts()
+				unselectAll()
+			},
+			onError(err: any) {
+				toast.error(cleanError(err.messages[0] || err))
+				console.error(err)
+			},
+		})
 	})
-		.then(() => {
-			zoomAccounts.reload()
-			toast.success(__('Email Templates deleted successfully'))
-			unselectAll()
-		})
-		.catch((err) => {
-			toast.error(
-				cleanError(err.messages[0]) || __('Error deleting email templates')
-			)
-		})
 }
 
 const columns = computed(() => {

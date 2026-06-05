@@ -1,10 +1,10 @@
 <template>
 	<div
-		class="flex h-full flex-col justify-between transition-all duration-300 ease-in-out border-r bg-surface-menu-bar"
+		class="flex h-full flex-col justify-between transition-all duration-300 ease-in-out border-e bg-surface-menu-bar overflow-x-hidden"
 		:class="sidebarStore.isSidebarCollapsed ? 'w-14' : 'w-56'"
 	>
 		<div
-			class="flex flex-col overflow-hidden"
+			class="flex flex-col overflow-y-auto"
 			:class="sidebarStore.isSidebarCollapsed ? 'items-center' : ''"
 		>
 			<UserDropdown :isCollapsed="sidebarStore.isSidebarCollapsed" />
@@ -31,21 +31,24 @@
 				class="mt-4"
 			>
 				<div
-					class="flex items-center justify-between pr-2 cursor-pointer"
-					:class="sidebarStore.isSidebarCollapsed ? 'pl-3' : 'pl-4'"
+					class="flex items-center justify-between pe-2 cursor-pointer"
+					:class="sidebarStore.isSidebarCollapsed ? 'ps-3' : 'ps-4'"
 					@click="toggleWebPages"
 				>
 					<div
 						v-if="!sidebarStore.isSidebarCollapsed"
-						class="flex items-center text-sm text-ink-gray-5 my-1"
+						class="flex items-center text-ink-gray-5 my-1"
 					>
 						<span class="grid h-5 w-6 flex-shrink-0 place-items-center">
 							<ChevronRight
 								class="h-4 w-4 stroke-1.5 text-ink-gray-9 transition-all duration-300 ease-in-out"
-								:class="{ 'rotate-90': !sidebarStore.isWebpagesCollapsed }"
+								:class="{
+									'rotate-90': !sidebarStore.isWebpagesCollapsed,
+									'rtl:rotate-180': sidebarStore.isWebpagesCollapsed,
+								}"
 							/>
 						</span>
-						<span class="ml-2">
+						<span class="ms-2">
 							{{ __('More') }}
 						</span>
 					</div>
@@ -90,6 +93,56 @@
 					)
 				}}
 			</div>
+			<div
+				v-if="
+					isStudent && !profileIsComplete && !sidebarStore.isSidebarCollapsed
+				"
+				class="flex flex-col gap-3 text-ink-gray-9 py-2.5 px-3 bg-surface-white shadow-sm rounded-md"
+			>
+				<div class="flex flex-col text-p-sm gap-1">
+					<div class="inline-flex gap-1">
+						<User class="h-4 my-0.5 shrink-0" />
+						<div class="font-medium">
+							{{ __('Complete your profile') }}
+						</div>
+					</div>
+					<div class="text-ink-gray-7 leading-5">
+						{{ __('Highlight what makes you unique and show your skills.') }}
+					</div>
+				</div>
+				<router-link
+					:to="{
+						name: 'Profile',
+						params: {
+							username: userResource.data?.username,
+						},
+					}"
+				>
+					<Button :label="__('My Profile')" class="w-full">
+						<template #prefix>
+							<ChevronsRight class="h-4 w-4 text-ink-gray-7 stroke-1.5" />
+						</template>
+					</Button>
+				</router-link>
+			</div>
+			<Tooltip
+				v-if="
+					isStudent && !profileIsComplete && sidebarStore.isSidebarCollapsed
+				"
+				:text="__('Complete your profile')"
+			>
+				<router-link
+					:to="{
+						name: 'Profile',
+						params: {
+							username: userResource.data?.username,
+						},
+					}"
+					class="flex items-center justify-center"
+				>
+					<User class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer" />
+				</router-link>
+			</Tooltip>
 			<TrialBanner
 				v-if="
 					userResource.data?.is_system_manager && userResource.data?.is_fc_site
@@ -109,12 +162,8 @@
 				"
 			>
 				<div
-					class="flex items-center flex-1"
-					:class="
-						sidebarStore.isSidebarCollapsed
-							? 'flex-col space-y-3'
-							: 'flex-row space-x-3'
-					"
+					class="flex items-center flex-1 gap-3"
+					:class="sidebarStore.isSidebarCollapsed ? 'flex-col' : 'flex-row'"
 				>
 					<Tooltip v-if="readOnlyMode && sidebarStore.isSidebarCollapsed">
 						<CircleAlert
@@ -132,10 +181,13 @@
 							</div>
 						</template>
 					</Tooltip>
-					<Tooltip :text="__('Powered by Learning')">
-						<Zap
+					<Tooltip
+						v-if="showAppointmentIcon"
+						:text="__('Book a free onboarding session with the Frappe team')"
+					>
+						<Phone
 							class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
-							@click="redirectToWebsite()"
+							@click="redirectToAppointmentScreen()"
 						/>
 					</Tooltip>
 					<Tooltip v-if="showOnboarding" :text="__('Help')">
@@ -149,6 +201,12 @@
 							"
 						/>
 					</Tooltip>
+					<Tooltip :text="__('Powered by Frappe Learning')">
+						<Zap
+							class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
+							@click="redirectToWebsite()"
+						/>
+					</Tooltip>
 				</div>
 				<Tooltip
 					:text="
@@ -157,8 +215,11 @@
 				>
 					<CollapseSidebar
 						class="size-4 text-ink-gray-7 duration-300 stroke-1.5 ease-in-out cursor-pointer"
-						:class="{
-							'[transform:rotateY(180deg)]': sidebarStore.isSidebarCollapsed,
+						:style="{
+							transform:
+								isRtl !== sidebarStore.isSidebarCollapsed
+									? 'rotateY(180deg)'
+									: '',
 						}"
 						@click="toggleSidebar()"
 					/>
@@ -166,6 +227,7 @@
 			</div>
 		</div>
 		<HelpModal
+			data-testid="onboarding-help-modal"
 			v-if="showOnboarding && showHelpModal"
 			v-model="showHelpModal"
 			v-model:articles="articles"
@@ -210,15 +272,19 @@ import {
 	markRaw,
 	h,
 	onUnmounted,
+	computed,
 } from 'vue'
 import {
 	BookOpen,
 	CircleAlert,
 	ChevronRight,
-	Plus,
+	ChevronsRight,
 	CircleHelp,
 	FolderTree,
 	FileText,
+	Phone,
+	Plus,
+	User,
 	UserPlus,
 	Users,
 	BookText,
@@ -260,6 +326,7 @@ const router = useRouter()
 let onboardingDetails
 let isOnboardingStepsCompleted = false
 const readOnlyMode = window.read_only_mode
+const isRtl = document.documentElement.dir === 'rtl'
 const iconProps = {
 	strokeWidth: 1.5,
 	width: 16,
@@ -607,10 +674,53 @@ watch(settingsStore.settings, () => {
 const updateSidebarLinks = () => {
 	sidebarLinks.value = getSidebarLinks()
 	updateSidebarLinksVisibility()
+	updateUnreadCount()
 }
 
 const redirectToWebsite = () => {
 	window.open('https://frappe.io/learning', '_blank')
+}
+
+const isStudent = computed(() => {
+	return userResource.data?.is_student
+})
+
+const profileIsComplete = computed(() => {
+	return (
+		userResource.data?.user_image &&
+		userResource.data?.headline &&
+		userResource.data?.bio
+	)
+})
+
+const showAppointmentIcon = computed(() => {
+	let isTrialPlan = userResource.data?.site_info?.plan?.is_trial_plan
+	let trialEndDate = calculateTrialEndDays(
+		userResource.data?.site_info?.trial_end_date
+	)
+	return (
+		userResource.data?.is_system_manager &&
+		userResource.data?.is_fc_site &&
+		isTrialPlan &&
+		trialEndDate > 0
+	)
+})
+
+const calculateTrialEndDays = (trialEndDate) => {
+	if (!trialEndDate) return 0
+
+	trialEndDate = new Date(trialEndDate)
+	const today = new Date()
+	const diffTime = trialEndDate - today
+	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+	return diffDays
+}
+
+const redirectToAppointmentScreen = () => {
+	window.open(
+		'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ0c7Z3XIpW1WgbeIuktSaoX6qudoYuSdRbIlJty5TW7p4IZaOk5viHQGwTNi6HpNVqzOZOTHcle',
+		'_blank'
+	)
 }
 
 onUnmounted(() => {

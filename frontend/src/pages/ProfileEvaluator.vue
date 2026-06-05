@@ -6,7 +6,7 @@
 
 		<div
 			v-if="readOnlyMode"
-			class="flex items-center space-x-2 text-sm text-ink-gray-7 bg-surface-gray-1 px-3 py-2 rounded-md w-full text-center"
+			class="flex items-center gap-x-2 text-sm text-ink-gray-7 bg-surface-gray-1 px-3 py-2 rounded-md w-full text-center"
 		>
 			<CircleAlert class="size-4 stroke-1.5" />
 			<span>
@@ -139,7 +139,7 @@
 					v-if="evaluator.data?.calendar && evaluator.data?.is_authorized"
 					class="flex items-center bg-surface-green-2 text-green-900 text-sm p-1 rounded-md mb-4 w-fit"
 				>
-					<Check class="h-4 w-4 stroke-1.5 mr-2" />
+					<Check class="h-4 w-4 stroke-1.5 me-2" />
 					{{ __('Your calendar is set.') }}
 				</div>
 				<Button @click="() => authorizeCalendar.submit()">
@@ -151,7 +151,7 @@
 </template>
 <script setup>
 import { createResource, FormControl, Button, Badge, toast } from 'frappe-ui'
-import { computed, reactive, ref, onMounted, inject } from 'vue'
+import { computed, reactive, ref, onMounted, inject, watch } from 'vue'
 import { convertToTitleCase } from '@/utils'
 import { Plus, X, Check, CircleAlert } from 'lucide-vue-next'
 
@@ -195,15 +195,34 @@ const evaluator = createResource({
 		evaluator: props.profile.data?.name,
 	},
 	auto: true,
-	onSuccess(data) {
-		if (data.slots.unavailable_from) from.value = data.slots.unavailable_from
-		if (data.slots.unavailable_to) to.value = data.slots.unavailable_to
+	onError(err) {
+		toast.error(err.messages?.[0] || err)
+		console.error(err)
 	},
 })
+
+watch(evaluator, () => {
+	if (evaluator.data?.slots?.unavailable_from)
+		from.value = evaluator.data.slots.unavailable_from
+	if (evaluator.data?.slots?.unavailable_to)
+		to.value = evaluator.data.slots.unavailable_to
+
+	evaluator.data?.slots?.schedule.forEach((slot) => {
+		slot.start_time = formatTime(slot.start_time)
+		slot.end_time = formatTime(slot.end_time)
+	})
+})
+
+const formatTime = (time) => {
+	if (!time) return ''
+	const [hour, minute] = time.split(':')
+	return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`
+}
 
 const createSlot = createResource({
 	url: 'frappe.client.insert',
 	makeParams(values) {
+		console.log(evaluator.data)
 		return {
 			doc: {
 				doctype: 'Evaluator Schedule',

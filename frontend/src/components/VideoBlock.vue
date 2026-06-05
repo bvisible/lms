@@ -8,7 +8,7 @@
 				)
 			}}
 
-			<div v-for="(quiz, index) in quizzes" class="pl-3 mt-1">
+			<div v-for="(quiz, index) in quizzes" class="ps-3 mt-1">
 				<span>
 					{{ index + 1 }}. <span class="font-semibold"> {{ quiz.quiz }} </span>
 				</span>
@@ -36,7 +36,7 @@
 				@click="playVideo"
 			>
 				<div
-					class="rounded-full p-4 pl-4.5"
+					class="rounded-full p-4 ps-4.5"
 					style="
 						background: radial-gradient(
 							circle,
@@ -49,7 +49,7 @@
 				</div>
 			</div>
 			<div
-				class="flex items-center space-x-2 py-2 px-1 text-ink-white bg-gradient-to-b from-transparent to-black/75 absolute bottom-0 left-0 right-0 mx-auto rounded-md"
+				class="flex items-center gap-x-2 py-2 px-1 text-ink-white bg-gradient-to-b from-transparent to-black/75 absolute bottom-0 start-0 end-0 mx-auto rounded-md"
 				:class="{
 					'invisible group-hover:visible': playing,
 				}"
@@ -76,7 +76,7 @@
 						class="duration-slider h-1"
 					/>
 					<!-- QUIZ MARKERS -->
-					<div class="absolute top-0 left-0 w-full h-full pointer-events-none">
+					<div class="absolute top-0 start-0 w-full h-full pointer-events-none">
 						<div
 							v-for="(quiz, index) in quizzes"
 							:key="index"
@@ -89,6 +89,11 @@
 				<span class="text-sm font-medium">
 					{{ formatSeconds(currentTime) }} / {{ formatSeconds(duration) }}
 				</span>
+
+				<Dropdown :options="dropdownOptions">
+					<Button>{{ playbackSpeedLabel }}</Button>
+				</Dropdown>
+
 				<Button
 					variant="ghost"
 					@click="toggleMute"
@@ -151,9 +156,9 @@
 	</Dialog>
 </template>
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import { Pause, Maximize, Volume2, VolumeX } from 'lucide-vue-next'
-import { Button, Dialog } from 'frappe-ui'
+import { Button, Dialog, Dropdown } from 'frappe-ui'
 import { formatSeconds, formatTimestamp } from '@/utils'
 import { useSettings } from '@/stores/settings'
 import Play from '@/components/Icons/Play.vue'
@@ -172,6 +177,16 @@ const quizLoadTimer = ref(0)
 const currentQuiz = ref(null)
 const nextQuiz = ref({})
 const { settings } = useSettings()
+
+// Speed control states
+const playbackSpeed = ref(1)
+const playbackSpeedLabel = ref('1x')
+const playbackSpeeds = [
+	{ label: '0.5x', value: 0.5 },
+	{ label: '1x', value: 1 },
+	{ label: '1.5x', value: 1.5 },
+	{ label: '2x', value: 2 },
+]
 
 const props = defineProps({
 	file: {
@@ -199,6 +214,9 @@ const props = defineProps({
 onMounted(() => {
 	updateCurrentTime()
 	updateNextQuiz()
+	if (videoRef.value) {
+		videoRef.value.playbackRate = 1
+	}
 })
 
 const updateCurrentTime = () => {
@@ -318,9 +336,25 @@ const toggleFullscreen = () => {
 const getQuizMarkerStyle = (time) => {
 	const percentage = ((time - 5) / Math.ceil(duration.value)) * 100
 	return {
-		left: `${percentage}%`,
+		insetInlineStart: `${percentage}%`,
 	}
 }
+
+const setPlaybackSpeed = (speed, label) => {
+	playbackSpeed.value = speed
+	playbackSpeedLabel.value = label
+	if (videoRef.value) {
+		videoRef.value.playbackRate = speed
+	}
+}
+
+const dropdownOptions = computed(() =>
+	playbackSpeeds.map((speed) => ({
+		label: speed.label,
+		active: playbackSpeed.value === speed.value,
+		onClick: () => setPlaybackSpeed(speed.value, speed.label),
+	}))
+)
 </script>
 
 <style scoped>

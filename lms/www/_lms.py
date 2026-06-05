@@ -3,6 +3,9 @@ import re
 import frappe
 from bs4 import BeautifulSoup
 from frappe import _
+from frappe.translate import get_user_lang
+from frappe.utils.data import escape_html
+from frappe.utils.jinja_globals import is_rtl
 from frappe.utils.telemetry import capture
 
 from lms.lms.utils import get_lms_path, get_lms_route
@@ -35,6 +38,8 @@ def get_boot():
 			"csrf_token": frappe.sessions.get_csrf_token(),
 			"site_name": frappe.local.site,
 			"lms_path": get_lms_path(),
+			"lang": get_user_lang(),
+			"text_direction": "rtl" if is_rtl() else "ltr",
 		}
 	)
 
@@ -109,7 +114,7 @@ def get_meta_from_document(app_path):
 
 		if course.description:
 			soup = BeautifulSoup(course.description, "html.parser")
-			course.description = soup.get_text()
+			course.description = escape_html(soup.get_text())
 
 		return {
 			"title": course.title,
@@ -136,7 +141,7 @@ def get_meta_from_document(app_path):
 
 		if batch.batch_details:
 			soup = BeautifulSoup(batch.batch_details, "html.parser")
-			batch.batch_details = soup.get_text()
+			batch.batch_details = escape_html(soup.get_text())
 
 		return {
 			"title": batch.title,
@@ -163,7 +168,7 @@ def get_meta_from_document(app_path):
 
 		if batch.batch_details:
 			soup = BeautifulSoup(batch.batch_details, "html.parser")
-			batch.batch_details = soup.get_text()
+			batch.batch_details = escape_html(soup.get_text())
 
 		return {
 			"title": batch.title,
@@ -191,7 +196,7 @@ def get_meta_from_document(app_path):
 
 		if job_opening.description:
 			soup = BeautifulSoup(job_opening.description, "html.parser")
-			job_opening.description = soup.get_text()
+			job_opening.description = escape_html(soup.get_text())
 
 		return {
 			"title": job_opening.job_title,
@@ -221,7 +226,7 @@ def get_meta_from_document(app_path):
 
 		if user.bio:
 			soup = BeautifulSoup(user.bio, "html.parser")
-			user.bio = soup.get_text()
+			user.bio = escape_html(soup.get_text())
 
 		return {
 			"title": user.full_name,

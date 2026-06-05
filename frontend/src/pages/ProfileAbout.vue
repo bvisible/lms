@@ -45,7 +45,7 @@
 							/>
 							<div
 								v-if="badge.count > 1"
-								class="flex items-end bg-surface-gray-2 p-2 text-xs font-semibold rounded-full absolute right-0 bottom-0"
+								class="flex items-end bg-surface-gray-2 p-2 text-xs font-semibold rounded-full absolute end-0 bottom-0"
 							>
 								<span>
 									<X class="w-3 h-3" />
@@ -70,17 +70,20 @@
 								<div class="leading-5 mb-4">
 									{{ badge.badge_description }}
 								</div>
-								<div class="flex flex-col mb-4">
+								<div class="flex flex-col">
 									<span class="text-xs text-ink-gray-7 font-medium mb-1">
 										{{ __('Issued on') }}:
 									</span>
 									{{ dayjs(badge.issued_on).format('DD MMM YYYY') }}
 								</div>
-								<div class="flex flex-col">
+								<div
+									v-if="user.data?.name == profile.data?.name"
+									class="flex flex-col mt-4"
+								>
 									<span class="text-xs text-ink-gray-7 font-medium mb-1">
 										{{ __('Share on') }}:
 									</span>
-									<div class="flex items-center space-x-2">
+									<div class="flex items-center gap-x-2">
 										<Button
 											variant="outline"
 											size="sm"
@@ -125,6 +128,7 @@ import DOMPurify from 'dompurify'
 import { getLmsRoute } from '@/utils/basePath'
 
 const dayjs = inject('$dayjs')
+const user = inject('$user')
 const { branding } = sessionStore()
 
 const props = defineProps({
@@ -135,13 +139,9 @@ const props = defineProps({
 })
 
 const badges = createResource({
-	url: 'frappe.client.get_list',
+	url: 'lms.lms.api.get_badges',
 	params: {
-		doctype: 'LMS Badge Assignment',
-		fields: ['name', 'badge', 'badge_image', 'badge_description', 'issued_on'],
-		filters: {
-			member: props.profile.data.name,
-		},
+		member: props.profile.data.name,
 	},
 	auto: true,
 	transform(data) {
@@ -160,14 +160,16 @@ const shareOnSocial = (badge, medium) => {
 	let shareUrl
 	const url = encodeURIComponent(
 		`${window.location.origin}${getLmsRoute(
-			`badges/${badge.badge}/${props.profile.data?.email}`
+			`user/${props.profile.data?.username}`
 		)}`
 	)
-	const summary = `I am happy to announce that I earned the ${
-		badge.badge
-	} badge on ${dayjs(badge.issued_on).format('DD MMM YYYY')} at ${
+	const summary = __(
+		'I am happy to announce that I earned the {0} badge on {1} at {2}'
+	).format(
+		badge.badge,
+		dayjs(badge.issued_on).format('DD MMM YYYY'),
 		branding.data?.app_name
-	}.`
+	)
 
 	if (medium == 'LinkedIn')
 		shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&text=${summary}`

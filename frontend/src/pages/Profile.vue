@@ -26,7 +26,7 @@
 				class="h-[130px] w-full"
 			></div>
 			<div
-				class="absolute bottom-[30%] md:bottom-0 left-[50%] mb-4 flex -translate-x-1/2 space-x-2 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
+				class="absolute bottom-[30%] md:bottom-0 start-[50%] mb-4 flex -translate-x-1/2 gap-x-2 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
 				v-if="isSessionUser()"
 			>
 				<EditCoverImage
@@ -72,7 +72,7 @@
 							placement="right"
 						>
 							<div
-								class="absolute bottom-3 right-1 p-0.5 bg-surface-white rounded-full"
+								class="absolute bottom-3 end-1 p-0.5 bg-surface-white rounded-full"
 							>
 								<div
 									class="rounded-full w-fit"
@@ -88,14 +88,14 @@
 						</Tooltip>
 					</div>
 				</div>
-				<div class="ml-6 mt-5">
+				<div class="ms-6 mt-5">
 					<h2 class="text-3xl font-semibold text-ink-gray-9">
 						{{ profile.data.full_name }}
 					</h2>
 					<div class="text-base text-ink-gray-7 mt-1">
 						{{ profile.data.headline }}
 					</div>
-					<div class="flex items-center space-x-4 mt-2">
+					<div class="flex items-center gap-x-4 mt-2">
 						<Twitter
 							v-if="profile.data.twitter"
 							class="size-4 text-ink-gray-5 cursor-pointer"
@@ -115,7 +115,7 @@
 				</div>
 				<Button
 					v-if="isSessionUser() && !readOnlyMode"
-					class="mt-3 sm:mt-0 md:ml-auto"
+					class="mt-3 sm:mt-0 md:ms-auto"
 					@click="editProfile()"
 				>
 					<template #prefix>
@@ -149,6 +149,7 @@ import {
 	createResource,
 	TabButtons,
 	Tooltip,
+	toast,
 	usePageMeta,
 } from 'frappe-ui'
 import { computed, inject, watch, ref, onMounted, watchEffect } from 'vue'
@@ -248,7 +249,7 @@ const editProfile = () => {
 }
 
 const isSessionUser = () => {
-	return $user.data?.email === profile.data?.name
+	return $user.data?.name === profile.data?.name
 }
 
 const currentUserHasHigherAccess = () => {
@@ -263,22 +264,33 @@ const isEvaluatorOrModerator = () => {
 }
 
 const getTabButtons = () => {
-	let buttons = [{ label: 'About' }, { label: 'Certificates' }]
-	if ($user.data?.is_moderator) buttons.push({ label: 'Roles' })
+	let buttons = [
+		{ label: __('About'), value: 'About' },
+		{ label: __('Certificates'), value: 'Certificates' },
+	]
+	if ($user.data?.is_moderator) {
+		buttons.push({ label: __('Roles'), value: 'Roles' })
+	}
 
 	if (currentUserHasHigherAccess() && isEvaluatorOrModerator()) {
-		buttons.push({ label: 'Slots' })
-		buttons.push({ label: 'Schedule' })
+		buttons.push({ label: __('Slots'), value: 'Slots' })
+		buttons.push({ label: __('Schedule'), value: 'Schedule' })
 	}
 	return buttons
 }
 
 const reloadUser = () => {
-	call('frappe.sessions.clear').then(() => {
-		$user.reload().then(() => {
-			profile.reload()
+	call('frappe.sessions.clear')
+		.then(() => {
+			$user.reload().then(() => {
+				profile.reload()
+				toast.success(__('Session refreshed successfully'))
+			})
 		})
-	})
+		.catch((err) => {
+			toast.error(__('Failed to refresh session'))
+			console.error(err)
+		})
 }
 
 const navigateTo = (url) => {
@@ -288,7 +300,7 @@ const navigateTo = (url) => {
 const breadcrumbs = computed(() => {
 	let crumbs = [
 		{
-			label: 'People',
+			label: __('People'),
 		},
 		{
 			label: profile.data?.full_name,

@@ -19,11 +19,11 @@
 					/>
 					<LMSLogo v-else class="w-8 h-8 rounded flex-shrink-0" />
 					<div
-						class="flex flex-1 flex-col text-left duration-300 ease-in-out"
+						class="flex flex-1 flex-col text-start duration-300 ease-in-out"
 						:class="
 							isCollapsed
-								? 'opacity-0 ml-0 w-0 overflow-hidden'
-								: 'opacity-100 ml-2 w-auto'
+								? 'opacity-0 ms-0 w-0 overflow-hidden'
+								: 'opacity-100 ms-2 w-auto'
 						"
 					>
 						<div class="text-base font-medium text-ink-gray-9 leading-none">
@@ -47,8 +47,8 @@
 						class="duration-300 ease-in-out"
 						:class="
 							isCollapsed
-								? 'opacity-0 ml-0 w-0 overflow-hidden'
-								: 'opacity-100 ml-2 w-auto'
+								? 'opacity-0 ms-0 w-0 overflow-hidden'
+								: 'opacity-100 ms-2 w-auto'
 						"
 					>
 						<ChevronDown class="h-4 w-4 text-ink-gray-7" />
@@ -65,9 +65,10 @@
 
 <script setup>
 import { sessionStore } from '@/stores/session'
-import { Dropdown } from 'frappe-ui'
+import { call, Dropdown, toast } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { convertToTitleCase } from '@/utils'
+import { applyTheme, toggleTheme, theme } from '@/utils/theme'
 import { usersStore } from '@/stores/user'
 import { useSettings } from '@/stores/settings'
 import { markRaw, watch, ref, onMounted, computed } from 'vue'
@@ -85,8 +86,7 @@ import {
 	User,
 	Settings,
 	Sun,
-	Wrench,
-	Zap,
+	Trash2,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -95,7 +95,6 @@ let { userResource } = usersStore()
 const settingsStore = useSettings()
 let { isLoggedIn } = sessionStore()
 const showSettingsModal = ref(false)
-const theme = ref('light')
 const frappeCloudBaseEndpoint = 'https://frappecloud.com'
 const $dialog = createDialog
 
@@ -107,9 +106,8 @@ const props = defineProps({
 })
 
 onMounted(() => {
-	theme.value = localStorage.getItem('theme') || 'light'
 	if (['light', 'dark'].includes(theme.value)) {
-		document.documentElement.setAttribute('data-theme', theme.value)
+		applyTheme(theme.value)
 	}
 })
 
@@ -119,13 +117,6 @@ watch(
 		showSettingsModal.value = value
 	}
 )
-
-const toggleTheme = () => {
-	const currentTheme = document.documentElement.getAttribute('data-theme')
-	theme.value = currentTheme === 'dark' ? 'light' : 'dark'
-	document.documentElement.setAttribute('data-theme', theme.value)
-	localStorage.setItem('theme', theme.value)
-}
 
 const userDropdownOptions = computed(() => {
 	return [
@@ -171,15 +162,22 @@ const userDropdownOptions = computed(() => {
 					},
 				},
 				{
-					label: 'Configuration',
-					icon: Wrench,
-					submenu: [
-						{
-							component: markRaw(Configuration),
-						},
-					],
+					component: markRaw(Configuration),
 					condition: () => {
 						return userResource.data?.is_moderator
+					},
+				},
+				{
+					label: 'Clear Demo Data',
+					icon: Trash2,
+					onClick: () => {
+						clearDemoDataConfirmation()
+					},
+					condition: () => {
+						return (
+							userResource.data?.is_moderator &&
+							settingsStore.settings.data?.demo_data_present
+						)
 					},
 				},
 				{
@@ -240,5 +238,37 @@ const userDropdownOptions = computed(() => {
 const loginToFrappeCloud = () => {
 	let redirect_to = '/dashboard/sites/' + userResource.data.sitename
 	window.open(`${frappeCloudBaseEndpoint}${redirect_to}`, '_blank')
+}
+
+const clearDemoDataConfirmation = () => {
+	$dialog({
+		title: __('Confirm clearing demo data?'),
+		message: __(
+			'Are you sure you want to clear the demo data? This would delete the course "A guide  to Frappe Learning" along with all its associated data. This action cannot be undone.'
+		),
+		actions: [
+			{
+				label: __('Confirm'),
+				theme: 'red',
+				variant: 'solid',
+				onClick(close) {
+					clearDemoData()
+					close()
+				},
+			},
+		],
+	})
+}
+
+const clearDemoData = () => {
+	call('lms.lms.api.clear_demo_data')
+		.then(() => {
+			window.location.href = '/lms'
+			toast.success(__('Demo data cleared successfully'))
+		})
+		.catch((error) => {
+			toast.error(__(error.message || 'Error clearing demo data'))
+			console.error('Error clearing demo data:', error)
+		})
 }
 </script>

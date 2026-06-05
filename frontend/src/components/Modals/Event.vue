@@ -14,7 +14,7 @@
 
 					<div class="flex flex-col space-y-4 text-sm text-ink-gray-8">
 						<Tooltip :text="__('Email ID')">
-							<div class="flex items-center space-x-2 w-fit">
+							<div class="flex items-center gap-x-2 w-fit">
 								<User class="h-4 w-4 stroke-1.5" />
 								<span>
 									{{ event.member }}
@@ -23,7 +23,7 @@
 						</Tooltip>
 						<Tooltip :text="__('Course')">
 							<div
-								class="flex space-x-2 w-fit cursor-pointer"
+								class="flex gap-x-2 w-fit cursor-pointer"
 								@click="openLink('course', event.course)"
 							>
 								<BookOpen class="h-4 w-4 stroke-1.5" />
@@ -34,7 +34,7 @@
 						</Tooltip>
 						<Tooltip v-if="event.batch_title" :text="__('Batch')">
 							<div
-								class="flex space-x-2 w-fit cursor-pointer"
+								class="flex gap-x-2 w-fit cursor-pointer"
 								@click="openLink('batch', event.batch_name)"
 							>
 								<Users class="h-4 w-4 stroke-1.5" />
@@ -44,7 +44,7 @@
 							</div>
 						</Tooltip>
 						<Tooltip :text="__('Date')">
-							<div class="flex items-center space-x-2 w-fit">
+							<div class="flex items-center gap-x-2 w-fit">
 								<Calendar class="h-4 w-4 stroke-1.5" />
 								<span>
 									{{ dayjs(event.date).format('DD MMM YYYY') }}
@@ -52,7 +52,7 @@
 							</div>
 						</Tooltip>
 						<Tooltip :text="__('Time')">
-							<div class="flex items-center space-x-2 w-fit">
+							<div class="flex items-center gap-x-2 w-fit">
 								<Clock class="h-4 w-4 stroke-1.5" />
 								<span>
 									{{ formatTime(event.start_time) }} -
@@ -61,7 +61,7 @@
 							</div>
 						</Tooltip>
 					</div>
-					<div class="flex items-center space-x-2 mt-auto">
+					<div class="flex items-center gap-x-2 mt-auto">
 						<Button
 							v-if="certificate.name"
 							@click="openCertificate(certificate)"
@@ -86,7 +86,7 @@
 						</Button>
 					</div>
 				</div>
-				<Tabs :tabs="tabs" as="div" v-model="tabIndex" class="border-l w-1/2">
+				<Tabs :tabs="tabs" as="div" v-model="tabIndex" class="border-s w-1/2">
 					<template #tab-panel="{ tab }">
 						<div
 							v-if="tab.label == 'Evaluation'"
@@ -122,10 +122,13 @@
 							</Button>
 						</div>
 						<div v-else class="flex flex-col space-y-4 p-5">
-							<FormControl
-								type="checkbox"
+							<Switch
+								size="sm"
 								v-model="certificate.published"
 								:label="__('Published')"
+								:description="
+									__('Make this certificate visible to the participant.')
+								"
 								:disabled="!userIsEvaluator()"
 							/>
 							<Link
@@ -174,6 +177,7 @@ import {
 	Textarea,
 	toast,
 } from 'frappe-ui'
+import Switch from '@/components/Controls/Switch.vue'
 import {
 	User,
 	Calendar,
@@ -243,13 +247,12 @@ const evaluationResource = createResource({
 			member: props.event.member,
 			course: props.event.course,
 			batch_name: props.event.batch_name,
-			date: props.event.date,
+			date_value: props.event.date,
 			start_time: props.event.start_time,
 			end_time: props.event.end_time,
 			status: evaluation.status,
 			rating: evaluation.rating,
 			summary: evaluation.summary,
-			evaluator: props.event.evaluator,
 		}
 	},
 	auto: false,
@@ -309,7 +312,6 @@ const certificateResource = createResource({
 			issue_date: certificate.issue_date,
 			expiry_date: certificate.expiry_date,
 			template: certificate.template,
-			evaluator: props.event.evaluator,
 		}
 	},
 	auto: false,

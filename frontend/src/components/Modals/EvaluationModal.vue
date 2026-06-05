@@ -27,7 +27,7 @@
 					</div>
 					<div class="space-y-5">
 						<div v-for="row in slots.data" class="space-y-2">
-							<div class="flex items-center text-ink-gray-7 space-x-2">
+							<div class="flex items-center text-ink-gray-7 gap-x-2">
 								<Calendar class="size-3" />
 								<div class="text-ink-gray-9">
 									{{ dayjs(row.date).format('DD MMMM YYYY') }}
@@ -55,6 +55,9 @@
 						</div>
 					</div>
 				</div>
+				<div v-else-if="!evaluation.course" class="text-ink-gray-7">
+					{{ __('Please select a course to view available slots.') }}
+				</div>
 				<div v-else class="text-ink-red-3">
 					{{ __('No slots available for the selected course.') }}
 				</div>
@@ -63,18 +66,12 @@
 	</Dialog>
 </template>
 <script setup>
-import {
-	call,
-	createResource,
-	dayjs,
-	Dialog,
-	FormControl,
-	toast,
-} from 'frappe-ui'
+import { call, createResource, Dialog, FormControl, toast } from 'frappe-ui'
 import { ref, watch, inject } from 'vue'
 import { Calendar } from 'lucide-vue-next'
 import { formatTime } from '@/utils/'
 
+const dayjs = inject('$dayjs')
 const user = inject('$user')
 const show = defineModel()
 const evaluations = defineModel('reloadEvals')

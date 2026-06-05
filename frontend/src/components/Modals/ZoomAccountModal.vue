@@ -18,10 +18,13 @@
 	>
 		<template #body-content>
 			<div class="mb-4">
-				<FormControl
+				<Switch
+					size="sm"
 					v-model="account.enabled"
 					:label="__('Enabled')"
-					type="checkbox"
+					:description="
+						__('Activate this Zoom account for scheduling meetings.')
+					"
 				/>
 			</div>
 			<div class="grid grid-cols-2 gap-5">
@@ -41,7 +44,9 @@
 					v-model="account.member"
 					:label="__('Member')"
 					doctype="Course Evaluator"
-					:onCreate="(value: string, close: () => void) => openSettings('Members', close)"
+					:onCreate="
+						(value: string, close: () => void) => openSettings('Members', close)
+					"
 					:required="true"
 				/>
 				<FormControl
@@ -62,6 +67,7 @@
 </template>
 <script setup lang="ts">
 import { call, Dialog, FormControl, toast } from 'frappe-ui'
+import Switch from '@/components/Controls/Switch.vue'
 import { inject, reactive, watch } from 'vue'
 import { User } from '@/components/Settings/types'
 import { openSettings, cleanError } from '@/utils'
@@ -109,16 +115,14 @@ const account = reactive({
 	client_secret: '',
 })
 
-const props = defineProps({
-	accountID: {
-		type: String,
-		default: 'new',
-	},
-})
+const props = defineProps<{
+	accountID: string | null
+}>()
 
 watch(
 	() => props.accountID,
 	(val) => {
+		console.log(props.accountID)
 		if (val === 'new') {
 			account.name = ''
 			account.enabled = false

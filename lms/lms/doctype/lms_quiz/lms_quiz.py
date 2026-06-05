@@ -9,11 +9,16 @@ import frappe
 from frappe import _, safe_decode
 from frappe.core.doctype.file.utils import get_random_filename
 from frappe.model.document import Document
-from frappe.utils import cint, comma_and, cstr
+from frappe.utils import cint, comma_and
 from frappe.utils.file_manager import safe_b64decode
 from fuzzywuzzy import fuzz
 
 from lms.lms.doctype.course_lesson.course_lesson import save_progress
+from lms.lms.doctype.lms_question.lms_question import (
+	QUESTION_CORRECTNESS_FIELDS,
+	QUESTION_OPTION_FIELDS,
+	QUESTION_POSSIBILITY_FIELDS,
+)
 from lms.lms.utils import (
 	generate_slug,
 )
@@ -93,7 +98,7 @@ class LMSQuiz(Document):
 			return result[0]
 
 
-def set_total_marks(questions):
+def set_total_marks(questions: list) -> int:
 	marks = 0
 	for question in questions:
 		marks += question.get("marks")
@@ -101,9 +106,8 @@ def set_total_marks(questions):
 
 
 @frappe.whitelist()
-def quiz_summary(quiz, results):
-	results = results and json.loads(results)
-	percentage = 0
+def submit_quiz(quiz: str, results: str | None = None):
+	results = json.loads(results) if results else []
 
 	quiz_details = frappe.db.get_value(
 		"LMS Quiz",
@@ -121,28 +125,28 @@ def quiz_summary(quiz, results):
 	)
 
 	data = process_results(results, quiz_details)
-	results = data["results"]
-	score = data["score"]
 	is_open_ended = data["is_open_ended"]
 
-	score_out_of = quiz_details.total_marks
-	percentage = (score / score_out_of) * 100 if score_out_of else 0
-	submission = create_submission(quiz, results, score_out_of, quiz_details.passing_percentage)
-
+	# Score and percentage are the submission's responsibility — its validate()
+	# runs validate_marks() + set_percentage() on save. Read them back rather
+	# than recomputing here, so the two paths can't drift.
+	submission = create_submission(
+		quiz, data["results"], quiz_details.total_marks, quiz_details.passing_percentage
+	)
+	percentage = submission.percentage or 0
 	save_progress_after_quiz(quiz_details, percentage)
 
 	return {
-		"score": score,
-		"score_out_of": score_out_of,
+		"score": submission.score,
+		"score_out_of": submission.score_out_of,
 		"submission": submission.name,
-		"pass": percentage == quiz_details.passing_percentage,
+		"pass": percentage >= quiz_details.passing_percentage,
 		"percentage": percentage,
 		"is_open_ended": is_open_ended,
 	}
 
 
-def process_results(results, quiz_details):
-	score = 0
+def process_results(results: list, quiz_details: dict):
 	is_open_ended = False
 
 	for result in results:
@@ -152,43 +156,60 @@ def process_results(results, quiz_details):
 			["question", "marks", "question_detail", "type"],
 			as_dict=1,
 		)
-
 		result["question_name"] = question_details.question
 		result["question"] = question_details.question_detail
 		result["marks_out_of"] = question_details.marks
 
 		if question_details.type != "Open Ended":
-			if len(result["is_correct"]) > 0:
-				correct = result["is_correct"][0]
-				for point in result["is_correct"]:
-					correct = correct and point
-				result["is_correct"] = correct
+			if question_details.type == "User Input":
+				correct = bool(check_input_answers(question_details.question, result["answer"][0]))
 			else:
-				result["is_correct"] = 0
-
+				correct = verify_answer(question_details.question, result["answer"])
+			result["answer"] = ", ".join(result["answer"])
 			if correct:
-				marks = question_details.marks
+				result["marks"] = question_details.marks
 			else:
-				marks = -quiz_details.marks_to_cut if quiz_details.enable_negative_marking else 0
-
-			result["marks"] = marks
-			score += marks
+				result["marks"] = -quiz_details.marks_to_cut if quiz_details.enable_negative_marking else 0
+			result["is_correct"] = 1 if correct else 0
 
 		else:
 			is_open_ended = True
 			result["is_correct"] = 0
 			result["answer"] = re.sub(
-				r'<img[^>]*src\s*=\s*["\'](?=data:)(.*?)["\']', _save_file, result["answer"]
+				r'<img[^>]*src\s*=\s*["\'](?=data:)(.*?)["\']', _save_file, result["answer"][0]
 			)
 
 	return {
 		"results": results,
-		"score": score,
 		"is_open_ended": is_open_ended,
 	}
 
 
-def _save_file(match):
+def verify_answer(question: str, answer: list):
+	question_details = get_question_details(question)
+
+	if question_details.multiple:
+		for option_field, correctness_field in zip(
+			QUESTION_OPTION_FIELDS, QUESTION_CORRECTNESS_FIELDS, strict=True
+		):
+			option = question_details[option_field]
+			is_correct = question_details[correctness_field]
+			if option in answer and not is_correct:
+				return False
+			if is_correct and option not in answer:
+				return False
+		return True
+
+	correct = False
+	for option_field, correctness_field in zip(
+		QUESTION_OPTION_FIELDS, QUESTION_CORRECTNESS_FIELDS, strict=True
+	):
+		if question_details[option_field] in answer:
+			correct = question_details[correctness_field]
+	return correct
+
+
+def _save_file(match: re.Match) -> str:
 	data = match.group(1).split("data:")[1]
 	headers, content = data.split(",")
 	mtype = headers.split(";", 1)[0]
@@ -231,7 +252,7 @@ def get_corrupted_image_msg():
 	return _("Image: Corrupted Data Stream")
 
 
-def create_submission(quiz, results, score_out_of, passing_percentage):
+def create_submission(quiz: str, results: list, score_out_of: int, passing_percentage: float):
 	submission = frappe.new_doc("LMS Quiz Submission")
 	# Score and percentage are calculated by the controller function
 	submission.update(
@@ -250,49 +271,51 @@ def create_submission(quiz, results, score_out_of, passing_percentage):
 	return submission
 
 
-def save_progress_after_quiz(quiz_details, percentage):
-	if percentage >= quiz_details.passing_percentage and quiz_details.lesson and quiz_details.course:
-		save_progress(quiz_details.lesson, quiz_details.course)
-	elif not quiz_details.passing_percentage:
-		save_progress(quiz_details.lesson, quiz_details.course)
+def save_progress_after_quiz(quiz_details: dict, percentage: float):
+	if not quiz_details.lesson or not quiz_details.course:
+		return
+
+	if quiz_details.passing_percentage and percentage < quiz_details.passing_percentage:
+		return
+	save_progress(quiz_details.lesson, quiz_details.course)
 
 
 @frappe.whitelist()
-def get_question_details(question):
-	if frappe.db.exists("LMS Quiz Question", question):
-		fields = ["name", "question", "type"]
-		for num in range(1, 5):
-			fields.append(f"option_{cstr(num)}")
-			fields.append(f"is_correct_{cstr(num)}")
-			fields.append(f"explanation_{cstr(num)}")
-			fields.append(f"possibility_{cstr(num)}")
+def check_answer(quiz: str, question: str, question_type: str, answers: str):
+	ADMIN_ROLES = ("System Manager", "Moderator", "Course Creator", "Batch Evaluator")
+	is_admin = any(role in ADMIN_ROLES for role in frappe.get_roles())
 
-		return frappe.db.get_value("LMS Quiz Question", question, fields, as_dict=1)
-	return
+	if not frappe.db.exists("LMS Quiz Question", {"parent": quiz, "question": question}):
+		frappe.throw(_("Question not found in this quiz."), frappe.PermissionError)
 
+	if not is_admin and not frappe.db.get_value("LMS Quiz", quiz, "show_answers"):
+		frappe.throw(
+			_("Live answer checking is not enabled for this quiz."),
+			frappe.PermissionError,
+		)
 
-@frappe.whitelist()
-def check_answer(question, type, answers):
-	answers = json.loads(answers)
-	if type == "Choices":
+	answers = answers and json.loads(answers)
+	if question_type == "Choices":
 		return check_choice_answers(question, answers)
 	else:
 		return check_input_answers(question, answers[0])
 
 
-def check_choice_answers(question, answers):
-	fields = ["multiple"]
+def get_question_details(question: str):
+	fields = ["multiple"] + QUESTION_OPTION_FIELDS + QUESTION_CORRECTNESS_FIELDS
+	return frappe.db.get_value("LMS Question", question, fields, as_dict=1)
+
+
+def check_choice_answers(question: str, answers: list):
+	question_details = get_question_details(question)
 	is_correct = []
-	for num in range(1, 5):
-		fields.append(f"option_{cstr(num)}")
-		fields.append(f"is_correct_{cstr(num)}")
 
-	question_details = frappe.db.get_value("LMS Question", question, fields, as_dict=1)
-
-	for num in range(1, 5):
-		if question_details[f"option_{num}"] in answers:
-			is_correct.append(question_details[f"is_correct_{num}"])
-		elif question_details[f"is_correct_{num}"]:
+	for option_field, correctness_field in zip(
+		QUESTION_OPTION_FIELDS, QUESTION_CORRECTNESS_FIELDS, strict=True
+	):
+		if question_details[option_field] in answers:
+			is_correct.append(question_details[correctness_field])
+		elif question_details[correctness_field]:
 			is_correct.append(2)
 		else:
 			is_correct.append(0)
@@ -300,15 +323,10 @@ def check_choice_answers(question, answers):
 	return is_correct
 
 
-def check_input_answers(question, answer):
-	fields = []
-	for num in range(1, 5):
-		fields.append(f"possibility_{cstr(num)}")
-
-	question_details = frappe.db.get_value("LMS Question", question, fields, as_dict=1)
-	for num in range(1, 5):
-		current_possibility = question_details[f"possibility_{num}"]
-		if current_possibility and fuzz.token_sort_ratio(current_possibility, answer) > 85:
+def check_input_answers(question: str, answer: str):
+	question_details = frappe.db.get_value("LMS Question", question, QUESTION_POSSIBILITY_FIELDS, as_dict=1)
+	for field in QUESTION_POSSIBILITY_FIELDS:
+		possibility = question_details[field]
+		if possibility and fuzz.token_sort_ratio(possibility, answer) > 85:
 			return 1
-
 	return 0

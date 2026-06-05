@@ -63,7 +63,7 @@
 						<span class="text-ink-gray-5 uppercase text-xs">
 							{{ __('Enter a Coupon Code') }}:
 						</span>
-						<div class="flex items-center space-x-2">
+						<div class="flex items-center gap-x-2">
 							<FormControl
 								v-model="appliedCoupon"
 								:disabled="orderSummary.data.discount_amount > 0"
@@ -103,7 +103,7 @@
 					</p>
 				</div>
 
-				<div class="flex-1 lg:mr-10">
+				<div class="flex-1 lg:me-10">
 					<div class="mb-5">
 						<div class="text-lg font-semibold text-ink-gray-9">
 							{{ __('Address') }}
@@ -114,25 +114,27 @@
 							<FormControl
 								:label="__('Billing Name')"
 								v-model="billingDetails.billing_name"
-								:required="true"
+								:required="!!fieldMeta.billing_name?.reqd"
 							/>
 							<FormControl
 								:label="__('Address Line 1')"
 								v-model="billingDetails.address_line1"
-								:required="true"
+								:required="!!fieldMeta.address_line1?.reqd"
 							/>
 							<FormControl
 								:label="__('Address Line 2')"
 								v-model="billingDetails.address_line2"
+								:required="!!fieldMeta.address_line2?.reqd"
 							/>
 							<FormControl
 								:label="__('City')"
 								v-model="billingDetails.city"
-								:required="true"
+								:required="!!fieldMeta.city?.reqd"
 							/>
 							<FormControl
 								:label="__('State/Province')"
 								v-model="billingDetails.state"
+								:required="!!fieldMeta.state?.reqd"
 							/>
 						</div>
 						<div class="space-y-4">
@@ -141,34 +143,36 @@
 								:value="billingDetails.country"
 								@change="(option) => changeCurrency(option)"
 								:label="__('Country')"
-								:required="true"
+								:required="!!fieldMeta.country?.reqd"
 							/>
 							<FormControl
 								:label="__('Postal Code')"
 								v-model="billingDetails.pincode"
-								:required="true"
+								:required="!!fieldMeta.pincode?.reqd"
 							/>
 							<FormControl
 								:label="__('Phone Number')"
 								v-model="billingDetails.phone"
-								:required="true"
+								:required="!!fieldMeta.phone?.reqd"
 							/>
 							<Link
 								doctype="LMS Source"
 								:value="billingDetails.source"
 								@change="(option) => (billingDetails.source = option)"
 								:label="__('Where did you hear about us?')"
-								:required="true"
+								:required="!!fieldMeta.source?.reqd"
 							/>
 							<FormControl
 								v-if="billingDetails.country == 'India'"
 								:label="__('GST Number')"
 								v-model="billingDetails.gstin"
+								:required="!!fieldMeta.gstin?.reqd"
 							/>
 							<FormControl
 								v-if="billingDetails.country == 'India'"
 								:label="__('PAN Number')"
 								v-model="billingDetails.pan"
+								:required="!!fieldMeta.pan?.reqd"
 							/>
 						</div>
 					</div>
@@ -195,8 +199,15 @@
 								}}
 							</div>
 						</div>
-						<Button variant="solid" size="md" @click="generatePaymentLink()">
-							{{ __('Proceed to Payment') }}
+						<Button
+							variant="solid"
+							size="md"
+							class="ms-auto"
+							@click="generatePaymentLink()"
+						>
+							{{
+								isZeroAmount ? __('Enroll for Free') : __('Proceed to Payment')
+							}}
 						</Button>
 					</div>
 				</div>
@@ -273,6 +284,7 @@ const access = createResource({
 		name: props.name,
 	},
 	onSuccess(data) {
+		Object.assign(fieldMeta, data.billing_field_meta || {})
 		setBillingDetails(data.address)
 		orderSummary.submit()
 	},
@@ -295,19 +307,24 @@ const orderSummary = createResource({
 
 const appliedCoupon = ref(null)
 const billingDetails = reactive({})
+const fieldMeta = reactive({})
+
+const getDefault = (fieldname) => fieldMeta[fieldname]?.default || ''
 
 const setBillingDetails = (data) => {
-	billingDetails.billing_name = data?.billing_name || ''
-	billingDetails.address_line1 = data?.address_line1 || ''
-	billingDetails.address_line2 = data?.address_line2 || ''
-	billingDetails.city = data?.city || ''
-	billingDetails.state = data?.state || ''
-	billingDetails.country = data?.country || ''
-	billingDetails.pincode = data?.pincode || ''
-	billingDetails.phone = data?.phone || ''
-	billingDetails.source = data?.source || ''
-	billingDetails.gstin = data?.gstin || ''
-	billingDetails.pan = data?.pan || ''
+	billingDetails.billing_name = data?.billing_name || getDefault('billing_name')
+	billingDetails.address_line1 =
+		data?.address_line1 || getDefault('address_line1')
+	billingDetails.address_line2 =
+		data?.address_line2 || getDefault('address_line2')
+	billingDetails.city = data?.city || getDefault('city')
+	billingDetails.state = data?.state || getDefault('state')
+	billingDetails.country = data?.country || getDefault('country')
+	billingDetails.pincode = data?.pincode || getDefault('pincode')
+	billingDetails.phone = data?.phone || getDefault('phone')
+	billingDetails.source = data?.source || getDefault('source')
+	billingDetails.gstin = data?.gstin || getDefault('gstin')
+	billingDetails.pan = data?.pan || getDefault('pan')
 }
 
 const paymentLink = createResource({
@@ -316,16 +333,10 @@ const paymentLink = createResource({
 		let data = {
 			doctype: props.type == 'batch' ? 'LMS Batch' : 'LMS Course',
 			docname: props.name,
-			title: orderSummary.data.title,
-			amount: orderSummary.data.original_amount,
-			discount_amount: orderSummary.data.discount_amount || 0,
-			gst_amount: orderSummary.data.gst_applied || 0,
-			currency: orderSummary.data.currency,
 			address: billingDetails,
-			redirect_to: redirectTo.value,
 			payment_for_certificate: props.type == 'certificate',
 			coupon_code: appliedCoupon.value,
-			coupon: orderSummary.data.coupon,
+			country: billingDetails.country,
 		}
 		return data
 	},
@@ -336,7 +347,7 @@ const generatePaymentLink = () => {
 		{},
 		{
 			validate() {
-				if (!billingDetails.source) {
+				if (!billingDetails.source && fieldMeta.source?.reqd) {
 					return __('Please let us know where you heard about us from.')
 				}
 				if (!billingDetails.member_consent) {
@@ -370,15 +381,19 @@ function removeCoupon() {
 }
 
 const validateAddress = () => {
-	let mandatoryFields = [
+	let billingFields = [
 		'billing_name',
 		'address_line1',
+		'address_line2',
 		'city',
+		'state',
 		'pincode',
 		'country',
 		'phone',
-		'source',
+		'gstin',
+		'pan',
 	]
+	let mandatoryFields = billingFields.filter((f) => fieldMeta[f]?.reqd)
 	for (let field of mandatoryFields) {
 		if (!billingDetails[field])
 			return (
@@ -444,14 +459,8 @@ const changeCurrency = (country) => {
 	orderSummary.reload()
 }
 
-const redirectTo = computed(() => {
-	if (props.type == 'course') {
-		return getLmsRoute(`courses/${props.name}`)
-	} else if (props.type == 'batch') {
-		return getLmsRoute(`batches/${props.name}`)
-	} else if (props.type == 'certificate') {
-		return getLmsRoute(`courses/${props.name}/certification`)
-	}
+const isZeroAmount = computed(() => {
+	return orderSummary.data && parseFloat(orderSummary.data.total_amount) <= 0
 })
 
 watch(billingDetails, () => {

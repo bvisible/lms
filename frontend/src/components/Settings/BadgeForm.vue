@@ -9,11 +9,7 @@
 		<template #body-content>
 			<div class="grid grid-cols-2 gap-x-5">
 				<div class="space-y-4">
-					<FormControl
-						v-model="badge.enabled"
-						:label="__('Enabled')"
-						type="checkbox"
-					/>
+					<Switch size="sm" v-model="badge.enabled" :label="__('Enabled')" />
 					<FormControl
 						v-model="badge.title"
 						:label="__('Title')"
@@ -21,7 +17,9 @@
 						:required="true"
 					/>
 					<Autocomplete
-						@update:modelValue="(opt: any) => (badge.reference_doctype = opt.value)"
+						@update:modelValue="
+							(opt: any) => (badge.reference_doctype = opt.value)
+						"
 						:modelValue="badge.reference_doctype"
 						:options="referenceDoctypeOptions"
 						:required="true"
@@ -41,10 +39,11 @@
 				</div>
 
 				<div class="space-y-4">
-					<FormControl
+					<Switch
+						size="sm"
 						v-model="badge.grant_only_once"
 						:label="__('Grant Only Once')"
-						type="checkbox"
+						:description="__('Each user can only receive this badge one time.')"
 					/>
 					<FormControl
 						v-model="badge.event"
@@ -73,7 +72,7 @@
 			</div>
 		</template>
 		<template #actions="{ close }">
-			<div class="pb-5 float-right">
+			<div class="pb-5 float-end">
 				<Button variant="solid" @click="saveBadge(close)">
 					{{ __('Save') }}
 				</Button>
@@ -83,6 +82,7 @@
 </template>
 <script setup lang="ts">
 import { Button, call, Dialog, FormControl, toast } from 'frappe-ui'
+import Switch from '@/components/Controls/Switch.vue'
 import { computed, ref, watch } from 'vue'
 import { cleanError } from '@/utils'
 import type { Badges, Badge } from '@/components/Settings/types'
@@ -206,7 +206,7 @@ const referenceDoctypeOptions = computed(() => {
 })
 
 const eventOptions = computed(() => {
-	let options = ['New', 'Value Change', 'Auto Assign']
+	let options = ['New', 'Value Change', 'Manual Assignment']
 	return options.map((event) => ({ label: __(event), value: event }))
 })
 

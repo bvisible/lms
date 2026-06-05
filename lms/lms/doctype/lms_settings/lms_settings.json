@@ -11,8 +11,9 @@
   "send_calendar_invite_for_evaluations",
   "column_break_zdel",
   "disable_pwa",
-  "persona_captured",
   "default_home",
+  "persona_captured",
+  "demo_data_present",
   "column_break_bjis",
   "unsplash_access_key",
   "livecode_url",
@@ -30,6 +31,12 @@
   "show_live_class",
   "show_discussions",
   "show_emails",
+  "course_progress_section",
+  "lesson_dwell_time",
+  "enforce_video_completion",
+  "column_break_cprg",
+  "enforce_quiz_completion",
+  "enforce_assignment_completion",
   "signup_settings_tab",
   "signup_settings_section",
   "column_break_9",
@@ -61,6 +68,8 @@
   "apply_gst",
   "show_usd_equivalent",
   "apply_rounding",
+  "send_payment_reminders_for_batch",
+  "send_payment_reminders_for_course",
   "no_payments_app",
   "payments_app_is_not_installed",
   "email_templates_tab",
@@ -76,11 +85,13 @@
   "contact_us_tab",
   "contact_us_email",
   "column_break_gcgv",
-  "contact_us_url"
+  "contact_us_url",
+  "jobs_tab",
+  "allow_job_posting"
  ],
  "fields": [
   {
-   "default": "https://falcon.frappe.io/",
+   "default": "https://falcon.frappe.io",
    "fieldname": "livecode_url",
    "fieldtype": "Data",
    "label": "LiveCode URL"
@@ -440,7 +451,7 @@
    "label": "Contact Us URL"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "certifications",
    "fieldtype": "Check",
    "label": "Certifications"
@@ -471,14 +482,82 @@
   {
    "fieldname": "column_break_dtns",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "jobs_tab",
+   "fieldtype": "Tab Break",
+   "label": "Jobs"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_job_posting",
+   "fieldtype": "Check",
+   "label": "Allow Job Posting"
+  },
+  {
+   "default": "0",
+   "fieldname": "demo_data_present",
+   "fieldtype": "Check",
+   "label": "Demo Data Present",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_payment_reminders_for_batch",
+   "fieldtype": "Check",
+   "label": "Send Payment Reminders for Batch"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_payment_reminders_for_course",
+   "fieldtype": "Check",
+   "label": "Send Payment Reminders for Course"
+  },
+  {
+   "fieldname": "course_progress_section",
+   "fieldtype": "Section Break",
+   "label": "Course Progress"
+  },
+  {
+   "default": "30",
+   "description": "Seconds a learner must stay on a text-only lesson before it auto-marks complete. Default 30.",
+   "fieldname": "lesson_dwell_time",
+   "fieldtype": "Int",
+   "label": "Lesson Dwell Time (seconds)",
+   "non_negative": 1
+  },
+  {
+   "default": "1",
+   "description": "When enabled, lessons that contain a video can only be marked complete by playing the video to the end. If the video fails to load, the dwell timer is used as a fallback.",
+   "fieldname": "enforce_video_completion",
+   "fieldtype": "Check",
+   "label": "Enforce Video Completion"
+  },
+  {
+   "fieldname": "column_break_cprg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "When enabled, lessons with a quiz cannot be marked complete until the quiz is submitted.",
+   "fieldname": "enforce_quiz_completion",
+   "fieldtype": "Check",
+   "label": "Enforce Quiz Completion"
+  },
+  {
+   "default": "1",
+   "description": "When enabled, lessons with an assignment cannot be marked complete until the assignment is submitted.",
+   "fieldname": "enforce_assignment_completion",
+   "fieldtype": "Check",
+   "label": "Enforce Assignment Completion"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-01 19:36:54.443390",
- "modified_by": "sayali@frappe.io",
+ "modified": "2026-05-27 13:00:00.000000",
+ "modified_by": "Administrator",
  "module": "LMS",
  "name": "LMS Settings",
  "owner": "Administrator",
@@ -492,13 +571,6 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "LMS Student",
-   "share": 1
   },
   {
    "create": 1,

@@ -1,6 +1,6 @@
 <template>
 	<FrappeUIProvider>
-		<Layout class="isolate text-base">
+		<Layout class="isolate text-p-base">
 			<router-view />
 		</Layout>
 		<InstallPrompt v-if="isMobile && !settings.data?.disable_pwa" />
@@ -14,9 +14,9 @@ import { computed, onUnmounted, ref } from 'vue'
 import { useScreenSize } from './utils/composables'
 import { useSettings } from '@/stores/settings'
 import { useRouter } from 'vue-router'
-import DesktopLayout from './components/DesktopLayout.vue'
-import MobileLayout from './components/MobileLayout.vue'
-import NoSidebarLayout from './components/NoSidebarLayout.vue'
+import DesktopLayout from './components/Layouts/DesktopLayout.vue'
+import MobileLayout from './components/Layouts/MobileLayout.vue'
+import NoSidebarLayout from './components/Layouts/NoSidebarLayout.vue'
 import InstallPrompt from './components/InstallPrompt.vue'
 
 const { isMobile } = useScreenSize()
