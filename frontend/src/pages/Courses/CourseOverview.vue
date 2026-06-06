@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, watch } from 'vue'
 import { createResource, Badge } from 'frappe-ui'
 import { Star, UsersRound } from 'lucide-vue-next'
 import { formatAmount, formatRating } from '@/utils/'
@@ -169,12 +169,22 @@ const isCourseAdmin = computed<boolean>(
 
 const outline = createResource({
 	url: 'lms.lms.utils.get_course_outline',
-	cache: ['course_outline', props.course.data?.name],
 	makeParams() {
 		return { course: props.course.data?.name, progress: false }
 	},
-	auto: true,
+	auto: false,
 }) as Resource<OutlineChapter[]>
+
+// Fetch the outline only once the course (and thus its name) is loaded.
+// With auto:true the request fired before props.course.data was ready,
+// sending no `course` → HTTP 500 → "Course Content coming soon!".
+watch(
+	() => props.course.data?.name,
+	(name) => {
+		if (name) outline.reload()
+	},
+	{ immediate: true }
+)
 
 const outlineStats = computed(() => {
 	const chapters = outline.data || []

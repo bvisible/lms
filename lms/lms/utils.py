@@ -1000,8 +1000,11 @@ def get_categorized_courses(courses: list) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
-def get_course_outline(course: str, progress: bool = False) -> list:
+def get_course_outline(course: str = None, progress: bool = False) -> list:
 	"""Returns the course outline."""
+
+	if not course:
+		return []
 
 	if not guest_access_allowed():
 		return []
