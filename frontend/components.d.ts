@@ -85,6 +85,8 @@ declare module 'vue' {
     MobileLayout: typeof import('./src/components/Layouts/MobileLayout.vue')['default']
     MultiLink: typeof import('./src/components/Controls/MultiLink.vue')['default']
     MultiSelect: typeof import('./src/components/Controls/MultiSelect.vue')['default']
+    NeoCockpitBridge: typeof import('./src/components/NeoCockpitBridge.vue')['default']
+    NeoCockpitLMSSidebar: typeof import('./src/components/NeoCockpitLMSSidebar.vue')['default']
     NewMemberModal: typeof import('./src/components/Modals/NewMemberModal.vue')['default']
     NoPermission: typeof import('./src/components/NoPermission.vue')['default']
     NoSidebarLayout: typeof import('./src/components/Layouts/NoSidebarLayout.vue')['default']
