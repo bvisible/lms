@@ -53,6 +53,8 @@ label.block:not([data-slot='label']) {
 	--surface-blue-2: 214 138 89;
 	--text-ink-blue-2: 221 164 121;
 	--text-ink-blue-3: 233 197 164;
+}
+
 /* frappe-ui's --ink-gray-2 bullets are near-invisible; use --ink-gray-4 (as the
    ordered-list counters do) so markers stay legible. */
 .prose {
