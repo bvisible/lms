@@ -54,7 +54,11 @@ def resolve_lesson_access(lesson: str, *, user: str | None = None) -> tuple[bool
 			# lesson payload and the video can never disagree.
 			from lms.lms.neoffice_video import has_active_course_access
 
-			return False, has_active_course_access(lesson_row.course, user)
+			if has_active_course_access(lesson_row.course, user):
+				return False, True
+			# Do NOT return here: a lapsed subscriber must still reach the preview
+			# gate below, or they would lose the free teasers — the very lessons
+			# meant to bring them back.
 		# Preview is for prospective students of a LIVE course. Require the course to be
 		# published so draft lessons don't leak via this gate (matches get_course_details,
 		# which already hides unpublished courses from non-authors). Instructors/members
