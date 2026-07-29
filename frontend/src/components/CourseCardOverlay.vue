@@ -181,7 +181,12 @@ const props = withDefaults(
 
 const video_link = computed<string | undefined>(() => {
 	const link = props.course.data?.video_link
-	return link ? 'https://www.youtube.com/embed/' + link : undefined
+	if (!link) return undefined
+	// A full URL means a non-YouTube provider (e.g. an Infomaniak teaser) and is
+	// embedded as-is; a bare id is still a YouTube video.
+	if (/^https?:\/\//.test(link)) return link
+	// nocookie: no Google cookie is set until the visitor actually presses play.
+	return 'https://www.youtube-nocookie.com/embed/' + link
 })
 
 function enrollStudent() {

@@ -71,7 +71,7 @@
 							log.document_type == 'LMS Course' &&
 							log.document_details.video_link
 						"
-						:src="`https://www.youtube.com/embed/${log.document_details.video_link}`"
+						:src="`https://www.youtube-nocookie.com/embed/${log.document_details.video_link}`"
 						class="rounded-s-md w-72"
 					/>
 					<video

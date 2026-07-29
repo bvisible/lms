@@ -1203,7 +1203,11 @@ def get_lesson(course: str, chapter: int, lesson: int) -> dict:
 		as_dict=1,
 	)
 
-	if not lesson_details.include_in_preview and not membership and not can_modify_course(course):
+	# Neoffice: a lapsed subscription must close the lesson too, not just the
+	# video. Same guard as the playback token, so the two can never disagree.
+	from lms.lms.neoffice_video import has_active_course_access
+
+	if not lesson_details.include_in_preview and not has_active_course_access(course):
 		return {
 			"no_preview": 1,
 			"title": lesson_details.title,

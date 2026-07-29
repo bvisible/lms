@@ -107,6 +107,7 @@ declare module 'vue' {
     ReviewModal: typeof import('./src/components/Modals/ReviewModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SecureVideo: typeof import('./src/components/SecureVideo.vue')['default']
     Select: typeof import('./src/components/Controls/Select.vue')['default']
     SettingDetails: typeof import('./src/components/Settings/SettingDetails.vue')['default']
     SettingFields: typeof import('./src/components/Settings/SettingFields.vue')['default']

@@ -176,7 +176,7 @@ def exercise_renderer(argument):
 def youtube_video_renderer(video_id):
 	return f"""
     <iframe width="100%" height="400"
-        src="https://www.youtube.com/embed/{video_id}"
+        src="https://www.youtube-nocookie.com/embed/{video_id}"
         title="YouTube video player"
         frameborder="0"
         class="youtube-video

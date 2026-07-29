@@ -77,6 +77,8 @@ before_uninstall = "lms.install.before_uninstall"
 setup_wizard_complete = "lms.demo.demo_data.create_demo_data"
 after_migrate = [
 	"lms.sqlite.build_index_in_background",
+	# Neoffice: subscription-gated video access fields on LMS Enrollment
+	"lms.lms.neoffice_video.setup_custom_fields",
 ]
 
 # Desk Notifications
@@ -126,6 +128,16 @@ doc_events = {
 	"User": {
 		"validate": "lms.lms.user.validate_username_duplicates",
 		"before_insert": "lms.lms.user.add_lms_student_role",
+	},
+	# Neoffice: paying extends course access, exactly like it extends a cloud
+	# instance's validity.
+	"Sales Invoice": {
+		"on_update_after_submit": "lms.lms.neoffice_video.on_invoice_paid",
+	},
+	# A Payment Entry settles invoices via db_set, which never fires
+	# on_update_after_submit — this is the hook real payments actually take.
+	"Payment Entry": {
+		"on_submit": "lms.lms.neoffice_video.on_payment_entry_submitted",
 	},
 }
 

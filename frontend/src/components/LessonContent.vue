@@ -23,6 +23,13 @@
 		<div v-else-if="block.includes('{{ Quiz')">
 			<Quiz :quiz="getId(block)" />
 		</div>
+		<div v-else-if="block.includes('{{ SecureVideo')">
+			<SecureVideo
+				:media="getId(block)"
+				:lesson="lessonName"
+				@ended="emit('video-ended')"
+			/>
+		</div>
 		<div v-else-if="block.includes('{{ Video')">
 			<video
 				controls
@@ -65,9 +72,12 @@
 </template>
 <script setup>
 import Quiz from '@/components/QuizBlock.vue'
+import SecureVideo from '@/components/SecureVideo.vue'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
 import { useScreenSize } from '@/utils/composables'
+
+const emit = defineEmits(['video-ended'])
 
 const screenSize = useScreenSize()
 
@@ -91,13 +101,18 @@ const props = defineProps({
 		type: String,
 		required: false,
 	},
+	lessonName: {
+		type: String,
+		required: false,
+	},
 })
 
 const getYouTubeVideoSource = (block) => {
 	if (block.includes('{{')) {
 		block = getId(block)
 	}
-	return `https://www.youtube.com/embed/${block}`
+	// nocookie: no Google cookie before the visitor presses play.
+	return `https://www.youtube-nocookie.com/embed/${block}`
 }
 
 const getPDFSource = (block) => {

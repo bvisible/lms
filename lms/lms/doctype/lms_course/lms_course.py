@@ -51,9 +51,18 @@ class LMSCourse(Document):
 			).save(ignore_permissions=True)
 
 	def validate_video_link(self):
-		if self.video_link and "watch?v=" in self.video_link:
+		if not self.video_link:
+			return
+
+		# Neoffice: only YouTube links are reduced to a bare video id. Any other
+		# provider — an Infomaniak VOD teaser, for instance — must keep its full
+		# URL, otherwise this would silently strip it down to a useless fragment.
+		if "youtube.com" not in self.video_link and "youtu.be" not in self.video_link:
+			return
+
+		if "watch?v=" in self.video_link:
 			self.video_link = self.video_link.split("watch?v=")[-1]
-		elif self.video_link and "/" in self.video_link:
+		elif "/" in self.video_link:
 			self.video_link = self.video_link.split("/")[-1]
 
 	def validate_status(self):

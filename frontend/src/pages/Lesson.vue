@@ -234,6 +234,8 @@
 								:content="lesson.data.body"
 								:youtube="lesson.data.youtube"
 								:quizId="lesson.data.quiz_id"
+									:lessonName="lesson.data.name"
+									@video-ended="onSecureVideoEnded"
 							/>
 						</div>
 					</div>
@@ -341,6 +343,10 @@ import {
 	shouldStartDwellTimer,
 	shouldAttachVideoFallback,
 } from '@/utils/lessonProgress'
+import {
+	getSecureVideoDetails,
+	secureVideoSources,
+} from '@/utils/secureVideo'
 import EditorJS from '@editorjs/editorjs'
 import LessonContent from '@/components/LessonContent.vue'
 import CourseInstructors from '@/components/CourseInstructors.vue'
@@ -668,10 +674,18 @@ const trackVideoWatchDuration = () => {
 	if (!lesson.data?.membership) return
 	let videoDetails = getVideoDetails()
 	videoDetails = videoDetails.concat(getPlyrSourceDetails())
+	// Infomaniak iframes report their position over postMessage, not through
+	// the DOM, so they are collected from their own registry.
+	videoDetails = videoDetails.concat(getSecureVideoDetails())
 	call('lms.lms.api.track_video_watch_duration', {
 		lesson: lesson.data.name,
 		videos: videoDetails,
 	})
+}
+
+const onSecureVideoEnded = () => {
+	markProgress()
+	trackVideoWatchDuration()
 }
 
 const getVideoDetails = () => {
@@ -725,8 +739,12 @@ watch(
 		startTimer()
 		await getPlyrSource()
 		updateNotes()
+		// An Infomaniak iframe is neither a <video> nor a Plyr instance; without
+		// it here the dwell timer would mark a video lesson complete on its own.
 		const hasVideoListener =
-			plyrSources.value.length > 0 || !!document.querySelector('video')
+			plyrSources.value.length > 0 ||
+			secureVideoSources.value.length > 0 ||
+			!!document.querySelector('video')
 		const enforceVideo = Number(
 			settingsStore.settings?.data?.enforce_video_completion ?? 0
 		)
