@@ -235,6 +235,7 @@
 								:youtube="lesson.data.youtube"
 								:quizId="lesson.data.quiz_id"
 									:lessonName="lesson.data.name"
+									:videos="lesson.data.videos"
 									@video-ended="onSecureVideoEnded"
 							/>
 						</div>

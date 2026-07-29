@@ -41,7 +41,12 @@ import {
 const props = defineProps({
 	media: { type: String, required: true },
 	lesson: { type: String, required: true },
+	// Seconds already watched, from LMS Video Watch Duration.
+	startAt: { type: Number, required: false, default: 0 },
 })
+
+// Below this, resuming is more disorienting than helpful.
+const RESUME_THRESHOLD = 5
 
 const emit = defineEmits(['ended'])
 
@@ -74,7 +79,10 @@ const onMessage = (event) => {
 			entry.currentTime = Number(data.currentTime)
 		}
 	} else if (data.type === 'ended') {
-		entry.currentTime = entry.duration || entry.currentTime
+		// Record 0, not the duration: completion is tracked by markProgress, and
+		// storing the end position would make the next visit resume at the very
+		// end. Same rule the plain <video> path applies.
+		entry.currentTime = 0
 		emit('ended')
 	}
 }
@@ -85,7 +93,11 @@ const load = async () => {
 			lesson: props.lesson,
 			media: props.media,
 		})
-		src.value = result.url
+		// `t` is the only offset the Infomaniak player honours — its postMessage
+		// bridge is outbound-only, so there is no way to seek after load.
+		const resume = Math.floor(props.startAt || 0)
+		src.value =
+			resume > RESUME_THRESHOLD ? `${result.url}&t=${resume}` : result.url
 	} catch (e) {
 		// The server already phrases why (expired subscription, not enrolled…).
 		error.value =

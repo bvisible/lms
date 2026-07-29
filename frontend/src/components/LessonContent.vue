@@ -27,6 +27,7 @@
 			<SecureVideo
 				:media="getId(block)"
 				:lesson="lessonName"
+				:startAt="watchedSeconds(getId(block))"
 				@ended="emit('video-ended')"
 			/>
 		</div>
@@ -105,7 +106,19 @@ const props = defineProps({
 		type: String,
 		required: false,
 	},
+	// [{ source, watch_time }] from LMS Video Watch Duration, for this member.
+	videos: {
+		type: Array,
+		required: false,
+		default: () => [],
+	},
 })
+
+// The registry stores secure videos under `infomaniak:<media>`.
+const watchedSeconds = (media) => {
+	const row = props.videos?.find((v) => v.source === `infomaniak:${media}`)
+	return row ? Number(row.watch_time) || 0 : 0
+}
 
 const getYouTubeVideoSource = (block) => {
 	if (block.includes('{{')) {
