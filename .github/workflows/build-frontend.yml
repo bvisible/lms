@@ -2,7 +2,15 @@ name: build-frontend
 
 on:
   push:
-    branches: [version-15]
+    # version-15 is the branch the fleet deploys from. The two wildcards exist so
+    # a branch can be validated on a real instance BEFORE it lands there: the LMS
+    # is a commit-the-build SPA, so testing in a browser needs compiled assets,
+    # and compiling them by hand on an instance is slow and OOMs on small boxes
+    # (2 vCPU + 4 GB is not enough for this bundle). Push to one of these
+    # prefixes and the artifacts come back committed, ready to pull and test.
+    #   merge-upstream-*  upstream merges, which always need a real-instance pass
+    #   build/*           anything else you want built without touching version-15
+    branches: [version-15, 'merge-upstream-*', 'build/**']
     paths:
       - 'frontend/**'
       - '!**/node_modules/**'
