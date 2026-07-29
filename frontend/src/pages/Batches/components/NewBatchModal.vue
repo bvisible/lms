@@ -1,12 +1,6 @@
 <template>
-	<Dialog
-		v-model="show"
-		:options="{
-			title: __('New Batch'),
-			size: '3xl',
-		}"
-	>
-		<template #body-content>
+	<Dialog v-model:open="show" title="New Batch" size="3xl">
+		<template #default>
 			<div class="text-base">
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 					<FormControl
@@ -30,20 +24,25 @@
 						:required="true"
 						variant="outline"
 					/>
-					<FormControl
-						v-model="batch.start_time"
-						:label="__('Start Time')"
-						type="time"
-						:required="true"
-						variant="outline"
-					/>
-					<FormControl
-						v-model="batch.end_time"
-						:label="__('End Time')"
-						type="time"
-						:required="true"
-						variant="outline"
-					/>
+					<!-- beta.7's TimePicker (FormControl type="time") ignores the
+					     `label` prop, so render FormLabel explicitly like Timezone
+					     below — otherwise these fields show only the placeholder. -->
+					<div class="space-y-1.5">
+						<FormLabel :label="__('Start Time')" :required="true" />
+						<FormControl
+							v-model="batch.start_time"
+							type="time"
+							variant="outline"
+						/>
+					</div>
+					<div class="space-y-1.5">
+						<FormLabel :label="__('End Time')" :required="true" />
+						<FormControl
+							v-model="batch.end_time"
+							type="time"
+							variant="outline"
+						/>
+					</div>
 					<div class="space-y-1.5">
 						<FormLabel :label="__('Timezone')" :required="true" />
 						<Combobox
@@ -84,7 +83,6 @@
 							:label="__('Description')"
 							type="textarea"
 							:required="true"
-							:rows="4"
 							variant="outline"
 						/>
 						<MultiLink
@@ -106,9 +104,9 @@
 							:required="true"
 						/>
 						<div
-							class="rounded-t-lg rounded-b-md outline-none transition-[box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:ring-2 ring-outline-gray-3"
+							class="rounded-t-lg rounded-b-md outline-none transition-[box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
 						>
-							<TextEditor
+							<RichTextEditor
 								:id="batchDetailsId"
 								:content="batch.batch_details"
 								@change="(val: string) => (batch.batch_details = val)"
@@ -123,7 +121,11 @@
 		</template>
 		<template #actions="{ close }">
 			<div class="text-end">
-				<Button variant="solid" @click="saveBatch(close)">
+				<Button
+					variant="solid"
+					:loading="batches.insert.loading"
+					@click="saveBatch(close)"
+				>
 					{{ __('Save') }}
 				</Button>
 			</div>
@@ -142,7 +144,6 @@ import {
 	Dialog,
 	FormControl,
 	FormLabel,
-	TextEditor,
 	createResource,
 	toast,
 } from 'frappe-ui'
@@ -154,6 +155,7 @@ import MultiLink from '@/components/Controls/MultiLink.vue'
 import Link from '@/components/Controls/Link.vue'
 import Select from '@/components/Controls/Select.vue'
 import NewMemberModal from '@/components/Modals/NewMemberModal.vue'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const show = defineModel<boolean>({ required: true, default: false })
 const router = useRouter()

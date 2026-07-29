@@ -1,14 +1,14 @@
 <template>
 	<header
-		class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+		class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-base px-3 py-2.5 sm:px-5"
 	>
 		<Breadcrumbs class="h-7" :items="breadcrumbs" />
 	</header>
 	<div class="p-5">
 		<div v-if="certificate.data && Object.keys(certificate.data).length">
-			<div class="text-lg text-ink-gray-9 font-semibold mb-1">
+			<h1 class="text-lg-semibold text-ink-gray-9 mb-1">
 				{{ __('Certification') }}
-			</div>
+			</h1>
 			<div class="text-ink-gray-9 text-sm">
 				{{
 					__(
@@ -16,18 +16,19 @@
 					)
 				}}
 			</div>
-			<div
-				class="border p-3 w-fit min-w-60 rounded-md space-y-2 hover:bg-surface-gray-1 cursor-pointer mt-5"
+			<button
+				type="button"
+				class="border p-3 w-fit min-w-60 rounded-md space-y-2 hover:bg-surface-gray-1 cursor-pointer mt-5 text-start block"
 				@click="openCertificate(certificate.data)"
 			>
 				<div class="text-ink-gray-9 font-semibold">
 					{{ courseTitle }}
 				</div>
-				<div class="text-sm text-ink-gray-7 font-medium">
+				<div class="text-sm-medium text-ink-gray-7">
 					{{ __('Issued On') }}:
 					{{ dayjs(certificate.data.issue_date).format('DD MMM YYYY') }}
 				</div>
-			</div>
+			</button>
 		</div>
 		<div v-else>
 			<UpcomingEvaluations v-if="courses.length" :courses="courses" />

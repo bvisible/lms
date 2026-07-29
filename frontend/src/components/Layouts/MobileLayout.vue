@@ -1,23 +1,33 @@
 <template>
 	<div class="relative flex h-screen flex-col">
-		<div
-			class="flex flex-1 flex-col overflow-y-auto pb-10"
+		<a
+			href="#scrollContainer"
+			@click.prevent="skipToContent('scrollContainer')"
+			class="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-50 focus:rounded focus:bg-surface-base focus:px-4 focus:py-2 focus:text-ink-gray-9 focus:shadow-md focus:outline-none focus:ring-2 focus:ring-outline-gray-3"
+		>
+			{{ __('Skip to main content') }}
+		</a>
+		<main
+			class="flex flex-1 flex-col overflow-y-auto pb-10 focus:outline-none"
 			id="scrollContainer"
+			tabindex="-1"
 		>
 			<slot />
-		</div>
+		</main>
 
 		<div class="relative z-20">
 			<!-- Dropdown menu -->
 			<div
-				class="fixed bottom-16 end-2 w-[80%] space-y-4 rounded-md bg-surface-white p-5 text-base shadow-md"
-				v-if="showMenu"
+				id="mobileMoreMenu"
+				class="fixed bottom-16 end-2 w-[80%] space-y-4 rounded-md bg-surface-base p-5 text-base shadow-md"
+				v-show="showMenu"
 				ref="menu"
 			>
-				<div
+				<button
 					v-for="link in otherLinks"
 					:key="link.label"
-					class="flex cursor-pointer items-center gap-x-2"
+					type="button"
+					class="flex w-full cursor-pointer items-center gap-x-2"
 					@click="handleClick(link)"
 				>
 					<component
@@ -25,17 +35,21 @@
 						class="h-4 w-4 stroke-1.5 text-ink-gray-5"
 					/>
 					<div>{{ link.label }}</div>
-				</div>
+				</button>
 			</div>
 
 			<!-- Fixed menu -->
-			<div
+			<nav
 				v-if="sidebarSettings.data"
-				class="standalone:pb-4 fixed bottom-0 start-0 z-10 flex w-full items-center justify-around border-t border-outline-gray-2 bg-surface-white"
+				:aria-label="__('Primary')"
+				class="standalone:pb-4 fixed bottom-0 start-0 z-10 flex w-full items-center justify-around border-t border-outline-gray-2 bg-surface-base"
 			>
 				<button
 					v-for="tab in sidebarLinks"
 					:key="tab.label"
+					type="button"
+					:aria-label="__(tab.label)"
+					:aria-current="isActive(tab) ? 'page' : undefined"
 					:class="isVisible(tab) ? 'block' : 'hidden'"
 					class="flex flex-col items-center justify-center py-3 transition active:scale-95"
 					@click="handleClick(tab)"
@@ -46,17 +60,24 @@
 						:class="[isActive(tab) ? 'text-ink-gray-9' : 'text-ink-gray-5']"
 					/>
 				</button>
-				<button @click="toggleMenu">
+				<button
+					type="button"
+					:aria-label="__('More')"
+					:aria-expanded="showMenu"
+					aria-controls="mobileMoreMenu"
+					@click="toggleMenu"
+				>
 					<component
 						:is="icons['List']"
 						class="h-6 w-6 stroke-1.5 text-ink-gray-5"
 					/>
 				</button>
-			</div>
+			</nav>
 		</div>
 	</div>
 </template>
 <script setup>
+import { skipToContent } from '@/utils/a11y'
 import { getSidebarLinks } from '@/utils'
 import { useRouter } from 'vue-router'
 import { call } from 'frappe-ui'
@@ -65,10 +86,11 @@ import { sessionStore } from '@/stores/session'
 import { useSettings } from '@/stores/settings'
 import { usersStore } from '@/stores/user'
 import * as icons from 'lucide-vue-next'
+import { toggleNotifications } from '@/stores/notifications'
 
 const { logout, user } = sessionStore()
 let { isLoggedIn } = sessionStore()
-const { sidebarSettings } = useSettings()
+const { sidebarSettings, loadSidebarSettings } = useSettings()
 const router = useRouter()
 let { userResource } = usersStore()
 const sidebarLinks = ref([])
@@ -136,21 +158,18 @@ const addLink = (label, icon, to = '') => {
 const updateSidebarLinks = () => {
 	sidebarLinks.value = getSidebarLinks(true)
 	destructureSidebarLinks()
-	sidebarSettings.reload(
-		{},
-		{
-			onSuccess: async (data) => {
-				filterLinksToShow(data)
-				await addPrograms()
-				if (isModerator.value || isInstructor.value) {
-					addQuizzes()
-					addAssignments()
-					addProgrammingExercises()
-				}
-				addOtherLinks()
-			},
+	loadSidebarSettings().then(async () => {
+		const data = sidebarSettings.data
+		if (!data) return
+		filterLinksToShow(data)
+		await addPrograms()
+		if (isModerator.value || isInstructor.value) {
+			addQuizzes()
+			addAssignments()
+			addProgrammingExercises()
 		}
-	)
+		addOtherLinks()
+	})
 }
 
 const addQuizzes = () => {
@@ -193,6 +212,8 @@ watch(
 	{ immediate: true }
 )
 
+watch(() => sidebarSettings.data, updateSidebarLinks, { deep: true })
+
 const checkIfCanAddProgram = async () => {
 	if (!userResource.data) return false
 	if (isModerator.value || isInstructor.value) {
@@ -207,7 +228,10 @@ let isActive = (tab) => {
 }
 
 const handleClick = (tab) => {
-	if (tab.label == 'Log in') window.location.href = '/login'
+	if (tab.label == 'Notifications') {
+		toggleNotifications()
+		toggleMenu()
+	} else if (tab.label == 'Log in') window.location.href = '/login'
 	else if (tab.label == 'Log out')
 		logout.submit().then(() => {
 			isLoggedIn = false

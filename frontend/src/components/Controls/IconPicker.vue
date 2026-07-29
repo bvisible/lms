@@ -1,14 +1,12 @@
 <template>
 	<div class="space-y-1.5">
-		<label class="block text-xs text-ink-gray-5">
-			{{ label }}
-		</label>
+		<FormLabel :label="label" />
 		<div class="w-full">
 			<Popover>
-				<template #target="{ togglePopover }">
+				<template #trigger>
 					<button
-						@click="openPopover(togglePopover)"
-						class="flex w-full items-center gap-x-2 focus:outline-none bg-surface-gray-2 rounded h-7 py-1.5 px-2 hover:bg-surface-gray-3 focus:bg-surface-white border border-gray-100 hover:border-outline-gray-modals focus:border-outline-gray-4"
+						type="button"
+						class="flex w-full items-center gap-x-2 focus:outline-none transition-colors border border-[--surface-gray-2] bg-surface-gray-2 rounded h-7 py-1.5 px-2 hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:bg-surface-base focus:border-outline-gray-4 focus:shadow-sm focus:ring-0"
 					>
 						<component
 							v-if="selectedIcon"
@@ -28,22 +26,28 @@
 						</span>
 					</button>
 				</template>
-				<template #body-main="{ close, isOpen }" class="w-full">
+				<template #default="{ close, isOpen }" class="w-full">
 					<div class="p-3 max-h-56 overflow-auto w-full">
 						<FormControl
 							ref="search"
 							v-model="iconQuery"
 							:placeholder="__('Search for an icon')"
+							:aria-label="__('Search for an icon')"
 							autocomplete="off"
 						/>
 						<div class="grid grid-cols-10 gap-4 mt-4">
-							<div v-for="(iconComponent, iconName) in filteredIcons">
+							<button
+								v-for="(iconComponent, iconName) in filteredIcons"
+								:key="iconName"
+								type="button"
+								:aria-label="iconName"
+								@click="setIcon(iconName, close)"
+							>
 								<component
 									:is="iconComponent"
 									class="h-4 w-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
-									@click="setIcon(iconName, close)"
 								/>
-							</div>
+							</button>
 						</div>
 					</div>
 				</template>
@@ -52,7 +56,7 @@
 	</div>
 </template>
 <script setup>
-import { FormControl, Popover } from 'frappe-ui'
+import { FormControl, FormLabel, Popover } from 'frappe-ui'
 import * as icons from 'lucide-vue-next'
 import { ref, computed, onMounted, nextTick } from 'vue'
 
@@ -107,8 +111,4 @@ const filteredIcons = computed(() => {
 			return result
 		}, {})
 })
-
-const openPopover = (togglePopover) => {
-	togglePopover()
-}
 </script>

@@ -1,9 +1,6 @@
 <template>
-	<div class="mb-4">
-		<div v-if="label" class="text-xs text-ink-gray-5 mb-2">
-			{{ __(label) }}
-			<span v-if="required" class="text-ink-red-3">*</span>
-		</div>
+	<div class="space-y-1.5">
+		<FormLabel v-if="label" :label="__(label)" :required="required" />
 		<FileUploader
 			:fileTypes="[fileType]"
 			:validateFile="(file: File) => validateFile(file, true, type)"
@@ -22,6 +19,7 @@
 							<img
 								v-if="type === 'image'"
 								:src="modelValue"
+								:alt="label ? __(label) : __('Uploaded image preview')"
 								class="size-full object-cover"
 							/>
 							<video v-else controls class="size-full object-cover">
@@ -62,7 +60,7 @@
 
 <script setup lang="ts">
 import { validateFile } from '@/utils'
-import { Button, FileUploader, toast } from 'frappe-ui'
+import { Button, FileUploader, FormLabel, toast } from 'frappe-ui'
 import { Image, Video } from 'lucide-vue-next'
 import { computed } from 'vue'
 

@@ -1,6 +1,6 @@
 <template>
 	<header
-		class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+		class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-base px-3 py-2.5 sm:px-5"
 	>
 		<Breadcrumbs class="h-7" :items="breadcrumbs" />
 	</header>
@@ -14,6 +14,7 @@
 	>
 		<iframe
 			:src="chapter.doc.launch_file"
+			:title="chapter.doc?.title || __('Lesson content')"
 			class="w-full h-[calc(100vh-3.00rem)]"
 		/>
 	</div>

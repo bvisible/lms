@@ -1,26 +1,30 @@
 <template>
-	<div>
-		<label v-if="attrs.label" class="block mb-1.5" :class="labelClasses">
-			{{ attrs.label }}
-			<span v-if="attrs.required" class="text-ink-red-3">*</span>
-		</label>
+	<div :class="attrs.class as any" :style="attrs.style as any">
+		<FormLabel
+			v-if="attrs.label"
+			:label="attrs.label"
+			:required="attrs.required"
+			class="mb-1.5"
+		/>
 		<Combobox
+			:open="isOpen"
 			:modelValue="value"
 			:options="resolvedOptions"
 			:placeholder="attrs.placeholder as string"
 			:disabled="attrs.readonly as boolean"
 			:size="(attrs.size as ComboboxSize) || 'sm'"
+			:aria-label="attrs['aria-label'] as string"
 			:variant="attrs.variant as ComboboxVariant"
 			:loading="options.loading"
 			@update:modelValue="onSelect"
 			@update:query="onQuery"
 			@update:open="onOpen"
-			class="w-full"
+			class="w-full focus-within:border-outline-gray-4 focus-within:bg-surface-base focus-within:shadow-sm focus-within:outline-none data-[state=open]:border-outline-gray-4 data-[state=open]:bg-surface-base data-[state=open]:shadow-sm data-[state=open]:outline-none"
 		>
 			<template #footer>
 				<div
 					data-popover-footer-sticky
-					class="-m-1 border-t border-outline-gray-2 bg-surface-modal p-2 mt-1"
+					class="-m-1 border-t border-outline-gray-2 bg-surface-elevation-2 p-2 mt-1"
 				>
 					<div v-if="creating" class="flex items-center gap-1">
 						<button
@@ -28,7 +32,7 @@
 							:aria-label="__('Cancel')"
 							@click="creating = false"
 						>
-							<ArrowLeft class="size-4 stroke-1.5" />
+							<span class="lucide-arrow-left size-4" />
 						</button>
 						<FormControl
 							v-model="newItemName"
@@ -64,7 +68,7 @@
 							@click="handleCreate"
 						>
 							<template #prefix>
-								<Plus class="size-4 stroke-1.5" />
+								<span class="lucide-plus size-4" />
 							</template>
 							{{ __('Create New') }}
 						</Button>
@@ -76,12 +80,17 @@
 </template>
 
 <script setup lang="ts">
-import { Combobox, Button, FormControl, createResource } from 'frappe-ui'
+import {
+	Combobox,
+	Button,
+	FormControl,
+	FormLabel,
+	createResource,
+} from 'frappe-ui'
 import { useDebounceFn, watchDebounced } from '@vueuse/core'
-import { ArrowLeft, Plus } from 'lucide-vue-next'
-import { useAttrs, computed, ref } from 'vue'
+import { useAttrs, computed, ref, watch } from 'vue'
 import { useSettings } from '@/stores/settings'
-import type { Resource } from '@/types/api'
+import type { Resource } from '@/types'
 
 type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
 type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
@@ -112,42 +121,81 @@ const emit = defineEmits<{
 	(e: 'change', value: string): void
 }>()
 
+defineOptions({ inheritAttrs: false })
+
 const attrs = useAttrs()
 const valuePropPassed = computed<boolean>(() => 'value' in attrs)
 
-const labelClasses = computed<(string | undefined)[]>(() => {
-	const sizeMap: Record<string, string> = { sm: 'text-xs', md: 'text-base' }
-	return [sizeMap[(attrs.size as string) || 'sm'], 'text-ink-gray-5']
-})
-
 const creating = ref<boolean>(false)
 const newItemName = ref<string>('')
+const isOpen = ref<boolean>(false)
 let loaded = false
 
 const value = computed<string>(() =>
 	valuePropPassed.value ? (attrs.value as string) : props.modelValue
 )
 
+const searchTransform = (data: LinkOption[]): LinkOption[] =>
+	data.map((o) => {
+		const label = o.label || o.value
+		// Drop the description when it just repeats the label.
+		const hasDescription = o.description && o.description !== label
+		return hasDescription
+			? { label, value: o.value, description: o.description }
+			: { label, value: o.value }
+	})
+
 const options = createResource({
 	url: 'frappe.desk.search.search_link',
 	method: 'POST',
 	auto: false,
-	transform: (data: LinkOption[]) =>
-		data.map((o) => {
-			const label = o.label || o.value
-			// Drop the description when it just repeats the label.
-			const hasDescription = o.description && o.description !== label
-			return hasDescription
-				? { label, value: o.value, description: o.description }
-				: { label, value: o.value }
-		}),
+	transform: searchTransform,
 }) as Resource<LinkOption[] | null>
+
+// A preselected value arrives as a raw docname. Resolve its title (the link's
+// label) so the control shows e.g. the course title instead of "abce1234".
+const currentLabel = ref<string>('')
+let resolvedFor = ''
+
+const titleResource = createResource({
+	url: 'frappe.desk.search.search_link',
+	method: 'POST',
+	auto: false,
+	transform: searchTransform,
+	onSuccess(data: LinkOption[]) {
+		const match = (data || []).find((o) => o.value === resolvedFor)
+		if (match) currentLabel.value = match.label
+	},
+}) as Resource<LinkOption[] | null>
+
+watch(
+	value,
+	(v) => {
+		if (!v) {
+			currentLabel.value = ''
+			resolvedFor = ''
+			return
+		}
+		// Skip if the value is already known (just picked, or already resolved).
+		if (v === resolvedFor || options.data?.some((o) => o.value === v)) return
+		resolvedFor = v
+		titleResource.update({
+			params: {
+				txt: v,
+				doctype: props.doctype,
+				filters: JSON.stringify(props.filters),
+			},
+		})
+		titleResource.reload()
+	},
+	{ immediate: true }
+)
 
 const resolvedOptions = computed<LinkOption[]>(() => {
 	const list = options.data || []
 	const current = value.value
 	if (current && !list.some((o) => o.value === current)) {
-		return [{ label: current, value: current }, ...list]
+		return [{ label: currentLabel.value || current, value: current }, ...list]
 	}
 	return list
 })
@@ -165,6 +213,7 @@ function reload(txt: string = ''): void {
 }
 
 function onOpen(open: boolean): void {
+	isOpen.value = open
 	if (open && !loaded) reload('')
 }
 
@@ -195,6 +244,8 @@ function handleCreate(): void {
 		creating.value = true
 		return
 	}
+	// Close the dropdown so it doesn't stack on top of the modal onCreate opens.
+	isOpen.value = false
 	props.onCreate?.(null)
 }
 

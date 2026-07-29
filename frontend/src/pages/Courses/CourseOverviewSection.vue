@@ -1,26 +1,20 @@
 <template>
 	<section class="space-y-5 border-t pt-6">
-		<div class="text-base font-semibold text-ink-gray-9">
+		<div class="text-base-semibold text-ink-gray-9">
 			{{ __('Course overview') }}
 		</div>
-		<FormControl
-			v-model="doc.video_link"
-			:label="__('Embed (preview video)')"
-			:description="__('Supports YouTube and Vimeo.')"
-			:placeholder="__('e.g. https://www.youtube.com/video')"
-			variant="outline"
-			@input="markDirty()"
-		/>
 		<div class="space-y-1.5">
-			<FormLabel
-				:label="__('Course Description')"
-				:id="descriptionId"
-				:required="true"
-			/>
-			<div
-				class="rounded-t-lg rounded-b-md outline-none transition-[box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:ring-2 ring-outline-gray-3"
+			<label
+				:for="descriptionId"
+				class="block text-p-sm-medium text-ink-gray-7"
 			>
-				<TextEditor
+				{{ __('Course Description') }}
+				<span class="text-ink-red-6">*</span>
+			</label>
+			<div
+				class="rounded-t-lg rounded-b-md outline-none transition-[box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
+			>
+				<RichTextEditor
 					:id="descriptionId"
 					:content="doc.description"
 					@change="
@@ -38,18 +32,18 @@
 		<MultiLink
 			v-model="relatedCourses"
 			doctype="LMS Course"
-			:filters="{ name: ['!=', resource.doc?.name] }"
+			:filters="{ name: ['!=', resource.doc?.name], published: 1 }"
 			:label="__('Related Courses')"
 			:placeholder="__('Select related courses')"
+			:emptyText="__('No other published courses available')"
 			variant="outline"
-			:onCreate="goToCreateCourse"
 			@update:modelValue="markDirty()"
 		/>
 	</section>
 
 	<section class="space-y-5 border-t pt-6">
 		<div>
-			<div class="text-base font-semibold text-ink-gray-9">
+			<div class="text-base-semibold text-ink-gray-9">
 				{{ __('Meta Tags') }}
 			</div>
 			<div class="mt-1 text-p-sm text-ink-gray-6">
@@ -64,7 +58,6 @@
 			v-model="meta.description"
 			:label="__('Meta description')"
 			type="textarea"
-			:rows="4"
 			:placeholder="__('A short summary of the course for search results.')"
 			variant="outline"
 			@input="markDirty()"
@@ -73,7 +66,6 @@
 			v-model="meta.keywords"
 			:label="__('Meta keywords')"
 			type="textarea"
-			:rows="4"
 			:placeholder="__('Comma separated keywords for SEO')"
 			variant="outline"
 			@input="markDirty()"
@@ -82,20 +74,14 @@
 </template>
 
 <script setup lang="ts">
-import { TextEditor, FormControl, FormLabel } from 'frappe-ui'
+import { FormControl } from 'frappe-ui'
 import { computed, inject, useId } from 'vue'
-import { useRouter } from 'vue-router'
 import MultiLink from '@/components/Controls/MultiLink.vue'
-import type { CourseFormContext } from '@/types/api'
+import type { CourseFormContext } from '@/types'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const { resource, relatedCourses, meta, markDirty } =
 	inject<CourseFormContext>('courseForm')!
-const router = useRouter()
 const doc = computed(() => resource.doc)
 const descriptionId = useId()
-
-function goToCreateCourse(close: () => void) {
-	close()
-	router.push({ name: 'Courses', query: { newCourse: '1' } })
-}
 </script>

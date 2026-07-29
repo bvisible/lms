@@ -1,111 +1,96 @@
 <template>
-	<div class="flex min-h-0 flex-col text-base">
-		<div class="flex items-center justify-between mb-5">
-			<div>
-				<div class="text-xl font-semibold mb-2 text-ink-gray-9">
-					{{ __(label) }}
-				</div>
-				<div class="text-ink-gray-6 leading-5">
-					{{ __(description) }}
-				</div>
-			</div>
-			<Button @click="openForm()">
+	<SettingsLayout :title="__(label)" :description="__(description)">
+		<template #header-actions>
+			<Button variant="solid" @click="openForm()">
 				<template #prefix>
-					<Plus class="h-3 w-3 stroke-1.5" />
+					<span class="lucide-plus h-4 w-4" />
 				</template>
 				{{ __('New') }}
 			</Button>
-		</div>
+		</template>
 
-		<div v-if="coupons.data?.length" class="overflow-y-auto">
-			<ListView
-				:columns="columns"
-				:rows="coupons.data"
-				row-key="name"
-				:options="{
-					showTooltip: false,
-					selectable: true,
-                    onRowClick: (row: Coupon) => {
-						openForm(row)
-					},
-				}"
-			>
-				<ListHeader
-					class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
-				>
-				</ListHeader>
-				<ListRows>
-					<ListRow :row="row" v-for="row in coupons.data" :key="row.name">
-						<template #default="{ column, item }">
-							<ListRowItem :item="row[column.key]" :align="column.align">
-								<div v-if="column.key == 'enabled'">
-									<Badge v-if="row[column.key]" theme="green">
-										{{ __('Enabled') }}
-									</Badge>
-									<Badge v-else theme="gray">
-										{{ __('Disabled') }}
-									</Badge>
-								</div>
-								<div v-else-if="column.key == 'expires_on'">
-									{{ dayjs(row[column.key]).format('DD MMM YYYY') }}
-								</div>
-								<div v-else-if="column.key == 'discount'">
-									<div v-if="row['discount_type'] == 'Percentage'">
-										{{ row['percentage_discount'] }}%
-									</div>
-									<div v-else-if="row['discount_type'] == 'Fixed Amount'">
-										{{ row['fixed_amount_discount'] }}/-
-									</div>
-								</div>
-								<div v-else class="leading-5 text-sm">
-									{{ row[column.key] }}
-								</div>
-							</ListRowItem>
-						</template>
-					</ListRow>
-				</ListRows>
-				<ListSelectBanner>
-					<template #actions="{ unselectAll, selections }">
-						<div class="flex gap-2">
-							<Button
-								variant="ghost"
-								@click="confirmDeletion(selections, unselectAll)"
-							>
-								<Trash2 class="h-4 w-4 stroke-1.5" />
-							</Button>
-						</div>
-					</template>
-				</ListSelectBanner>
-			</ListView>
-		</div>
+		<List v-if="coupons.data?.length" :columns="columns" class="list-row-px-3">
+			<ListHeader>
+				<ListHeaderCell>{{ __('Code') }}</ListHeaderCell>
+				<ListHeaderCell>{{ __('Discount') }}</ListHeaderCell>
+				<ListHeaderCell>{{ __('Expires On') }}</ListHeaderCell>
+				<ListHeaderCell>{{ __('Redeemed') }}</ListHeaderCell>
+				<ListHeaderCell>{{ __('Status') }}</ListHeaderCell>
+				<ListHeaderCell />
+			</ListHeader>
+			<ListRows :items="coupons.data" row-key="name" v-slot="{ item: row }">
+				<ListRow class="py-3" @click="openForm(row)">
+					<ListCell class="gap-2">
+						<span class="lucide-tag size-4 shrink-0 text-ink-gray-5" />
+						<span class="truncate text-p-base-medium text-ink-gray-8">
+							{{ row.code }}
+						</span>
+					</ListCell>
+					<ListCell class="text-p-base text-ink-gray-6">
+						<span class="truncate">
+							<template v-if="row.discount_type == 'Percentage'">
+								{{ row.percentage_discount }}%
+							</template>
+							<template v-else-if="row.discount_type == 'Fixed Amount'">
+								{{ row.fixed_amount_discount }}/-
+							</template>
+						</span>
+					</ListCell>
+					<ListCell class="text-p-base text-ink-gray-6">
+						<span class="truncate">
+							{{ dayjs(row.expires_on).format('DD MMM YYYY') }}
+						</span>
+					</ListCell>
+					<ListCell class="text-p-base text-ink-gray-6">
+						{{ row.redemption_count }}/{{ row.usage_limit }}
+					</ListCell>
+					<ListCell>
+						<Badge :theme="row.enabled ? 'green' : 'gray'">
+							{{ row.enabled ? __('Enabled') : __('Disabled') }}
+						</Badge>
+					</ListCell>
+					<ListCell class="justify-end" @click.stop>
+						<Dropdown
+							:options="[
+								{
+									label: __('Delete'),
+									icon: 'lucide-trash-2',
+									onClick: () => confirmDeletion(row.name),
+								},
+							]"
+							:button="{
+								icon: 'lucide-more-horizontal',
+								variant: 'ghost',
+								label: __('Coupon actions'),
+							}"
+							placement="right"
+						/>
+					</ListCell>
+				</ListRow>
+			</ListRows>
+		</List>
 		<EmptyStateLayout
 			v-else
 			name="Coupons"
 			:description="__('Add one to get started.')"
-			:icon="Ticket"
+			icon="lucide-ticket"
 		/>
-	</div>
+	</SettingsLayout>
 </template>
 <script setup lang="ts">
+import { Badge, Button, Dropdown, call, toast } from 'frappe-ui'
 import {
-	Badge,
-	Button,
-	call,
-	createListResource,
-	FeatherIcon,
-	ListView,
+	List,
+	ListCell,
 	ListHeader,
-	ListHeaderItem,
-	ListRows,
+	ListHeaderCell,
 	ListRow,
-	ListRowItem,
-	ListSelectBanner,
-	toast,
-} from 'frappe-ui'
-import { computed, getCurrentInstance, inject, ref } from 'vue'
-import { Plus, Trash2, Ticket } from 'lucide-vue-next'
-import type { Coupon, Coupons } from './types'
+	ListRows,
+} from 'frappe-ui/list'
+import { getCurrentInstance, inject } from 'vue'
+import type { Coupon, Coupons } from '@/types'
 import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
+import SettingsLayout from '@/components/Layouts/SettingsLayout.vue'
 
 const dayjs = inject('$dayjs') as typeof import('dayjs')
 const app = getCurrentInstance()
@@ -118,15 +103,21 @@ const props = defineProps<{
 	coupons: Coupons
 }>()
 
+// Grid track sizes shared by the header and every row (--list-columns).
+const columns = [
+	'minmax(0, 1.4fr)',
+	'minmax(0, 1fr)',
+	'minmax(0, 1fr)',
+	'5.5rem',
+	'6.5rem',
+	'2.25rem',
+]
+
 const openForm = (coupon: Coupon = {} as Coupon) => {
 	emit('updateStep', 'details', { ...coupon })
 }
 
-const confirmDeletion = (selections: any[], unselectAll: () => void) => {
-	if (selections.length === 0) {
-		toast.info(__('No coupons selected for deletion'))
-		return
-	}
+const confirmDeletion = (name: string) => {
 	$dialog({
 		title: __('Delete this coupon?'),
 		message: __(
@@ -138,15 +129,7 @@ const confirmDeletion = (selections: any[], unselectAll: () => void) => {
 				theme: 'red',
 				variant: 'solid',
 				onClick({ close }: { close: () => void }) {
-					call('lms.lms.api.delete_documents', {
-						doctype: 'LMS Coupon',
-						documents: Array.from(selections),
-					}).then((data: any) => {
-						toast.success(__('Coupon(s) deleted successfully'))
-						coupons.reload()
-						unselectAll()
-						close()
-					})
+					trashCoupon(name, close)
 				},
 			},
 		],
@@ -160,48 +143,4 @@ function trashCoupon(name, close) {
 		if (typeof close === 'function') close()
 	})
 }
-
-const columns = computed(() => {
-	return [
-		{
-			label: __('Code'),
-			key: 'code',
-			icon: 'tag',
-			width: '150px',
-		},
-		{
-			label: __('Discount'),
-			key: 'discount',
-			align: 'center',
-			width: '80px',
-			icon: 'dollar-sign',
-		},
-		{
-			label: __('Expires On'),
-			key: 'expires_on',
-			width: '120px',
-			icon: 'calendar',
-		},
-		{
-			label: __('Usage Limit'),
-			key: 'usage_limit',
-			align: 'center',
-			width: '100px',
-			icon: 'hash',
-		},
-		{
-			label: __('Redemption Count'),
-			key: 'redemption_count',
-			align: 'center',
-			width: '100px',
-			icon: 'users',
-		},
-		{
-			label: __('Enabled'),
-			key: 'enabled',
-			align: 'center',
-			icon: 'check-square',
-		},
-	]
-})
 </script>

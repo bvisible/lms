@@ -1,7 +1,7 @@
 <template>
 	<div class="">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-base px-3 py-2.5 sm:px-5"
 		>
 			<Breadcrumbs
 				class="h-7"
@@ -21,7 +21,7 @@
 				class="flex items-center gap-x-2"
 			>
 				<router-link
-					v-if="canManageJob && applicationCount.data > 0"
+					v-if="canManageJob && applicantCount > 0"
 					:to="{
 						name: 'JobApplications',
 						params: { job: job.data?.name },
@@ -40,14 +40,14 @@
 				>
 					<Button>
 						<template #prefix>
-							<Pencil class="h-4 w-4 stroke-1.5" />
+							<span class="lucide-pencil size-4" />
 						</template>
 						{{ __('Edit') }}
 					</Button>
 				</router-link>
 				<Button @click="redirectToWebsite(job.data?.company_website)">
 					<template #prefix>
-						<SquareArrowOutUpRight class="h-4 w-4 stroke-1.5" />
+						<span class="lucide-square-arrow-out-up-right size-4" />
 					</template>
 					{{ __('Visit Website') }}
 				</Button>
@@ -57,13 +57,13 @@
 					@click="openApplicationModal()"
 				>
 					<template #prefix>
-						<SendHorizonal class="h-4 w-4" />
+						<span class="lucide-send-horizonal size-4" />
 					</template>
 					{{ __('Apply') }}
 				</Button>
 				<Badge v-else variant="subtle" theme="green" size="lg">
 					<template #prefix>
-						<Check class="h-4 w-4" />
+						<span class="lucide-check size-4" />
 					</template>
 					{{ __('You have applied') }}
 				</Badge>
@@ -80,16 +80,22 @@
 			<div class="p-4">
 				<div class="space-y-5 mb-12">
 					<div class="flex">
-						<img
-							:src="job.data.company_logo"
-							class="size-10 rounded-lg object-contain cursor-pointer me-4"
-							:alt="job.data.company_name"
-							@click="redirectToWebsite(job.data.company_website)"
-						/>
+						<a
+							:href="job.data.company_website"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="me-4"
+						>
+							<img
+								:src="job.data.company_logo"
+								class="size-10 rounded-lg object-contain cursor-pointer"
+								:alt="job.data.company_name"
+							/>
+						</a>
 						<div class="">
-							<div class="text-2xl text-ink-gray-9 font-semibold mb-1">
+							<h1 class="text-xl text-ink-gray-9 font-semibold mb-1">
 								{{ job.data.job_title }}
-							</div>
+							</h1>
 							<div class="text-sm text-ink-gray-5 font-semibold">
 								{{ job.data.company_name }} - {{ job.data.location }},
 								{{ job.data.country }}
@@ -100,30 +106,30 @@
 					<div class="flex items-center gap-x-2">
 						<Badge size="lg">
 							<template #prefix>
-								<CalendarDays class="size-3 stroke-2 text-ink-gray-7" />
+								<span class="lucide-calendar-days size-3 text-ink-gray-7" />
 							</template>
 							{{ dayjs(job.data.creation).fromNow() }}
 						</Badge>
 						<Badge size="lg">
 							<template #prefix>
-								<ClipboardType class="size-3 stroke-2 text-ink-gray-7" />
+								<span class="lucide-clipboard-type size-3 text-ink-gray-7" />
 							</template>
 							{{ job.data.type }}
 						</Badge>
 						<Badge v-if="job.data?.work_mode" size="lg">
 							<template #prefix>
-								<BriefcaseBusiness class="size-3 stroke-2 text-ink-gray-7" />
+								<span
+									class="lucide-briefcase-business size-3 text-ink-gray-7"
+								/>
 							</template>
 							{{ job.data.work_mode }}
 						</Badge>
-						<Badge v-if="applicationCount.data" size="lg">
+						<Badge v-if="applicantCount" size="lg">
 							<template #prefix>
-								<SquareUserRound class="size-3 stroke-2 text-ink-gray-7" />
+								<span class="lucide-square-user-round size-3 text-ink-gray-7" />
 							</template>
-							{{ applicationCount.data }}
-							{{
-								applicationCount.data == 1 ? __('applicant') : __('applicants')
-							}}
+							{{ applicantCount }}
+							{{ applicantCount == 1 ? __('applicant') : __('applicants') }}
 						</Badge>
 					</div>
 				</div>
@@ -131,13 +137,13 @@
 				<div class="flex items-center justify-between">
 					<div class="bg-surface-gray-2 h-px m-1 w-1/2"></div>
 					<div>
-						<FileText class="size-3 stroke-1 text-ink-gray-5" />
+						<span class="lucide-file-text size-3 text-ink-gray-5" />
 					</div>
 					<div class="bg-surface-gray-2 h-px m-1 w-1/2"></div>
 				</div>
 
 				<p
-					v-html="job.data.description"
+					v-html="sanitizeRichHTML(job.data.description)"
 					class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-12"
 				></p>
 			</div>
@@ -150,6 +156,7 @@
 	</div>
 </template>
 <script setup>
+import { sanitizeRichHTML } from '@/utils/sanitizeRichHTML'
 import {
 	Badge,
 	Button,
@@ -160,18 +167,6 @@ import {
 import { inject, ref, computed, watch, nextTick } from 'vue'
 import { sessionStore } from '../stores/session'
 import JobApplicationModal from '@/components/Modals/JobApplicationModal.vue'
-import {
-	Check,
-	SendHorizonal,
-	Pencil,
-	CalendarDays,
-	SquareUserRound,
-	SquareArrowOutUpRight,
-	FileText,
-	ClipboardType,
-	BriefcaseBusiness,
-	Users,
-} from 'lucide-vue-next'
 
 const user = inject('$user')
 const dayjs = inject('$dayjs')
@@ -208,24 +203,13 @@ const jobApplication = createResource({
 	},
 })
 
-const applicationCount = createResource({
-	url: 'frappe.client.get_count',
-	makeParams() {
-		return {
-			doctype: 'LMS Job Application',
-			filters: {
-				job: job.data?.name,
-			},
-		}
-	},
-})
+const applicantCount = computed(() => job.data?.applicants || 0)
 
 const stopWatch = watch(
 	() => [job.data?.name, user.data?.name],
 	([jobName, userName]) => {
 		if (jobName && userName) {
 			jobApplication.submit()
-			applicationCount.submit()
 			nextTick(() => stopWatch())
 		}
 	},

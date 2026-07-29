@@ -1,7 +1,7 @@
 <template>
 	<div v-if="batch.data" class="">
 		<header
-			class="sticky top-0 z-10 border-b flex items-center justify-between bg-surface-white px-3 py-2.5 sm:px-5"
+			class="sticky top-0 z-10 border-b flex items-center justify-between bg-surface-base px-3 py-2.5 sm:px-5"
 		>
 			<div class="flex items-center gap-x-2">
 				<Breadcrumbs :items="breadcrumbs" />
@@ -14,14 +14,16 @@
 					<Badge v-if="childRef?.isDirty" theme="orange">
 						{{ __('Not Saved') }}
 					</Badge>
-					<Button @click="childRef.deleteBatch()">
+					<Button :label="__('Delete batch')" @click="childRef.deleteBatch()">
 						<template #icon>
-							<Trash2 class="w-4 h-4 stroke-1.5" />
+							<span class="lucide-trash-2 w-4 h-4" />
 						</template>
 					</Button>
-					<Button variant="solid" @click="childRef.submitBatch()">
-						{{ __('Save') }}
-					</Button>
+					<ShortcutTooltip :label="__('Save')" combo="Mod+S">
+						<Button variant="solid" @click="childRef.submitBatch()">
+							{{ __('Save') }}
+						</Button>
+					</ShortcutTooltip>
 				</template>
 				<Dropdown
 					v-else-if="isAdmin && batchMenu.length"
@@ -30,16 +32,49 @@
 					side="left"
 				>
 					<template v-slot="{ open }">
-						<Button variant="ghost">
+						<Button
+							variant="ghost"
+							:label="__('Batch options')"
+							:aria-expanded="open"
+						>
 							<template #icon>
-								<EllipsisVertical class="w-4 h-4 stroke-1.5" />
+								<span class="lucide-ellipsis-vertical w-4 h-4" />
 							</template>
 						</Button>
 					</template>
 				</Dropdown>
 				<Button
+					v-if="tabIndex === 1 && isAdmin"
+					variant="outline"
+					@click="childRef?.openEnrollModal?.()"
+				>
+					<template #prefix>
+						<span class="lucide-plus size-4" />
+					</template>
+					{{ __('Enroll') }}
+				</Button>
+				<Tooltip
+					v-if="currentTabLabel === 'Announcements' && isAdmin && !readOnlyMode"
+					:text="
+						batch.data?.students?.length
+							? ''
+							: __('Add students to the batch to make an announcement')
+					"
+				>
+					<Button
+						variant="outline"
+						:disabled="!batch.data?.students?.length"
+						@click="openAnnouncementModal"
+					>
+						<template #prefix>
+							<span class="lucide-send size-4" />
+						</template>
+						{{ __('Make Announcement') }}
+					</Button>
+				</Tooltip>
+				<Button
 					v-if="isAdmin"
-					:variant="batch.data?.published ? 'subtle' : 'solid'"
+					variant="outline"
 					:theme="batch.data?.published ? 'red' : 'gray'"
 					:loading="publishToggle.loading"
 					@click="togglePublishBatch"
@@ -93,14 +128,11 @@
 <script setup>
 import {
 	ClipboardPen,
-	EllipsisVertical,
 	Laptop,
 	List,
 	Mail,
 	MessageCircle,
-	SendIcon,
 	Settings2,
-	Trash2,
 	TrendingUp,
 } from 'lucide-vue-next'
 import { computed, inject, markRaw, ref, watch } from 'vue'
@@ -112,6 +144,7 @@ import {
 	createResource,
 	Dropdown,
 	Tabs,
+	Tooltip,
 	toast,
 	usePageMeta,
 } from 'frappe-ui'
@@ -125,6 +158,7 @@ import AnnouncementModal from '@/pages/Batches/components/AnnouncementModal.vue'
 import BatchForm from '@/pages/Batches/BatchForm.vue'
 import BulkCertificates from '@/pages/Batches/components/BulkCertificates.vue'
 import Discussions from '@/components/Discussions.vue'
+import ShortcutTooltip from '@/components/ShortcutTooltip.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -215,14 +249,10 @@ const isStudent = computed(() => {
 	return batch.data?.students?.includes(user.data?.name)
 })
 
+const currentTabLabel = computed(() => tabs.value[tabIndex.value]?.label)
+
 const openAnnouncementModal = () => {
 	showAnnouncementModal.value = true
-}
-
-const canMakeAnnouncement = () => {
-	if (readOnlyMode) return false
-	if (!batch.data?.students?.length) return false
-	return user.data?.is_moderator || user.data?.is_evaluator
 }
 
 const publishToggle = createResource({
@@ -250,11 +280,13 @@ const togglePublishBatch = () => {
 	publishToggle.submit()
 }
 
+// Announcements moved to a dedicated, tab-scoped header button; the "..." menu
+// only carries batch-wide admin actions now (and hides itself when empty).
 const batchMenu = computed(() => {
-	if (!batch.data?.certification && !canMakeAnnouncement()) {
+	if (!batch.data?.certification) {
 		return []
 	}
-	let options = [
+	return [
 		{
 			label: __('Generate Certificates'),
 			onClick() {
@@ -262,15 +294,7 @@ const batchMenu = computed(() => {
 			},
 			condition: () => batch.data?.certification,
 		},
-		{
-			label: __('Make an Announcement'),
-			onClick() {
-				openAnnouncementModal()
-			},
-			condition: () => canMakeAnnouncement(),
-		},
 	]
-	return options
 })
 
 const breadcrumbs = computed(() => {

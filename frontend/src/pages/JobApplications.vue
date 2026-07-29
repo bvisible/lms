@@ -17,17 +17,22 @@
 		</LayoutHeader>
 		<div class="mx-auto pt-5 p-4">
 			<div class="flex items-center justify-between mb-5">
-				<div class="text-lg font-semibold text-ink-gray-9 mb-4 md:mb-0">
+				<h1 class="text-md font-semibold text-ink-gray-9 mb-4 md:mb-0">
 					{{ totalApplications.data }}
 					{{
 						totalApplications.data === 1
 							? __('Application')
 							: __('Applications')
 					}}
-				</div>
-				<FormControl v-model="search" type="text" placeholder="Search">
+				</h1>
+				<FormControl
+					v-model="search"
+					type="text"
+					placeholder="Search"
+					:aria-label="__('Search applications')"
+				>
 					<template #prefix>
-						<FeatherIcon name="search" class="size-4 text-ink-gray-5" />
+						<span class="lucide-search size-4 text-ink-gray-5" />
 					</template>
 				</FormControl>
 			</div>
@@ -44,7 +49,7 @@
 					class="h-[79vh] border-b"
 				>
 					<ListHeader
-						class="mb-2 grid items-center rounded bg-surface-white border-b rounded-none p-2"
+						class="mb-2 grid items-center rounded bg-surface-gray-2 p-2"
 					>
 						<ListHeaderItem
 							:item="item"
@@ -52,10 +57,10 @@
 							:key="item.key"
 						>
 							<template #prefix="{ item }">
-								<FeatherIcon
+								<span
 									v-if="item.icon"
-									:name="item.icon?.toString()"
-									class="h-4 w-4"
+									:class="[item.icon, 'h-4 w-4']"
+									aria-hidden="true"
 								/>
 							</template>
 						</ListHeaderItem>
@@ -65,6 +70,7 @@
 							:row="row"
 							v-slot="{ column, item }"
 							v-for="row in applicantRows"
+							:key="row.name"
 							class="cursor-pointer"
 						>
 							<ListRowItem :item="item">
@@ -82,8 +88,8 @@
 								</div>
 								<div v-else-if="column.key === 'actions'">
 									<Dropdown :options="getActionOptions(row)">
-										<Button variant="ghost">
-											<FeatherIcon name="more-horizontal" class="w-4 h-4" />
+										<Button variant="ghost" :label="__('More actions')">
+											<span class="lucide-more-horizontal size-4" />
 										</Button>
 									</Dropdown>
 								</div>
@@ -111,27 +117,24 @@
 					</div>
 				</div>
 			</div>
-			<EmptyStateLayout
-				v-else-if="!applications.loading"
-				name="Job Applications"
-			/>
+			<div v-else-if="!applications.loading" class="flex-1">
+				<EmptyStateLayout name="Job Applications" icon="lucide-briefcase" />
+			</div>
 		</div>
 
 		<Dialog
 			v-model="showEmailModal"
-			:options="{
-				title: __('Send Email to {0}').format(selectedApplicant?.full_name),
-				size: 'lg',
-				actions: [
-					{
-						label: __('Send'),
-						variant: 'solid',
-						onClick: (close) => sendEmail(close),
-					},
-				],
-			}"
+			:title="__('Send Email to {0}').format(selectedApplicant?.full_name)"
+			size="lg"
+			:actions="[
+				{
+					label: __('Send'),
+					variant: 'solid',
+					onClick: (close) => sendEmail(close),
+				},
+			]"
 		>
-			<template #body-content>
+			<template #default>
 				<div class="space-y-4">
 					<FormControl
 						v-model="emailForm.subject"
@@ -148,12 +151,12 @@
 						<div class="text-sm text-ink-gray-5 mb-1">
 							{{ __('Message') }}
 						</div>
-						<TextEditor
+						<RichTextEditor
 							:content="emailForm.message"
 							@change="(val) => (emailForm.message = val)"
 							:editable="true"
 							:fixedMenu="true"
-							editorClass="prose-sm max-w-none border-b border-x border-outline-gray-modals bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
+							editorClass="prose-sm max-w-none border-b border-x border-outline-elevation-2 bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
 						/>
 					</div>
 				</div>
@@ -170,9 +173,7 @@ import {
 	call,
 	Dialog,
 	Dropdown,
-	FeatherIcon,
 	FormControl,
-	TextEditor,
 	ListView,
 	ListHeader,
 	ListHeaderItem,
@@ -188,6 +189,7 @@ import { computed, inject, ref, reactive, watch } from 'vue'
 import { sessionStore } from '../stores/session'
 import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
 import LayoutHeader from '@/components/Layouts/LayoutHeader.vue'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const dayjs = inject('$dayjs')
 const { brand } = sessionStore()
@@ -317,13 +319,13 @@ const getActionOptions = (row) => {
 	if (row.resume) {
 		options.push({
 			label: __('View Resume'),
-			icon: 'download',
+			icon: 'lucide-download',
 			onClick: () => downloadResume(row.resume),
 		})
 	}
 	options.push({
 		label: __('Send Email'),
-		icon: 'mail',
+		icon: 'lucide-mail',
 		onClick: () => openEmailModal(row),
 	})
 	return options
@@ -335,19 +337,19 @@ const applicationColumns = computed(() => {
 			label: __('Full Name'),
 			key: 'full_name',
 			width: 3,
-			icon: 'user',
+			icon: 'lucide-user',
 		},
 		{
 			label: __('Email'),
 			key: 'email',
 			width: 3,
-			icon: 'at-sign',
+			icon: 'lucide-at-sign',
 		},
 		{
 			label: __('Applied On'),
 			key: 'applied_on',
 			width: 2,
-			icon: 'calendar',
+			icon: 'lucide-calendar',
 		},
 		{
 			label: '',

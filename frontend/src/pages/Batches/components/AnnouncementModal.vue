@@ -1,19 +1,17 @@
 <template>
 	<Dialog
-		v-model="show"
-		:options="{
-			title: __('Make an Announcement'),
-			size: 'xl',
-			actions: [
-				{
-					label: 'Submit',
-					variant: 'solid',
-					onClick: (close) => makeAnnouncement(close),
-				},
-			],
-		}"
+		v-model:open="show"
+		title="Make an Announcement"
+		size="xl"
+		:actions="[
+			{
+				label: 'Submit',
+				variant: 'solid',
+				onClick: ({ close }) => makeAnnouncement(close),
+			},
+		]"
 	>
-		<template #body-content>
+		<template #default>
 			<div class="flex flex-col gap-4">
 				<FormControl
 					:label="__('Subject')"
@@ -28,11 +26,11 @@
 					:required="true"
 				/>
 				<div class="mb-4">
-					<div class="mb-1.5 text-sm text-ink-gray-5">
+					<div class="mb-1.5 text-p-sm-medium text-ink-gray-7">
 						{{ __('Announcement') }}
-						<span class="text-ink-red-3">*</span>
+						<span class="text-ink-red-6">*</span>
 					</div>
-					<TextEditor
+					<RichTextEditor
 						:fixedMenu="true"
 						@change="(val) => (announcement.announcement = val)"
 						editorClass="prose-sm py-2 px-2 min-h-[200px] border-outline-gray-2 hover:border-outline-gray-3 rounded-b-md bg-surface-gray-3"
@@ -43,14 +41,9 @@
 	</Dialog>
 </template>
 <script setup>
-import {
-	Dialog,
-	FormControl,
-	TextEditor,
-	createResource,
-	toast,
-} from 'frappe-ui'
+import { Dialog, FormControl, createResource, toast } from 'frappe-ui'
 import { reactive } from 'vue'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const show = defineModel()
 

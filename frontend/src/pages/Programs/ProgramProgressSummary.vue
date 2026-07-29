@@ -1,12 +1,10 @@
 <template>
 	<Dialog
-		v-model="show"
-		:options="{
-			title: __('Progress Summary for {0}').format(programName),
-			size: '2xl',
-		}"
+		v-model:open="show"
+		:title="__('Progress Summary for {0}').format(programName)"
+		size="2xl"
 	>
-		<template #body-content>
+		<template #default>
 			<div class="text-base">
 				<div class="flex items-center justify-between gap-x-4 mb-4">
 					<NumberChart
@@ -31,11 +29,11 @@
 						categoryColumn: 'category',
 						valueColumn: 'count',
 						colors: [
-							getColor('red', 400),
-							getColor('amber', 400),
-							getColor('pink', 400),
-							getColor('blue', 400),
-							getColor('green', 400),
+							'var(--red-400)',
+							'var(--amber-400)',
+							'var(--pink-400)',
+							'var(--blue-400)',
+							'var(--green-400)',
 						],
 					}"
 				/>
@@ -43,9 +41,13 @@
 				<div class="mt-10">
 					<FormControl
 						v-model="searchFilter"
-						:placeholder="__('Search by Member')"
+						:placeholder="__('Search')"
 						class="mb-4"
-					/>
+					>
+						<template #prefix>
+							<span class="lucide-search size-4 text-ink-gray-5" />
+						</template>
+					</FormControl>
 					<ListView
 						v-if="progressList.length"
 						:columns="progressColumns"
@@ -56,7 +58,7 @@
 							showTooltip: false,
 						}"
 					/>
-					<div v-else class="text-center text-gray-500">
+					<div v-else class="text-center text-ink-gray-5">
 						{{ __('No members found.') }}
 					</div>
 				</div>
@@ -74,7 +76,6 @@ import {
 } from 'frappe-ui'
 import type { ProgramMember } from '@/types'
 import { computed, ref, watch } from 'vue'
-import { getColor } from '@/utils'
 
 const show = defineModel<boolean>({ default: false })
 const searchFilter = ref<string | null>(null)

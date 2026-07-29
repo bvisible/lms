@@ -1,105 +1,86 @@
 <template>
-	<div class="flex flex-col min-h-0 text-base">
-		<div class="flex items-center justify-between mb-5">
-			<div class="flex flex-col space-y-2">
-				<div class="text-xl font-semibold text-ink-gray-9">
-					{{ label }}
-				</div>
-				<div class="text-ink-gray-6 leading-5">
-					{{ __(description || '') }}
-				</div>
-			</div>
-			<div class="flex items-center gap-x-5">
-				<Button @click="openForm('new')">
-					<template #prefix>
-						<Plus class="h-3 w-3 stroke-1.5" />
-					</template>
-					{{ __('New') }}
-				</Button>
-			</div>
-		</div>
-		<div v-if="zoomAccounts.data?.length" class="overflow-y-auto">
-			<ListView
-				:columns="columns"
-				:rows="zoomAccounts.data"
+	<SettingsLayout
+		v-if="view === 'list'"
+		:title="label"
+		:description="__(description || '')"
+	>
+		<template #header-actions>
+			<Button variant="solid" @click="openForm('new')">
+				<template #prefix>
+					<span class="lucide-plus h-4 w-4" />
+				</template>
+				{{ __('New') }}
+			</Button>
+		</template>
+		<List
+			v-if="zoomAccounts.data?.length"
+			:columns="columns"
+			class="list-row-px-3"
+		>
+			<ListHeader>
+				<ListHeaderCell>{{ __('Account') }}</ListHeaderCell>
+				<ListHeaderCell>{{ __('Status') }}</ListHeaderCell>
+				<ListHeaderCell />
+			</ListHeader>
+			<ListRows
+				:items="zoomAccounts.data"
 				row-key="name"
-				:options="{
-					showTooltip: false,
-					onRowClick: (row) => {
-						openForm(row.name)
-					},
-				}"
+				v-slot="{ item: row }"
 			>
-				<ListHeader
-					class="mb-2 grid items-center gap-x-4 rounded bg-surface-gray-2 p-2"
-				>
-					<ListHeaderItem :item="item" v-for="item in columns">
-						<template #prefix="{ item }">
-							<FeatherIcon
-								v-if="item.icon"
-								:name="item.icon"
-								class="h-4 w-4 stroke-1.5"
-							/>
-						</template>
-					</ListHeaderItem>
-				</ListHeader>
-
-				<ListRows>
-					<ListRow :row="row" v-for="row in zoomAccounts.data">
-						<template #default="{ column, item }">
-							<ListRowItem :item="row[column.key]" :align="column.align">
-								<template #prefix>
-									<div v-if="column.key == 'member_name'">
-										<Avatar
-											class="flex items-center"
-											:image="row['member_image']"
-											:label="item"
-											size="sm"
-										/>
-									</div>
-								</template>
-								<div v-if="column.key == 'enabled'">
-									<Badge v-if="row[column.key]" theme="green">
-										{{ __('Enabled') }}
-									</Badge>
-									<Badge v-else theme="gray">
-										{{ __('Disabled') }}
-									</Badge>
-								</div>
-								<div v-else class="leading-5 text-sm">
-									{{ row[column.key] }}
-								</div>
-							</ListRowItem>
-						</template>
-					</ListRow>
-				</ListRows>
-
-				<ListSelectBanner>
-					<template #actions="{ unselectAll, selections }">
-						<div class="flex gap-2">
-							<Button
-								variant="ghost"
-								@click="removeAccount(selections, unselectAll)"
-							>
-								<Trash2 class="h-4 w-4 stroke-1.5" />
-							</Button>
+				<ListRow class="py-2.5" @click="openForm(row.name)">
+					<ListCell class="gap-2">
+						<Avatar
+							:image="row.member_image"
+							:label="row.member_name"
+							size="lg"
+							class="shrink-0"
+						/>
+						<div class="flex min-w-0 flex-col">
+							<span class="truncate text-p-base-medium text-ink-gray-8">
+								{{ row.member_name }}
+							</span>
+							<span class="truncate text-p-sm text-ink-gray-5">
+								{{ row.account_id }}
+							</span>
 						</div>
-					</template>
-				</ListSelectBanner>
-			</ListView>
-		</div>
+					</ListCell>
+					<ListCell>
+						<Badge :theme="row.enabled ? 'green' : 'gray'">
+							{{ row.enabled ? __('Enabled') : __('Disabled') }}
+						</Badge>
+					</ListCell>
+					<ListCell class="justify-end" @click.stop>
+						<Dropdown
+							:options="[
+								{
+									label: __('Delete'),
+									icon: 'lucide-trash-2',
+									onClick: () => removeAccount(row.name),
+								},
+							]"
+							:button="{
+								icon: 'lucide-more-horizontal',
+								variant: 'ghost',
+								label: __('More options'),
+							}"
+							placement="right"
+						/>
+					</ListCell>
+				</ListRow>
+			</ListRows>
+		</List>
 		<EmptyStateLayout
 			v-else
 			name="Zoom Settings"
 			:description="__('Add one to get started.')"
-			:icon="Video"
+			icon="lucide-video"
 		/>
-	</div>
-	<ZoomAccountModal
-		v-if="showForm"
-		v-model="showForm"
-		v-model:zoomAccounts="zoomAccounts"
+	</SettingsLayout>
+	<ZoomAccountForm
+		v-else
 		:accountID="currentAccount"
+		v-model:zoomAccounts="zoomAccounts"
+		@updateStep="(step) => (view = step)"
 	/>
 </template>
 <script setup lang="ts">
@@ -107,24 +88,25 @@ import {
 	Avatar,
 	Button,
 	Badge,
+	Dropdown,
 	createListResource,
-	FeatherIcon,
-	ListView,
-	ListHeader,
-	ListHeaderItem,
-	ListRows,
-	ListRow,
-	ListRowItem,
-	ListSelectBanner,
 	toast,
 } from 'frappe-ui'
+import {
+	List,
+	ListCell,
+	ListHeader,
+	ListHeaderCell,
+	ListRow,
+	ListRows,
+} from 'frappe-ui/list'
 import { computed, onMounted, ref } from 'vue'
-import { Plus, Trash2, Video } from 'lucide-vue-next'
 import { cleanError } from '@/utils'
-import ZoomAccountModal from '@/components/Modals/ZoomAccountModal.vue'
+import ZoomAccountForm from '@/components/Settings/ZoomAccountForm.vue'
 import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
+import SettingsLayout from '@/components/Layouts/SettingsLayout.vue'
 
-const showForm = ref(false)
+const view = ref<'list' | 'form'>('list')
 const currentAccount = ref<string | null>(null)
 
 const props = defineProps<{
@@ -155,45 +137,24 @@ const fetchZoomAccounts = () => {
 	zoomAccounts.reload()
 }
 
+// Grid track sizes shared by the header and every row (--list-columns).
+const columns = ['minmax(0, 1fr)', '6.5rem', '2.25rem']
+
 const openForm = (accountID: string) => {
 	currentAccount.value = accountID
-	showForm.value = true
+	view.value = 'form'
 }
 
-const removeAccount = (selections: Set<string>, unselectAll: () => void) => {
-	Array.from(selections).forEach((accountID) => {
-		zoomAccounts.delete.submit(accountID, {
-			onSuccess() {
-				toast.success(__('Zoom account deleted successfully'))
-				fetchZoomAccounts()
-				unselectAll()
-			},
-			onError(err: any) {
-				toast.error(cleanError(err.messages[0] || err))
-				console.error(err)
-			},
-		})
+const removeAccount = (accountID: string) => {
+	zoomAccounts.delete.submit(accountID, {
+		onSuccess() {
+			toast.success(__('Zoom account deleted successfully'))
+			fetchZoomAccounts()
+		},
+		onError(err: any) {
+			toast.error(cleanError(err.messages?.[0] || err))
+			console.error(err)
+		},
 	})
 }
-
-const columns = computed(() => {
-	return [
-		{
-			label: __('Member'),
-			key: 'member_name',
-			icon: 'user',
-		},
-		{
-			label: __('Account Name'),
-			key: 'name',
-			icon: 'video',
-		},
-		{
-			label: __('Status'),
-			key: 'enabled',
-			align: 'center',
-			icon: 'check-square',
-		},
-	]
-})
 </script>

@@ -30,7 +30,6 @@ def get_lms_path():
 # app_include_js = "/assets/lms/js/lms.js"
 
 # include js, css files in header of web template
-web_include_css = "lms.bundle.css"
 # web_include_css = "/assets/lms/css/lms.css"
 web_include_js = []
 
@@ -77,6 +76,7 @@ before_uninstall = "lms.install.before_uninstall"
 setup_wizard_complete = "lms.demo.demo_data.create_demo_data"
 after_migrate = [
 	"lms.sqlite.build_index_in_background",
+	"lms.lms.doctype.lms_payment.lms_payment.add_unique_payment_id_constraint",
 	# Neoffice: subscription-gated video access fields on LMS Enrollment
 	"lms.lms.neoffice_video.setup_custom_fields",
 ]
@@ -100,6 +100,8 @@ has_permission = {
 	"LMS Batch": "lms.lms.doctype.lms_batch.lms_batch.has_permission",
 	"LMS Program": "lms.lms.doctype.lms_program.lms_program.has_permission",
 	"LMS Certificate": "lms.lms.doctype.lms_certificate.lms_certificate.has_permission",
+	"Course Lesson": "lms.lms.doctype.course_lesson.course_lesson.has_permission",
+	"File": "lms.lms.permissions.file_has_permission",
 }
 
 # DocType Class
@@ -159,6 +161,7 @@ scheduler_events = {
 		"lms.lms.doctype.lms_batch.lms_batch.send_batch_start_reminder",
 		"lms.lms.doctype.lms_live_class.lms_live_class.send_live_class_reminder",
 		"lms.lms.doctype.lms_course.lms_course.send_notification_for_published_courses",
+		"lms.lms.doctype.course_lesson.course_lesson.rename_settled_untitled_lessons",
 	],
 }
 
@@ -296,3 +299,11 @@ add_to_apps_screen = [
 sqlite_search = ["lms.sqlite.LearningSearch"]
 auth_hooks = ["lms.auth.authenticate"]
 require_type_annotated_api_methods = True
+
+# === Raven membership provider ===
+# Hook contract + admin setup: ../raven-membership-provider.md
+# TODO: that page is an interim capture — publish it at docs.frappe.io/learning
+# (specs/extensibility.md: "A hook isn't shipped until the docs exist") and delete it.
+# LMS contributes its rule types + evaluator to the standalone `raven_integration`
+# app via the `raven_membership_providers` hook. See lms/raven_provider.py.
+raven_membership_providers = ["lms.raven_provider.get_provider"]

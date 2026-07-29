@@ -14,7 +14,7 @@
 			>
 				<template #header="{ currentMonthYear, decrement, increment }">
 					<div class="mb-2 flex justify-between">
-						<span class="text-lg text-ink-gray-9 font-semibold">
+						<span class="text-lg-semibold text-ink-gray-9">
 							{{ currentMonthYear }}
 						</span>
 						<div class="flex gap-x-1">
@@ -22,13 +22,15 @@
 								@click="decrement()"
 								variant="ghost"
 								class="h-4 w-4"
-								icon="chevron-left"
+								icon="lucide-chevron-left"
+								:label="__('Previous')"
 							/>
 							<Button
 								@click="increment()"
 								variant="ghost"
 								class="h-4 w-4"
-								icon="chevron-right"
+								icon="lucide-chevron-right"
+								:label="__('Next')"
 							/>
 						</div>
 					</div>

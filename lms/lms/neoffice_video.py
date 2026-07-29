@@ -383,11 +383,15 @@ def get_playback_url(lesson: str, media: str = None) -> dict:
     if not media_id:
         frappe.throw(_("This lesson has no protected video."))
 
-    # A preview lesson is watchable by anyone; everything else needs live access.
-    if not lesson_doc.include_in_preview:
+    # Reuse upstream's resolver rather than re-deriving the rules: it also
+    # requires the course to be published and guest access to be allowed before
+    # honouring include_in_preview, and it already calls our subscription guard.
+    from lms.lms.permissions import resolve_lesson_access
+
+    _is_instructor, can_access = resolve_lesson_access(lesson)
+    if not can_access:
         access = get_course_access(lesson_doc.course)
-        if not access["allowed"]:
-            frappe.throw(access_denied_message(access), frappe.PermissionError)
+        frappe.throw(access_denied_message(access), frappe.PermissionError)
 
     share_id = _get_or_create_share(media_id)
     token = _mint_token(share_id)

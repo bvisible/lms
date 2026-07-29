@@ -1,7 +1,7 @@
 <template>
 	<div class="">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-base px-3 py-2.5 sm:px-5"
 		>
 			<Breadcrumbs
 				class="h-7"
@@ -67,11 +67,12 @@
 							<FormControl
 								v-model="appliedCoupon"
 								:disabled="orderSummary.data.discount_amount > 0"
+								:aria-label="__('Coupon Code')"
 								@input="appliedCoupon = $event.target.value.toUpperCase()"
 								@keydown.enter="applyCouponCode"
 								placeholder="COUPON2025"
 								autocomplete="off"
-								class="flex-1 [&_input]:bg-white"
+								class="flex-1 [&_input]:bg-surface-base"
 							/>
 							<Button
 								v-if="!orderSummary.data.discount_amount"
@@ -82,18 +83,19 @@
 							</Button>
 							<Button
 								v-if="orderSummary.data.discount_amount"
+								:label="__('Remove coupon')"
 								@click="removeCoupon"
 								variant="outline"
 							>
 								<template #icon>
-									<X class="size-4 stroke-1.5" />
+									<span class="lucide-x size-4" />
 								</template>
 							</Button>
 						</div>
 					</div>
 
 					<p
-						class="bg-surface-amber-2 text-ink-amber-2 text-sm leading-5 p-2 rounded-md"
+						class="bg-surface-amber-2 text-ink-amber-5 text-sm leading-5 p-2 rounded-md"
 					>
 						{{
 							__(
@@ -105,9 +107,9 @@
 
 				<div class="flex-1 lg:me-10">
 					<div class="mb-5">
-						<div class="text-lg font-semibold text-ink-gray-9">
+						<h2 class="text-lg-semibold text-ink-gray-9">
 							{{ __('Address') }}
-						</div>
+						</h2>
 					</div>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 						<div class="space-y-4">
@@ -192,7 +194,7 @@
 							/>
 							<div
 								v-if="showConsentWarning"
-								class="mt-1 text-xs text-ink-red-3"
+								class="mt-1 text-xs text-ink-red-6"
 							>
 								{{
 									__('Please provide your consent to proceed with the payment')
@@ -248,7 +250,6 @@ import { reactive, inject, onMounted, computed, ref, watch } from 'vue'
 import { sessionStore } from '../stores/session'
 import Link from '@/components/Controls/Link.vue'
 import NotPermitted from '@/components/NotPermitted.vue'
-import { X } from 'lucide-vue-next'
 import { useTelemetry } from 'frappe-ui/frappe'
 import { getLmsRoute } from '@/utils/basePath'
 
@@ -258,9 +259,6 @@ const showConsentWarning = ref(false)
 const { capture } = useTelemetry()
 
 onMounted(() => {
-	const script = document.createElement('script')
-	script.src = `https://checkout.razorpay.com/v1/checkout.js`
-	document.body.appendChild(script)
 	if (user.data?.name) {
 		access.submit()
 	}
@@ -357,6 +355,12 @@ const generatePaymentLink = () => {
 				return validateAddress()
 			},
 			onSuccess(data) {
+				if (typeof data !== 'string' || !data) {
+					toast.error(
+						__('Could not start the payment. Please contact the administrator.')
+					)
+					return
+				}
 				capture('checkout_initiated', { type: props.type })
 				window.location.href = data
 			},

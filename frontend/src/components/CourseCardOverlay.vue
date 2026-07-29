@@ -1,12 +1,11 @@
 <template>
 	<div class="border-2 rounded-md min-w-80 max-w-sm">
-		<iframe
-			v-if="course.data?.video_link"
-			:src="video_link"
-			class="rounded-t-md min-h-56 w-full"
+		<VideoPreview
+			:video-link="course.data?.video_link"
+			:fallback-image="course.data?.image"
 		/>
 		<div class="p-5">
-			<div class="text-2xl font-semibold text-ink-gray-9 mb-4">
+			<div class="text-3xl-semibold text-ink-gray-9 mb-4">
 				{{ priceLabel }}
 			</div>
 			<div v-if="!readOnlyMode">
@@ -27,7 +26,7 @@
 					>
 						<Button variant="solid" size="md" class="w-full">
 							<template #prefix>
-								<BookText class="size-4 stroke-1.5" />
+								<span class="lucide-book-text size-4" />
 							</template>
 							<span>
 								{{ __('Continue Learning') }}
@@ -48,7 +47,7 @@
 				>
 					<Button variant="solid" size="md" class="w-full mb-8">
 						<template #prefix>
-							<CreditCard class="size-4 stroke-1.5" />
+							<span class="lucide-credit-card size-4" />
 						</template>
 						<span>
 							{{ __('Buy this course') }}
@@ -71,7 +70,7 @@
 					size="md"
 				>
 					<template #prefix>
-						<BookText class="size-4 stroke-1.5" />
+						<span class="lucide-book-text size-4" />
 					</template>
 					<span>
 						{{ __('Enroll Now') }}
@@ -85,7 +84,7 @@
 					size="md"
 				>
 					<template #prefix>
-						<GraduationCap class="size-4 stroke-1.5" />
+						<span class="lucide-graduation-cap size-4" />
 					</template>
 					{{ __('Get Certificate') }}
 				</Button>
@@ -98,21 +97,21 @@
 					v-if="enrolledLabel"
 					class="flex items-center gap-3 text-ink-gray-8"
 				>
-					<Users class="size-4 stroke-1.5 shrink-0 text-ink-gray-7" />
+					<span class="lucide-users size-4 shrink-0 text-ink-gray-7" />
 					<span>{{ enrolledLabel }} {{ __('enrolled') }}</span>
 				</div>
 				<div
 					v-if="course.data?.video_link"
 					class="flex items-center gap-3 text-ink-gray-8"
 				>
-					<MonitorPlay class="size-4 stroke-1.5 shrink-0 text-ink-gray-7" />
+					<span class="lucide-monitor-play size-4 shrink-0 text-ink-gray-7" />
 					<span>{{ __('On demand course video') }}</span>
 				</div>
 				<div
 					v-if="course.data?.lessons"
 					class="flex items-center gap-3 text-ink-gray-8"
 				>
-					<BookOpen class="size-4 stroke-1.5 shrink-0 text-ink-gray-7" />
+					<span class="lucide-book-open size-4 shrink-0 text-ink-gray-7" />
 					<span>
 						{{ course.data?.lessons }}
 						{{ course.data?.lessons === 1 ? __('Lesson') : __('Lessons') }}
@@ -122,7 +121,7 @@
 					v-if="(course.data?.quiz_count || 0) > 0"
 					class="flex items-center gap-3 text-ink-gray-8"
 				>
-					<HelpCircle class="size-4 stroke-1.5 shrink-0 text-ink-gray-7" />
+					<span class="lucide-help-circle size-4 shrink-0 text-ink-gray-7" />
 					<span>
 						{{ course.data?.quiz_count }}
 						{{
@@ -136,7 +135,7 @@
 					v-if="course.data?.enable_certification"
 					class="flex items-center gap-3 text-ink-gray-8"
 				>
-					<Award class="size-4 stroke-1.5 shrink-0 text-ink-gray-7" />
+					<span class="lucide-award size-4 shrink-0 text-ink-gray-7" />
 					<span>{{ __('Certificate of completion') }}</span>
 				</div>
 			</section>
@@ -144,27 +143,18 @@
 	</div>
 </template>
 <script setup lang="ts">
-import {
-	Award,
-	BookOpen,
-	BookText,
-	CreditCard,
-	GraduationCap,
-	HelpCircle,
-	MonitorPlay,
-	Users,
-} from 'lucide-vue-next'
 import { computed, inject } from 'vue'
 import { Badge, Button, call, createResource, toast } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import CertificationLinks from '@/components/CertificationLinks.vue'
+import VideoPreview from '@/components/VideoPreview.vue'
 import { useTelemetry } from 'frappe-ui/frappe'
 import type {
 	CourseDetails,
 	CourseInstructorInfo,
 	Resource,
 	SessionUser,
-} from '@/types/api'
+} from '@/types'
 
 const router = useRouter()
 const user = inject<SessionUser>('$user')!
@@ -178,16 +168,6 @@ const props = withDefaults(
 	}>(),
 	{}
 )
-
-const video_link = computed<string | undefined>(() => {
-	const link = props.course.data?.video_link
-	if (!link) return undefined
-	// A full URL means a non-YouTube provider (e.g. an Infomaniak teaser) and is
-	// embedded as-is; a bare id is still a YouTube video.
-	if (/^https?:\/\//.test(link)) return link
-	// nocookie: no Google cookie is set until the visitor actually presses play.
-	return 'https://www.youtube-nocookie.com/embed/' + link
-})
 
 function enrollStudent() {
 	if (!user.data) {

@@ -3,17 +3,19 @@
 		<iframe
 			class="youtube-video"
 			:src="getYouTubeVideoSource(youtube.split('/').pop())"
+			:title="__('YouTube video')"
 			width="100%"
 			:height="screenSize.width < 640 ? 200 : 400"
 			frameborder="0"
 			allowfullscreen
 		></iframe>
 	</div>
-	<div v-for="block in content?.split('\n\n')">
+	<div v-for="(block, index) in content?.split('\n\n')" :key="index">
 		<div v-if="block.includes('{{ YouTubeVideo')">
 			<iframe
 				class="youtube-video"
 				:src="getYouTubeVideoSource(block)"
+				:title="__('YouTube video')"
 				width="100%"
 				:height="screenSize.width < 640 ? 200 : 400"
 				frameborder="0"
@@ -42,13 +44,7 @@
 			</video>
 		</div>
 		<div v-else-if="block.includes('{{ PDF')">
-			<iframe
-				:src="getPDFSource(block)"
-				width="100%"
-				height="700px"
-				frameborder="0"
-				allowfullscreen
-			></iframe>
+			<PdfBlock :file="getId(block)" />
 		</div>
 		<div v-else-if="block.includes('{{ Audio')">
 			<audio width="100%" controls controlsList="nodownload">
@@ -60,6 +56,7 @@
 				width="100%"
 				height="400"
 				:src="getId(block)"
+				:title="__('Embedded content')"
 				frameborder="0"
 				allowfullscreen
 			>
@@ -74,9 +71,11 @@
 <script setup>
 import Quiz from '@/components/QuizBlock.vue'
 import SecureVideo from '@/components/SecureVideo.vue'
+import PdfBlock from '@/components/PdfBlock.vue'
 import MarkdownIt from 'markdown-it'
-import DOMPurify from 'dompurify'
 import { useScreenSize } from '@/utils/composables'
+import { getMacroArg } from '@/utils/lessonMacros'
+import { sanitizeRichHTML } from '@/utils/sanitizeRichHTML'
 
 const emit = defineEmits(['video-ended'])
 
@@ -87,7 +86,11 @@ const markdown = new MarkdownIt({
 	linkify: true,
 })
 
-const renderSafe = (block) => DOMPurify.sanitize(markdown.render(block))
+// Route markdown output through the shared sanitizer so the anchor-target
+// hook (open in new tab) and form-tag blocklist are applied uniformly with
+// the rest of the LMS render pipelines. Keeps one source of truth for what
+// counts as safe user-authored HTML.
+const renderSafe = (block) => sanitizeRichHTML(markdown.render(block))
 
 const props = defineProps({
 	content: {
@@ -128,11 +131,9 @@ const getYouTubeVideoSource = (block) => {
 	return `https://www.youtube-nocookie.com/embed/${block}`
 }
 
-const getPDFSource = (block) => {
-	return `${getId(block)}#toolbar=0`
-}
-
 const getId = (block) => {
-	return block.match(/\(["']([^"']+?)["']\)/)[1]
+	// Guard the match: a malformed `{{ PDF() }}` / unbalanced-quote macro yields
+	// null, and the old unguarded [1] threw and killed the whole lesson render.
+	return getMacroArg(block) ?? ''
 }
 </script>
