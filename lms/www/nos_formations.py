@@ -43,10 +43,13 @@ def _courses(paid: bool) -> list:
 
     for row in rows:
         row.lessons = frappe.db.count("Course Lesson", {"course": row.name})
-        # Formaté ici : le namespace frappe.utils n'est pas garanti côté Jinja,
-        # et le prix sortait sans sa devise.
+        # "CHF 180.00" : fmt_money ne préfixe le symbole que si la devise en a un
+        # de renseigné, et CHF n'en a pas — le prix sortait donc nu.
         row.price_label = (
-            frappe.utils.fmt_money(row.course_price, currency=row.currency or "CHF")
+            "{0} {1}".format(
+                row.currency or "CHF",
+                frappe.utils.fmt_money(row.course_price, precision=2),
+            )
             if paid
             else None
         )
