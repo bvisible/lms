@@ -25,7 +25,7 @@ import frappe
 import requests
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils import add_months, getdate, nowdate
+from frappe.utils import add_months, flt, getdate, nowdate
 
 API_BASE = "https://api.infomaniak.com/1/vod/channel"
 API_TIMEOUT = 20
@@ -71,6 +71,19 @@ ENROLLMENT_FIELDS = {
             "label": _("Access Valid Till"),
             "insert_after": "access_from",
             "description": _("Empty means permanent access."),
+        },
+        # Idempotency key. Three hooks can carry the same payment (the invoice's
+        # on_submit and on_update_after_submit, plus the Payment Entry), so the
+        # period would be added several times without a record of what has
+        # already been applied.
+        {
+            "fieldname": "last_grant_invoice",
+            "fieldtype": "Data",
+            "label": _("Last Granting Invoice"),
+            "insert_after": "access_valid_till",
+            "read_only": 1,
+            "no_copy": 1,
+            "description": _("The invoice that last extended this access."),
         },
     ]
 }
@@ -272,44 +285,67 @@ def _period_months(subscription: str) -> int:
     return 1
 
 
-def extend_access_for_subscription(subscription: str) -> int:
+def extend_access_for_subscription(subscription: str, invoice: str = None) -> int:
     """Push every enrollment on this subscription one period further.
 
     Cumulative from the current expiry — `max(current, today) + one period` — so
     paying early never costs the learner the days already paid for. Same rule as
     the cloud instances (neoffice_devops.cloud.instance_validity).
+
+    `invoice` makes the call idempotent: the same invoice reaching this code
+    twice — and it does, see the hooks below — must not buy two periods.
     """
     enrollments = frappe.get_all(
         "LMS Enrollment",
         filters={"subscription": subscription},
-        fields=["name", "access_valid_till"],
+        fields=["name", "access_valid_till", "last_grant_invoice"],
     )
     if not enrollments:
         return 0
 
     months = _period_months(subscription)
     today = getdate(nowdate())
+    extended = 0
 
     for enrollment in enrollments:
+        if invoice and enrollment.last_grant_invoice == invoice:
+            continue
         current = getdate(enrollment.access_valid_till) if enrollment.access_valid_till else None
         base = max(current, today) if current else today
         frappe.db.set_value(
             "LMS Enrollment",
             enrollment.name,
-            "access_valid_till",
-            add_months(base, months),
+            {
+                "access_valid_till": add_months(base, months),
+                "last_grant_invoice": invoice,
+            },
         )
+        extended += 1
 
-    return len(enrollments)
+    return extended
+
+
+def invoice_outstanding(invoice) -> float:
+    """Outstanding amount read from the database, not from the doc in hand.
+
+    Frappe runs the controller's own on_submit before the hooked methods, and
+    ERPNext settles the invoice inside it (make_gl_entries → update_outstanding_amt,
+    a raw UPDATE). The document we are handed can therefore still carry the
+    pre-payment figure while the row is already at zero.
+    """
+    stored = frappe.db.get_value("Sales Invoice", invoice.name, "outstanding_amount")
+    if stored is None:
+        stored = invoice.get("outstanding_amount")
+    return flt(stored)
 
 
 def _extend_from_invoice(invoice) -> None:
-    if (invoice.get("outstanding_amount") or 0) > 0.01:
+    if invoice_outstanding(invoice) > 0.01:
         return
     if not invoice.get("subscription"):
         return
 
-    count = extend_access_for_subscription(invoice.subscription)
+    count = extend_access_for_subscription(invoice.subscription, invoice.name)
     if count:
         frappe.logger().info(
             "LMS course access extended for {0} enrollment(s) via {1}".format(
@@ -319,7 +355,16 @@ def _extend_from_invoice(invoice) -> None:
 
 
 def on_invoice_paid(doc, method=None):
-    """Sales Invoice → on_update_after_submit."""
+    """Sales Invoice → on_submit AND on_update_after_submit.
+
+    Both, because a webshop order arrives already settled: ERPNext's
+    PaymentRequest.set_as_paid() submits the Payment Entry first, then builds
+    the invoice with allocate_advances_automatically, so the invoice is born
+    with outstanding 0 and never gets updated afterwards. With
+    on_update_after_submit alone, nothing fires on a real online purchase —
+    measured on osiris, 0 enrollment. `last_grant_invoice` keeps the two hooks
+    from paying twice.
+    """
     _extend_from_invoice(doc)
 
 
@@ -329,6 +374,11 @@ def on_payment_entry_submitted(doc, method=None):
     A Payment Entry settles its invoices with `db_set`, which does NOT fire
     `on_update_after_submit`. Without this second hook, a real payment would
     never extend anyone's course access.
+
+    Note this catches the "invoice first, paid later" case only: on the webshop
+    tunnel the Payment Entry is submitted against the Sales Order, before the
+    invoice exists, so its references hold no Sales Invoice yet. That case is
+    covered by on_invoice_paid above.
     """
     for reference in doc.get("references") or []:
         if reference.reference_doctype != "Sales Invoice" or not reference.reference_name:

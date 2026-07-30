@@ -136,7 +136,15 @@ doc_events = {
 	# Neoffice: paying extends course access, exactly like it extends a cloud
 	# instance's validity — and, when the invoice sells a course as an Item,
 	# creates the enrolment in the first place.
+	# on_submit as well as on_update_after_submit: a webshop invoice is created
+	# already paid (PaymentRequest.set_as_paid submits the Payment Entry first,
+	# then make_invoice with allocate_advances_automatically), so it is never
+	# updated after submission and on_update_after_submit alone fires on nothing.
 	"Sales Invoice": {
+		"on_submit": [
+			"lms.lms.neoffice_video.on_invoice_paid",
+			"lms.lms.neoffice_commerce.on_invoice_paid",
+		],
 		"on_update_after_submit": [
 			"lms.lms.neoffice_video.on_invoice_paid",
 			"lms.lms.neoffice_commerce.on_invoice_paid",

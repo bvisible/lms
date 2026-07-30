@@ -102,8 +102,12 @@ def _buyer_user(invoice) -> str | None:
 # ---------------------------------------------------------------------------
 
 
-def _grant(course: str, member: str, months: int) -> str:
-    """Create or extend the enrolment. Cumulative, like the cloud instances."""
+def _grant(course: str, member: str, months: int, invoice: str = None) -> str:
+    """Create or extend the enrolment. Cumulative, like the cloud instances.
+
+    `invoice` is the idempotency key: the same invoice reaches this code from
+    two hooks, and adding the months twice would hand out a free period.
+    """
     name = frappe.db.get_value("LMS Enrollment", {"member": member, "course": course}, "name")
     today = getdate(nowdate())
 
@@ -115,18 +119,28 @@ def _grant(course: str, member: str, months: int) -> str:
                 "course": course,
                 "access_from": today,
                 "access_valid_till": add_months(today, months) if months else None,
+                "last_grant_invoice": invoice,
             }
         ).insert(ignore_permissions=True)
         return doc.name
 
+    if invoice and frappe.db.get_value("LMS Enrollment", name, "last_grant_invoice") == invoice:
+        return name
+
     if not months:
         # A permanent purchase clears any expiry the learner had.
-        frappe.db.set_value("LMS Enrollment", name, "access_valid_till", None)
+        frappe.db.set_value(
+            "LMS Enrollment", name, {"access_valid_till": None, "last_grant_invoice": invoice}
+        )
         return name
 
     current = frappe.db.get_value("LMS Enrollment", name, "access_valid_till")
     base = max(getdate(current), today) if current else today
-    frappe.db.set_value("LMS Enrollment", name, "access_valid_till", add_months(base, months))
+    frappe.db.set_value(
+        "LMS Enrollment",
+        name,
+        {"access_valid_till": add_months(base, months), "last_grant_invoice": invoice},
+    )
     return name
 
 
@@ -163,7 +177,7 @@ def grant_courses_for_invoice(invoice) -> list:
 
     granted = []
     for course, months in courses:
-        granted.append(_grant(course, member, months))
+        granted.append(_grant(course, member, months, invoice.name))
 
     frappe.logger().info(
         "LMS: {0} enrolled in {1} course(s) via {2}".format(member, len(granted), invoice.name)
@@ -177,13 +191,26 @@ def grant_courses_for_invoice(invoice) -> list:
 
 
 def _if_paid(invoice):
-    if (invoice.get("outstanding_amount") or 0) > 0.01:
+    from lms.lms.neoffice_video import invoice_outstanding
+
+    if invoice_outstanding(invoice) > 0.01:
         return
     grant_courses_for_invoice(invoice)
 
 
 def on_invoice_paid(doc, method=None):
-    """Sales Invoice → on_update_after_submit."""
+    """Sales Invoice → on_submit AND on_update_after_submit.
+
+    on_submit matters because a webshop order arrives already settled. ERPNext's
+    PaymentRequest.set_as_paid() (payment_request.py) submits the Payment Entry
+    against the Sales Order first, then calls make_invoice(), which inserts the
+    invoice with allocate_advances_automatically and submits it. The invoice is
+    therefore born with outstanding 0 and is never modified again — so
+    on_update_after_submit alone fires on nothing. Measured on osiris before the
+    fix: a full purchase through the tunnel enrolled zero learners.
+
+    `last_grant_invoice` on the enrolment stops the two hooks granting twice.
+    """
     _if_paid(doc)
 
 
@@ -191,8 +218,12 @@ def on_payment_entry_submitted(doc, method=None):
     """Payment Entry → on_submit.
 
     A Payment Entry settles its invoices with `db_set`, which never fires
-    on_update_after_submit — without this second hook a real payment would
-    enrol nobody. Same trap as neoffice_video and as the cloud instances.
+    on_update_after_submit — without this second hook a payment recorded against
+    an existing invoice would enrol nobody. Same trap as neoffice_video and as
+    the cloud instances.
+
+    It does NOT cover the webshop tunnel: there the Payment Entry references the
+    Sales Order and is submitted before any invoice exists. See on_invoice_paid.
     """
     for reference in doc.get("references") or []:
         if reference.reference_doctype != "Sales Invoice" or not reference.reference_name:
