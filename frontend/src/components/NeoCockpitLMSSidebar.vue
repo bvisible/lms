@@ -41,6 +41,7 @@ import NeoCockpitBridge from '@/components/NeoCockpitBridge.vue'
 import CommandPalette from '@/components/CommandPalette/CommandPalette.vue'
 
 import { translationsReady } from '@/translation'
+import { createResource } from 'frappe-ui'
 import { usersStore } from '@/stores/user'
 import { useSettings } from '@/stores/settings'
 import { useRouter, useRoute } from 'vue-router'
@@ -50,6 +51,14 @@ const router = useRouter()
 const route = useRoute()
 const settingsStore = useSettings()
 const { userResource } = usersStore()
+
+// Only categories that hold a published course — an entry filtering down to
+// nothing is a dead end (a fresh LMS ships seven empty demo categories).
+const categories = createResource({
+	url: 'lms.lms.neoffice_catalogue.get_course_categories',
+	cache: 'lms-course-categories',
+	auto: true,
+})
 const failed = ref(false)
 
 const surfaceApp = {
@@ -114,6 +123,21 @@ const contextNav = computed(() => {
 			active: route.name === 'ProfileCertificates',
 			onClick: () =>
 				router.push({ name: 'ProfileCertificates', params: { username } }),
+		})
+	}
+
+	const cats = categories.data || []
+	if (cats.length) {
+		sections.push({
+			label: __('Categories'),
+			items: cats.map((c) => ({
+				label: c.label,
+				icon: 'lucide-tag',
+				active: route.name === 'Courses' && route.query.category === c.name,
+				badge: String(c.total),
+				onClick: () =>
+					router.push({ name: 'Courses', query: { category: c.name } }),
+			})),
 		})
 	}
 

@@ -9888,3 +9888,7 @@ msgstr "Mes certificats"
 #: frontend/src/components/NeoCockpitLMSSidebar.vue
 msgid "Manage"
 msgstr "Animation"
+
+#: frontend/src/components/NeoCockpitLMSSidebar.vue
+msgid "Categories"
+msgstr "Catégories"
