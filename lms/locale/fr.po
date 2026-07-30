@@ -942,7 +942,7 @@ msgstr ""
 #: lms/lms/doctype/lms_quiz/lms_quiz.json
 #: lms/lms/doctype/lms_zoom_settings/lms_zoom_settings.json
 msgid "Batch Evaluator"
-msgstr "Évaluateur de lots"
+msgstr "Évaluateur de cohorte"
 
 #. Label of a Workspace Sidebar Item
 #: lms/workspace_sidebar/learning.json
@@ -4102,7 +4102,7 @@ msgstr ""
 #: frontend/src/components/Settings/Members.vue:174
 #: lms/lms/doctype/course_instructor/course_instructor.json
 msgid "Instructor"
-msgstr ""
+msgstr "Formateur"
 
 #. Label of the instructor_content (Text) field in DocType 'Course Lesson'
 #: lms/lms/doctype/course_lesson/course_lesson.json
@@ -5333,7 +5333,7 @@ msgstr ""
 #: lms/lms/doctype/lms_video_watch_duration/lms_video_watch_duration.json
 #: lms/lms/doctype/lms_zoom_settings/lms_zoom_settings.json
 msgid "Moderator"
-msgstr ""
+msgstr "Modérateur"
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue:295
 msgid "Modified"
@@ -9029,7 +9029,7 @@ msgstr ""
 #: frontend/src/components/CourseReviews.vue:20
 #: frontend/src/components/Modals/ReviewModal.vue:4
 msgid "Write a Review"
-msgstr ""
+msgstr "Écrire un avis"
 
 #: frontend/src/components/Assignment.vue:139
 msgid "Write your answer here"
@@ -9555,7 +9555,7 @@ msgstr ""
 
 #: frontend/src/components/CourseReviews.vue:10
 msgid "course rating"
-msgstr ""
+msgstr "note du cours"
 
 #: frontend/src/pages/Programs/StudentPrograms.vue:29
 msgid "courses"
@@ -9628,7 +9628,7 @@ msgstr "leçon"
 #: frontend/src/pages/Courses/CourseOverview.vue:208
 #: frontend/src/pages/Programs/ProgramEnrollment.vue:60
 msgid "lessons"
-msgstr ""
+msgstr "leçons"
 
 #: frontend/src/pages/Home/Home.vue:122 frontend/src/pages/Home/Home.vue:146
 msgid "live class"
@@ -9698,7 +9698,7 @@ msgstr "section"
 
 #: frontend/src/pages/Courses/CourseOverview.vue:202
 msgid "sections"
-msgstr ""
+msgstr "sections"
 
 #: lms/lms/email_account.py:63
 msgid "service must be a string"
@@ -9739,11 +9739,11 @@ msgstr ""
 
 #: frontend/src/components/CourseReviews.vue:14
 msgid "user rating"
-msgstr ""
+msgstr "avis"
 
 #: frontend/src/components/CourseReviews.vue:15
 msgid "user ratings"
-msgstr ""
+msgstr "avis"
 
 #: frontend/src/components/StudentHeatmap.vue:10
 msgid "weeks"
