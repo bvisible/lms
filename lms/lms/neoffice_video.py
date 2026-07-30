@@ -353,7 +353,11 @@ def extract_media_ids(body: str) -> list:
     return SECURE_VIDEO_RE.findall(body or "")
 
 
-@frappe.whitelist()
+# allow_guest, like upstream's get_lesson: an anonymous visitor must be able to
+# watch a preview lesson, which is the whole point of a free teaser. The gate is
+# resolve_lesson_access below, not the decorator — without allow_guest the call is
+# rejected before reaching it and the player shows "Internal Server Error".
+@frappe.whitelist(allow_guest=True)
 def get_playback_url(lesson: str, media: str = None) -> dict:
     """Return a signed, short-lived embed URL for a lesson video.
 
