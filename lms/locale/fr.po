@@ -3568,6 +3568,10 @@ msgstr ""
 msgid "Free"
 msgstr "Gratuit"
 
+#: frontend/src/components/CourseCardOverlay.vue
+msgid "Free of charge"
+msgstr "Gratuit"
+
 #. Option for the 'Type' (Select) field in DocType 'Job Opportunity'
 #. Option in a Select field in the job-opportunity Web Form
 #: frontend/src/pages/JobForm.vue:287 frontend/src/pages/Jobs.vue:333

@@ -219,7 +219,11 @@ const is_instructor = (): boolean => {
 
 const priceLabel = computed<string>(() => {
 	if (props.course.data?.paid_course) return props.course.data?.price || ''
-	return __('Free')
+	// Neoffice: NOT __('Free') — Frappe merges every app's translations into one
+	// flat namespace, and `suite` legitimately renders "Free" as "Libre" for the
+	// calendar's Free/Busy status. Loaded after lms, it won, so a gratis course
+	// was labelled "Libre". A price-specific source string sidesteps the clash.
+	return __('Free of charge')
 })
 
 const enrolledLabel = computed<string>(() => {
