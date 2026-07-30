@@ -35,6 +35,23 @@
 					</router-link>
 					<CertificationLinks :courseName="course.data.name" class="w-full" />
 				</div>
+				<!-- Neoffice: when an Item sells this course, buying goes through the
+				     shop cart — TWINT / Stripe / invoice / accounting all come with
+				     it. The LMS's own checkout is only the fallback, and having both
+				     live at once would mean two tunnels for one course. -->
+				<a
+					v-else-if="course.data?.paid_course && !isAdmin && shopRoute.data"
+					:href="shopRoute.data"
+				>
+					<Button variant="solid" size="md" class="w-full mb-8">
+						<template #prefix>
+							<span class="lucide-shopping-cart size-4" />
+						</template>
+						<span>
+							{{ __('Buy this course') }}
+						</span>
+					</Button>
+				</a>
 				<router-link
 					v-else-if="course.data?.paid_course && !isAdmin"
 					:to="{
@@ -143,7 +160,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, watch } from 'vue'
 import { Badge, Button, call, createResource, toast } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import CertificationLinks from '@/components/CertificationLinks.vue'
@@ -168,6 +185,13 @@ const props = withDefaults(
 	}>(),
 	{}
 )
+
+// Resolved once per course; null when no Item sells it, in which case the LMS
+// checkout stays in place.
+const shopRoute = createResource({
+	url: 'lms.lms.neoffice_commerce.get_shop_route',
+	makeParams: () => ({ course: props.course.data?.name }),
+})
 
 function enrollStudent() {
 	if (!user.data) {
@@ -216,6 +240,14 @@ const is_instructor = (): boolean => {
 	})
 	return user_is_instructor
 }
+
+watch(
+	() => props.course.data?.name,
+	(name) => {
+		if (name) shopRoute.fetch()
+	},
+	{ immediate: true }
+)
 
 const priceLabel = computed<string>(() => {
 	if (props.course.data?.paid_course) return props.course.data?.price || ''

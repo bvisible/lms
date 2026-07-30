@@ -205,3 +205,27 @@ def on_payment_entry_submitted(doc, method=None):
         )
         if invoice:
             _if_paid(invoice)
+
+
+# ---------------------------------------------------------------------------
+# The course page needs to send the buyer to the cart, not to LMS billing
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist(allow_guest=True)
+def get_shop_route(course: str) -> str | None:
+    """Public shop route of the Item selling this course, or None.
+
+    The course page uses it to point its buy button at the cart. Without it the
+    LMS falls back to its own checkout, and two purchase tunnels coexist for the
+    same course — the LMS one bypassing the cart, TWINT, Stripe and the invoice.
+    """
+    if not course:
+        return None
+
+    item = frappe.db.get_value("Item", {"lms_course": course, "disabled": 0}, "name")
+    if not item:
+        return None
+
+    route = frappe.db.get_value("Website Item", {"item_code": item, "published": 1}, "route")
+    return ("/" + route.lstrip("/")) if route else None
