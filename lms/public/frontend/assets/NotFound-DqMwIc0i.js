@@ -1,0 +1,2 @@
+import{o as a,k as s,w as r,e as u,u as l,am as i,U as m,g as _}from"./index-C7oi9y4z.js";const f={__name:"NotFound",setup(c){const t=m();return(e,o)=>{const n=_("Button");return a(),s(i,{name:"Page",title:e.__("Page not found"),description:e.__("The page you are looking for does not exist or has moved."),icon:"lucide-compass",width:"lg"},{default:r(()=>[u(n,{label:e.__("Back to Home"),onClick:o[0]||(o[0]=p=>l(t).push({name:"Home"}))},null,8,["label"])]),_:1},8,["title","description"])}}};export{f as default};
+//# sourceMappingURL=NotFound-DqMwIc0i.js.map
