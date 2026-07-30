@@ -40,6 +40,7 @@ import AppSidebar from '@/components/Sidebar/AppSidebar.vue'
 import NeoCockpitBridge from '@/components/NeoCockpitBridge.vue'
 import CommandPalette from '@/components/CommandPalette/CommandPalette.vue'
 
+import { translationsReady } from '@/translation'
 import { usersStore } from '@/stores/user'
 import { useSettings } from '@/stores/settings'
 import { useRouter, useRoute } from 'vue-router'
@@ -82,7 +83,11 @@ const item = (label, icon, routeName, activeFor = []) => ({
 })
 
 const contextNav = computed(() => {
-	// Reading route.name here keeps active states in sync with navigation.
+	// Reading route.name here keeps active states in sync with navigation, and
+	// translationsReady so the labels are recomputed when the dictionary lands —
+	// __() reads a non-reactive global, so a cold first visit would otherwise
+	// keep the English strings captured before the fetch resolved.
+	translationsReady.value
 	const sections = [
 		{
 			items: [item(__('Home'), 'home', 'Home')],

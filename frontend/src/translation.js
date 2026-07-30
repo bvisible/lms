@@ -1,4 +1,16 @@
 import { createResource } from 'frappe-ui'
+import { ref } from 'vue'
+
+/**
+ * Flips once the translation dictionary has landed.
+ *
+ * `__()` reads a plain `window` global, so anything that computes a label ONCE —
+ * a Vue computed, a prop passed to a non-Vue widget — freezes on whatever was
+ * available at that moment. The dictionary is ~3 MB, so on a cold visit it
+ * arrives well after the first render and those labels stay in English. Depend
+ * on this ref to recompute when it does.
+ */
+export const translationsReady = ref(Boolean(window.translatedMessages))
 
 export default function translationPlugin(app) {
 	app.config.globalProperties.__ = translate
@@ -35,6 +47,7 @@ function fetchTranslations(lang) {
 		auto: true,
 		transform: (data) => {
 			window.translatedMessages = data
+			translationsReady.value = true
 		},
 	})
 }
