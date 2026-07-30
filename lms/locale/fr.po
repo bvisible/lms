@@ -9892,3 +9892,71 @@ msgstr "Animation"
 #: frontend/src/components/NeoCockpitLMSSidebar.vue
 msgid "Categories"
 msgstr "Catégories"
+
+#: lms/www/nos-formations.html
+msgid "Our courses"
+msgstr "Nos formations"
+
+#: lms/www/nos-formations.html
+msgid "Practise at your own pace"
+msgstr "Pratiquez à votre rythme"
+
+#: lms/www/nos-formations.html
+msgid "Start free"
+msgstr "Commencer gratuitement"
+
+#: lms/www/nos-formations.html
+msgid "The programmes"
+msgstr "Les programmes"
+
+#: lms/www/nos-formations.html
+msgid "Read the course"
+msgstr "Lire le cours"
+
+#: lms/www/nos-formations.html
+msgid "See the programme"
+msgstr "Voir le programme"
+
+#: lms/www/nos-formations.html
+msgid "Buy"
+msgstr "Acheter"
+
+#: lms/www/nos-formations.html
+msgid "Permanent access"
+msgstr "Accès permanent"
+
+#: lms/www/nos-formations.html
+msgid "1 year of access"
+msgstr "1 an d'accès"
+
+#: lms/www/nos-formations.html
+msgid "{0} years of access"
+msgstr "{0} ans d'accès"
+
+#: lms/www/nos-formations.html
+msgid "{0} months of access"
+msgstr "{0} mois d'accès"
+
+#: lms/www/nos-formations.html
+msgid "Yoga"
+msgstr "Yoga"
+
+#: lms/www/nos-formations.html
+msgid "Illustrated guides, filmed sessions and progressive programmes. Start with the free courses — no account needed to read them — and go further when you feel like it."
+msgstr "Des guides illustrés, des séances filmées et des programmes progressifs. Commencez par les cours gratuits — aucun compte n'est demandé pour les lire — et allez plus loin quand vous en avez envie."
+
+#: lms/www/nos-formations.html
+msgid "Readable straight away, with nothing to pay and nothing to sign up for."
+msgstr "Lisibles tout de suite, sans rien payer et sans s'inscrire."
+
+#: lms/www/nos-formations.html
+msgid "Filmed sessions, reserved for members. Buy once, access for the stated period."
+msgstr "Des séances filmées, réservées aux inscrits. Un achat, un accès pour la durée indiquée."
+
+#: lms/www/nos-formations.html
+msgid "Every programme opens with a free lesson, so you can try before you buy."
+msgstr "Chaque programme s'ouvre sur une leçon offerte, pour essayer avant d'acheter."
+
+#: lms/www/nos-formations.html
+msgid "Browse the whole catalogue"
+msgstr "Parcourir tout le catalogue"

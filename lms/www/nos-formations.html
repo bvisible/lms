@@ -81,9 +81,7 @@
 				{% if c.category %}<div class="nf-tag">{{ c.category }}</div>{% endif %}
 				<h3>{{ c.title }}</h3>
 				<p>{{ c.short_introduction or "" }}</p>
-				<div class="nf-price">
-					{{ frappe.utils.fmt_money(c.course_price, currency=c.currency) }}
-				</div>
+				<div class="nf-price">{{ c.price_label }}</div>
 				<div class="nf-meta">
 					<span>{{ c.lessons }} {{ _("lessons") if c.lessons != 1 else _("lesson") }}</span>
 					{% if c.access %}<span>{{ c.access }}</span>{% endif %}

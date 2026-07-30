@@ -43,6 +43,13 @@ def _courses(paid: bool) -> list:
 
     for row in rows:
         row.lessons = frappe.db.count("Course Lesson", {"course": row.name})
+        # Formaté ici : le namespace frappe.utils n'est pas garanti côté Jinja,
+        # et le prix sortait sans sa devise.
+        row.price_label = (
+            frappe.utils.fmt_money(row.course_price, currency=row.currency or "CHF")
+            if paid
+            else None
+        )
         row.lms_url = "/lms/courses/{0}".format(row.name)
         row.shop_url = None
         row.access = None
