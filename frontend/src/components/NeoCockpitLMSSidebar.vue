@@ -3,6 +3,7 @@
 	<NeoCockpitBridge
 		v-else
 		:surface-app="surfaceApp"
+		:utilities="utilities"
 		:context-nav="contextNav"
 		:navigate="navigate"
 		:on-search="openSearch"
@@ -67,6 +68,11 @@ const isStaff = computed(() => {
 	const u = userResource?.data
 	return Boolean(u?.is_moderator || u?.is_instructor || u?.is_evaluator)
 })
+
+// A learner has no webmail, no NORA and no desk — and the Notes icon navigates
+// to /app/notes, which only answers with a permission error. Staff running the
+// platform keep the full row.
+const utilities = computed(() => (isStaff.value ? null : []))
 
 const item = (label, icon, routeName, activeFor = []) => ({
 	label,

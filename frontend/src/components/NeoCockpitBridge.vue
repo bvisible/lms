@@ -36,6 +36,8 @@ const props = defineProps({
   onSearch: { type: Function, default: null },
   /** Keyboard hint shown in the search bar (the app's native shortcut). */
   searchKbd: { type: String, default: "" },
+  /** Which header utility icons to keep. null = all of them (cockpit default). */
+  utilities: { type: Array, default: null },
 })
 
 const host = ref(null)
@@ -86,6 +88,7 @@ function render() {
     env: "spa",
     layout: "sidebar",
     surfaceApp: props.surfaceApp,
+    utilities: props.utilities || undefined,
     contextNav: props.contextNav,
     contextFooter: props.contextFooter,
     onSearch: props.onSearch || undefined,
