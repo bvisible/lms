@@ -79,6 +79,8 @@ after_migrate = [
 	"lms.lms.doctype.lms_payment.lms_payment.add_unique_payment_id_constraint",
 	# Neoffice: subscription-gated video access fields on LMS Enrollment
 	"lms.lms.neoffice_video.setup_custom_fields",
+	# Neoffice: Item.lms_course — the bridge that lets the webshop sell a course
+	"lms.lms.neoffice_commerce.setup_custom_fields",
 ]
 
 # Desk Notifications
@@ -132,14 +134,21 @@ doc_events = {
 		"before_insert": "lms.lms.user.add_lms_student_role",
 	},
 	# Neoffice: paying extends course access, exactly like it extends a cloud
-	# instance's validity.
+	# instance's validity — and, when the invoice sells a course as an Item,
+	# creates the enrolment in the first place.
 	"Sales Invoice": {
-		"on_update_after_submit": "lms.lms.neoffice_video.on_invoice_paid",
+		"on_update_after_submit": [
+			"lms.lms.neoffice_video.on_invoice_paid",
+			"lms.lms.neoffice_commerce.on_invoice_paid",
+		],
 	},
 	# A Payment Entry settles invoices via db_set, which never fires
 	# on_update_after_submit — this is the hook real payments actually take.
 	"Payment Entry": {
-		"on_submit": "lms.lms.neoffice_video.on_payment_entry_submitted",
+		"on_submit": [
+			"lms.lms.neoffice_video.on_payment_entry_submitted",
+			"lms.lms.neoffice_commerce.on_payment_entry_submitted",
+		],
 	},
 }
 
