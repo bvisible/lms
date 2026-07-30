@@ -1,0 +1,111 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Our courses") }}{% endblock %}
+
+{% block head_include %}
+<style>
+	.nf-wrap { --paper:#FAF7F2; --sand:#E8DDD0; --clay:#D68A59; --ink:#141414; --muted:#6B6156;
+		background:var(--paper); color:var(--ink); margin:0 -15px; padding:0 15px; }
+	.nf-inner { max-width:1120px; margin:0 auto; padding:64px 0 88px; }
+	.nf-eyebrow { font:600 12px/1 Helvetica,Arial,sans-serif; letter-spacing:.18em;
+		text-transform:uppercase; color:var(--clay); margin-bottom:18px; }
+	.nf-h1 { font:400 clamp(34px,5vw,54px)/1.1 Georgia,serif; margin:0 0 20px; }
+	.nf-lead { font-size:19px; line-height:1.65; color:var(--muted); max-width:62ch; margin:0 0 8px; }
+	.nf-h2 { font:400 clamp(25px,3vw,33px)/1.2 Georgia,serif; margin:72px 0 8px; }
+	.nf-sub { color:var(--muted); margin:0 0 30px; max-width:60ch; }
+	.nf-grid { display:grid; gap:26px; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); }
+	.nf-card { background:#fff; border:1px solid var(--sand); border-radius:14px; overflow:hidden;
+		display:flex; flex-direction:column; }
+	.nf-card img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:var(--paper); }
+	.nf-card-body { padding:22px; display:flex; flex-direction:column; gap:10px; flex:1; }
+	.nf-card h3 { font:400 21px/1.3 Georgia,serif; margin:0; }
+	.nf-card p { color:var(--muted); font-size:15px; line-height:1.6; margin:0; flex:1; }
+	.nf-meta { display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:var(--muted);
+		border-top:1px solid var(--sand); padding-top:14px; }
+	.nf-price { font:400 27px/1 Georgia,serif; }
+	.nf-price small { font-size:14px; color:var(--muted); }
+	.nf-btn { display:inline-block; text-align:center; padding:11px 20px; border-radius:9px;
+		font:600 14px/1 Helvetica,Arial,sans-serif; text-decoration:none; transition:opacity .15s; }
+	.nf-btn:hover { opacity:.86; text-decoration:none; }
+	.nf-btn-ink { background:var(--ink); color:#fff; }
+	.nf-btn-out { border:1px solid var(--sand); color:var(--ink); }
+	.nf-actions { display:flex; gap:10px; flex-wrap:wrap; }
+	.nf-tag { font:600 11px/1 Helvetica,Arial,sans-serif; letter-spacing:.1em; text-transform:uppercase;
+		color:var(--clay); }
+	.nf-foot { margin-top:80px; padding-top:34px; border-top:1px solid var(--sand); color:var(--muted); }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="nf-wrap">
+<div class="nf-inner">
+
+	<div class="nf-eyebrow">{{ _("Yoga") }}</div>
+	<h1 class="nf-h1">{{ _("Practise at your own pace") }}</h1>
+	<p class="nf-lead">
+		{{ _("Illustrated guides, filmed sessions and progressive programmes. Start with the free courses — no account needed to read them — and go further when you feel like it.") }}
+	</p>
+
+	{% if free_courses %}
+	<h2 class="nf-h2">{{ _("Start free") }}</h2>
+	<p class="nf-sub">{{ _("Readable straight away, with nothing to pay and nothing to sign up for.") }}</p>
+	<div class="nf-grid">
+		{% for c in free_courses %}
+		<article class="nf-card">
+			{% if c.image %}<img src="{{ c.image }}" alt="{{ c.title }}" loading="lazy">{% endif %}
+			<div class="nf-card-body">
+				{% if c.category %}<div class="nf-tag">{{ c.category }}</div>{% endif %}
+				<h3>{{ c.title }}</h3>
+				<p>{{ c.short_introduction or "" }}</p>
+				<div class="nf-meta">
+					<span>{{ c.lessons }} {{ _("lessons") if c.lessons != 1 else _("lesson") }}</span>
+					<span>{{ _("Free of charge") }}</span>
+				</div>
+				<div class="nf-actions">
+					<a class="nf-btn nf-btn-ink" href="{{ c.lms_url }}">{{ _("Read the course") }}</a>
+				</div>
+			</div>
+		</article>
+		{% endfor %}
+	</div>
+	{% endif %}
+
+	{% if paid_courses %}
+	<h2 class="nf-h2">{{ _("The programmes") }}</h2>
+	<p class="nf-sub">{{ _("Filmed sessions, reserved for members. Buy once, access for the stated period.") }}</p>
+	<div class="nf-grid">
+		{% for c in paid_courses %}
+		<article class="nf-card">
+			{% if c.image %}<img src="{{ c.image }}" alt="{{ c.title }}" loading="lazy">{% endif %}
+			<div class="nf-card-body">
+				{% if c.category %}<div class="nf-tag">{{ c.category }}</div>{% endif %}
+				<h3>{{ c.title }}</h3>
+				<p>{{ c.short_introduction or "" }}</p>
+				<div class="nf-price">
+					{{ frappe.utils.fmt_money(c.course_price, currency=c.currency) }}
+				</div>
+				<div class="nf-meta">
+					<span>{{ c.lessons }} {{ _("lessons") if c.lessons != 1 else _("lesson") }}</span>
+					{% if c.access %}<span>{{ c.access }}</span>{% endif %}
+					{% if c.enable_certification %}<span>{{ _("Certificate") }}</span>{% endif %}
+				</div>
+				<div class="nf-actions">
+					{% if c.shop_url %}
+					<a class="nf-btn nf-btn-ink" href="{{ c.shop_url }}">{{ _("Buy") }}</a>
+					{% endif %}
+					<a class="nf-btn nf-btn-out" href="{{ c.lms_url }}">{{ _("See the programme") }}</a>
+				</div>
+			</div>
+		</article>
+		{% endfor %}
+	</div>
+	{% endif %}
+
+	<p class="nf-foot">
+		{{ _("Every programme opens with a free lesson, so you can try before you buy.") }}
+		<a href="/lms/courses">{{ _("Browse the whole catalogue") }}</a>.
+	</p>
+
+</div>
+</div>
+{% endblock %}
