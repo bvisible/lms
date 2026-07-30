@@ -43,16 +43,7 @@ def _courses(paid: bool) -> list:
 
     for row in rows:
         row.lessons = frappe.db.count("Course Lesson", {"course": row.name})
-        # "CHF 180.00" : fmt_money ne préfixe le symbole que si la devise en a un
-        # de renseigné, et CHF n'en a pas — le prix sortait donc nu.
-        row.price_label = (
-            "{0} {1}".format(
-                row.currency or "CHF",
-                frappe.utils.fmt_money(row.course_price, precision=2),
-            )
-            if paid
-            else None
-        )
+        row.price_label = _price(row.course_price, row.currency) if paid else None
         row.lms_url = "/lms/courses/{0}".format(row.name)
         row.shop_url = None
         row.access = None
@@ -71,6 +62,19 @@ def _courses(paid: bool) -> list:
                     row.shop_url = "/" + route.lstrip("/")
 
     return rows
+
+
+def _price(amount, currency) -> str:
+    """« CHF 180.– », la convention du design system Neoffice.
+
+    fmt_money ne préfixe pas le symbole (CHF n'en a pas de renseigné dans le
+    doctype Currency), et un montant rond s'écrit avec un tiret, pas « .00 ».
+    """
+    amount = frappe.utils.flt(amount)
+    cur = currency or "CHF"
+    if amount == int(amount):
+        return "{0} {1}.–".format(cur, int(amount))
+    return "{0} {1}".format(cur, frappe.utils.fmt_money(amount, precision=2))
 
 
 def _n_months(months: int) -> str:
