@@ -17,16 +17,29 @@
 
 <script setup>
 /**
- * LMS flavor of the shared Neoffice chrome (NeoCockpit). Maps the existing
- * getSidebarLinks() output into contextNav; the native AppSidebar stays as
- * an automatic fallback (bundle missing, kill-switch, boot failure).
- * Recipe: neoffice ADR-015.
+ * LMS flavor of the shared Neoffice chrome (NeoCockpit).
+ *
+ * The nav below is declared EXPLICITLY, the way Drive does it — it is not
+ * mapped from getSidebarLinks(). Two reasons:
+ *
+ *  1. A paying learner must see a learner's menu. Upstream's list carries items
+ *     that belong to a platform back-office (job board, plaftorm statistics)
+ *     and shows them to everyone; on a course a customer paid for, that reads
+ *     as having wandered into someone else's admin.
+ *  2. Mapping upstream means every upstream merge can silently change our menu.
+ *     Declaring it decouples the two — the 513-commit merge of 2026-07-29 got
+ *     away with it by luck.
+ *
+ * Adding an entry is therefore a decision, not an inheritance.
+ *
+ * The native AppSidebar stays as an automatic fallback (bundle missing,
+ * kill-switch, boot failure). Recipe: neoffice ADR-015.
  */
 import AppSidebar from '@/components/Sidebar/AppSidebar.vue'
 import NeoCockpitBridge from '@/components/NeoCockpitBridge.vue'
 import CommandPalette from '@/components/CommandPalette/CommandPalette.vue'
 
-import { getSidebarLinks } from '@/utils'
+import { usersStore } from '@/stores/user'
 import { useSettings } from '@/stores/settings'
 import { useRouter, useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
@@ -34,6 +47,7 @@ import { ref, computed } from 'vue'
 const router = useRouter()
 const route = useRoute()
 const settingsStore = useSettings()
+const { userResource } = usersStore()
 const failed = ref(false)
 
 const surfaceApp = {
@@ -42,47 +56,71 @@ const surfaceApp = {
 	logo: '/assets/lms/frontend/learning.svg',
 }
 
-// LMS icons are PascalCase lucide names; NeoCockpit takes kebab strings
-const toKebab = (n) =>
-	String(n || '')
-		.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-		.toLowerCase()
-
 function navigate(r) {
 	if (!r) return
 	if (r.startsWith('/app') || r.startsWith('http')) window.location.href = r
 	else router.push(r)
 }
 
+// Whoever runs the platform, as opposed to whoever learns on it.
+const isStaff = computed(() => {
+	const u = userResource?.data
+	return Boolean(u?.is_moderator || u?.is_instructor || u?.is_evaluator)
+})
+
+const item = (label, icon, routeName, activeFor = []) => ({
+	label,
+	icon: `lucide-${icon}`,
+	active: [routeName, ...activeFor].includes(route.name),
+	onClick: () => router.push({ name: routeName }),
+})
+
 const contextNav = computed(() => {
-	// track the route so active states refresh
-	const currentName = route.name
-	const links = getSidebarLinks() || []
-	return links.map((section) => ({
-		label: section.hideLabel ? undefined : section.label,
-		items: section.items
-			// the cockpit search bar already covers Search
-			.filter((item) => item.label !== 'Search')
-			.map((item) => {
-				const external =
-					typeof item.to === 'string' &&
-					(item.to.startsWith('http') || item.to.includes('@'))
-				return {
-					label: item.label,
-					icon: 'lucide-' + toKebab(item.icon),
-					active:
-						currentName === item.to ||
-						(item.activeFor || []).includes(currentName),
-					onClick: external
-						? () =>
-								window.open(
-									item.to.includes('@') ? `mailto:${item.to}` : item.to,
-									'_blank'
-								)
-						: () => router.push({ name: item.to }),
-				}
-			}),
-	}))
+	// Reading route.name here keeps active states in sync with navigation.
+	const sections = [
+		{
+			items: [item(__('Home'), 'home', 'Home')],
+		},
+		{
+			label: __('Learning'),
+			items: [
+				item(__('My courses'), 'book-open', 'Courses', [
+					'CourseDetail',
+					'Lesson',
+					'SCORMChapter',
+				]),
+			],
+		},
+	]
+
+	// The profile route is /user/:username, so this only works once the user
+	// resource has resolved.
+	const username = userResource?.data?.username
+	if (username) {
+		sections[1].items.push({
+			label: __('My certificates'),
+			icon: 'lucide-graduation-cap',
+			active: route.name === 'ProfileCertificates',
+			onClick: () =>
+				router.push({ name: 'ProfileCertificates', params: { username } }),
+		})
+	}
+
+	if (isStaff.value) {
+		sections.push({
+			label: __('Manage'),
+			items: [
+				item(__('Batches'), 'users', 'Batches', ['BatchDetail']),
+				item(__('Quizzes'), 'circle-help', 'Quizzes', [
+					'QuizForm',
+					'QuizSubmissionList',
+				]),
+				item(__('Statistics'), 'trending-up', 'Statistics'),
+			],
+		})
+	}
+
+	return sections
 })
 
 function openSearch() {

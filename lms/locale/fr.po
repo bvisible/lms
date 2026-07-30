@@ -1032,7 +1032,7 @@ msgstr "Lot:"
 #: lms/lms/doctype/lms_settings/lms_settings.json
 #: lms/workspace_sidebar/learning.json lms/www/_lms.py:132
 msgid "Batches"
-msgstr "Lots"
+msgstr "Cohortes"
 
 #: lms/templates/emails/batch_confirmation.html:33
 #: lms/templates/emails/batch_start_reminder.html:31
@@ -4671,7 +4671,7 @@ msgstr ""
 #: frontend/src/pages/PersonaForm.vue:13
 #: lms/lms/workspace/learning/learning.json lms/workspace_sidebar/learning.json
 msgid "Learning"
-msgstr ""
+msgstr "Formation"
 
 #: frontend/src/pages/Home/Streak.vue:2
 msgid "Learning Consistency"
@@ -6952,7 +6952,7 @@ msgstr ""
 #: frontend/src/pages/Quizzes.vue:308 frontend/src/pages/Quizzes.vue:318
 #: lms/www/_lms.py:276
 msgid "Quizzes"
-msgstr ""
+msgstr "Quiz"
 
 #: frontend/src/pages/Quizzes.vue:256
 msgid "Quizzes deleted successfully"
@@ -9877,3 +9877,14 @@ msgstr ""
 msgid "{} Published"
 msgstr ""
 
+#: frontend/src/components/NeoCockpitLMSSidebar.vue
+msgid "My courses"
+msgstr "Mes cours"
+
+#: frontend/src/components/NeoCockpitLMSSidebar.vue
+msgid "My certificates"
+msgstr "Mes certificats"
+
+#: frontend/src/components/NeoCockpitLMSSidebar.vue
+msgid "Manage"
+msgstr "Animation"
