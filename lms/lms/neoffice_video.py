@@ -183,9 +183,15 @@ def _config() -> dict:
     return {"channel": channel, "account": account, "token": token}
 
 
-def _request(method: str, path: str, payload: dict = None) -> dict:
+def _request(
+    method: str, path: str, payload: dict = None, params: dict = None, envelope: bool = False
+) -> dict:
     cfg = _config()
     url = "{0}/{1}{2}".format(API_BASE, cfg["channel"], path)
+    # Omitting `account` yields a bare 403 vod_access_denied — undocumented.
+    query = {"account": cfg["account"]}
+    if params:
+        query.update(params)
     response = requests.request(
         method,
         url,
@@ -194,8 +200,7 @@ def _request(method: str, path: str, payload: dict = None) -> dict:
             "Accept": "application/json",
             "Content-Type": "application/json",
         },
-        # Omitting `account` yields a bare 403 vod_access_denied — undocumented.
-        params={"account": cfg["account"]},
+        params=query,
         json=payload,
         timeout=API_TIMEOUT,
     )
@@ -211,7 +216,26 @@ def _request(method: str, path: str, payload: dict = None) -> dict:
         )
         frappe.throw(_("The video service is temporarily unavailable."))
 
-    return body.get("data") or {}
+    return body if envelope else (body.get("data") or {})
+
+
+def _all_shares() -> list:
+    """Every Share on the channel, across every page.
+
+    /share paginates, at 15 items per page by default. Reading only the first
+    page means that past the fifteenth video an existing Share is never found —
+    so a duplicate would be created on every single playback. Verified against
+    the live API: the envelope carries total/pages/page, and per_page is honoured.
+    """
+    shares = []
+    page = 1
+    while True:
+        body = _request("GET", "/share", params={"page": page, "per_page": 500}, envelope=True)
+        batch = body.get("data") or []
+        shares.extend(batch)
+        if not batch or page >= (body.get("pages") or 1):
+            return shares
+        page += 1
 
 
 def _get_or_create_share(media_id: str) -> str:
@@ -226,7 +250,7 @@ def _get_or_create_share(media_id: str) -> str:
     if cached:
         return cached.decode() if isinstance(cached, bytes) else cached
 
-    for share in _request("GET", "/share") or []:
+    for share in _all_shares():
         if share.get("target_id") == media_id:
             cache.hset(SHARE_CACHE_KEY, media_id, share["id"])
             return share["id"]
