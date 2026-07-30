@@ -2109,7 +2109,7 @@ msgstr ""
 
 #: frontend/src/components/CourseCreatorCard.vue:138
 msgid "Course creator"
-msgstr ""
+msgstr "Créateur du cours"
 
 #: frontend/src/pages/Courses/CourseForm.vue:248
 msgid "Course deleted successfully"
@@ -8011,11 +8011,11 @@ msgstr ""
 
 #: frontend/src/components/CourseCreatorCard.vue:139
 msgid "Taught by"
-msgstr ""
+msgstr "Animé par"
 
 #: frontend/src/components/CourseCreatorCard.vue:140
 msgid "Taught by a team of {0}"
-msgstr ""
+msgstr "Animé par une équipe de {0}"
 
 #: frontend/src/pages/PersonaForm.vue:160
 msgid "Teachable"
