@@ -81,6 +81,8 @@ after_migrate = [
 	"lms.lms.neoffice_video.setup_custom_fields",
 	# Neoffice: Item.lms_course — the bridge that lets the webshop sell a course
 	"lms.lms.neoffice_commerce.setup_custom_fields",
+	# Neoffice: le marquage de la durée choisie, sur les trois documents du panier
+	"lms.lms.neoffice_commerce.setup_cart_fields",
 ]
 
 # Desk Notifications
@@ -170,6 +172,12 @@ doc_events = {
 	# cours payant que personne ne peut acheter doit le dire.
 	"LMS Course": {
 		"validate": "lms.lms.neoffice_commerce.keep_the_course_price_honest",
+	},
+	# Neoffice: une ligne de panier marquée garde le prix de l'offre choisie. Le
+	# contrôleur la retarifierait sinon depuis la liste de prix de l'article, et
+	# « 3 mois » repasserait au prix par défaut au premier changement de panier.
+	"Quotation": {
+		"before_validate": "lms.lms.neoffice_commerce.hold_the_offer_price",
 	},
 }
 

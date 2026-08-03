@@ -270,16 +270,28 @@ def _grant(course: str, member: str, months: int, invoice: str = None) -> str:
 
 def grant_courses_for_invoice(invoice) -> list:
     """Enrol the buyer in every course sold by this invoice's lines."""
-    lines = frappe.get_all(
-        "Sales Invoice Item",
-        filters={"parent": invoice.name},
-        fields=["item_code"],
-    )
+    champs = ["item_code"]
+    marque = frappe.db.has_column("Sales Invoice Item", "lms_offer")
+    if marque:
+        champs += ["lms_offer", "lms_months"]
+
+    lines = frappe.get_all("Sales Invoice Item", filters={"parent": invoice.name}, fields=champs)
     if not lines:
         return []
 
     courses = []
     for line in lines:
+        # 🔑 La durée MARQUÉE sur la ligne l'emporte : c'est celle que le client
+        # a choisie et payée. La relire sur l'article donnerait la durée
+        # d'aujourd'hui, qui a pu changer entre l'achat et l'encaissement — et
+        # sur un article qui vend trois durées, elle ne voudrait rien dire.
+        if marque and line.get("lms_offer"):
+            course = course_sold_by(line.item_code)
+            if course:
+                courses.append((course, int(line.get("lms_months") or 0)))
+                continue
+
+        # Sans marquage : le chemin historique, un article = une durée.
         course, months = (
             frappe.db.get_value("Item", line.item_code, ["lms_course", "lms_access_months"])
             or (None, None)
@@ -559,3 +571,139 @@ def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
     settings.flags.ignore_permissions = True
     settings.save(ignore_permissions=True)
     return label
+
+
+# ---------------------------------------------------------------------------
+# La durée choisie, du panier jusqu'à l'inscription
+# ---------------------------------------------------------------------------
+
+CART_DOCTYPES = ("Quotation Item", "Sales Order Item", "Sales Invoice Item")
+
+
+def setup_cart_fields():
+    """Le marquage qui dit « cette ligne est une offre de cours », et laquelle.
+
+    🔑 Deux champs et pas un : `lms_offer` porte le libellé — ce que le client a
+    choisi, lisible sur sa facture — et `lms_months` porte la durée, qui est ce
+    qui accorde réellement l'accès. Un seul entier ne suffirait pas : **zéro
+    signifie permanent**, on ne pourrait donc pas distinguer « offre permanente »
+    de « pas d'offre du tout ». Le libellé sert de présence.
+
+    La durée est FIGÉE sur la ligne, pas relue au moment du paiement : entre
+    l'achat et l'encaissement, la table des offres a pu changer, et le client a
+    droit à ce qu'il a acheté.
+    """
+    from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+    create_custom_fields(
+        {
+            dt: [
+                {
+                    "fieldname": "lms_offer",
+                    "fieldtype": "Data",
+                    "label": "Course offer",
+                    "insert_after": "item_name",
+                    "read_only": 1,
+                    "no_copy": 0,
+                    "print_hide": 0,
+                },
+                {
+                    "fieldname": "lms_months",
+                    "fieldtype": "Int",
+                    "label": "Access months",
+                    "insert_after": "lms_offer",
+                    "read_only": 1,
+                    "print_hide": 1,
+                },
+            ]
+            for dt in CART_DOCTYPES
+        },
+        ignore_validate=True,
+    )
+
+
+def _offer_named(course: str, label: str) -> dict | None:
+    for offre in offers_for(course):
+        if offre["label"] == label:
+            return offre
+    return None
+
+
+def course_sold_by(item_code: str) -> str | None:
+    """Le cours que vend cet article — dans le sens neuf, puis dans l'ancien."""
+    if not item_code:
+        return None
+    if frappe.get_meta("LMS Course").has_field("neo_item"):
+        course = frappe.db.get_value("LMS Course", {"neo_item": item_code}, "name")
+        if course:
+            return course
+    return frappe.db.get_value("Item", item_code, "lms_course")
+
+
+@frappe.whitelist(allow_guest=True)
+def add_offer_to_cart(item_code: str, offer: str):
+    """Mettre au panier la durée choisie sur la fiche boutique.
+
+    🔴 `update_cart` de webshop ne sait pas transporter un choix : elle ne prend
+    qu'un article et une quantité. La durée voulue se perdait donc entre la page
+    et le panier — c'est exactement pour cela qu'on avait fini par créer un
+    article par durée. On passe donc par la boutique pour la mécanique (le
+    devis, le client, la fiscalité), puis on marque la ligne et on y pose le
+    prix de l'offre.
+    """
+    course = course_sold_by(item_code)
+    if not course:
+        frappe.throw(_("{0} does not sell a course.").format(item_code))
+
+    choix = _offer_named(course, offer)
+    if not choix:
+        frappe.throw(_("Unknown offer: {0}").format(offer))
+
+    from webshop.webshop.shopping_cart.cart import _get_cart_quotation, update_cart
+
+    update_cart(item_code, qty=1)
+
+    doc = _get_cart_quotation()
+    ligne = None
+    for row in doc.items or []:
+        if row.item_code == item_code:
+            ligne = row  # la dernière l'emporte : c'est celle qu'on vient d'ajouter
+    if not ligne:
+        frappe.throw(_("The line could not be found in the cart."))
+
+    ligne.lms_offer = choix["label"]
+    ligne.lms_months = choix["months"]
+    ligne.rate = choix["price"]
+    ligne.price_list_rate = choix["price"]
+    doc.flags.ignore_permissions = True
+    doc.save()
+    frappe.db.commit()
+    return {"offer": choix["label"], "price": choix["price"]}
+
+
+def hold_the_offer_price(doc, method=None):
+    """Quotation before_validate — une ligne marquée garde le prix de son offre.
+
+    Sans cela, le contrôleur retarife la ligne depuis la liste de prix de
+    l'article à chaque enregistrement, et l'offre « 3 mois » repasserait au prix
+    de l'offre par défaut au premier changement de panier. Le même geste que
+    pour les options de réservation : ce qui est marqué est à nous, et se
+    réécrit à chaque tour.
+    """
+    if doc.get("order_type") != "Shopping Cart" or doc.docstatus != 0:
+        return
+    if not frappe.db.has_column("Quotation Item", "lms_offer"):
+        return
+
+    for row in doc.items or []:
+        if not row.get("lms_offer"):
+            continue
+        course = course_sold_by(row.item_code)
+        if not course:
+            continue
+        choix = _offer_named(course, row.lms_offer)
+        if not choix:
+            continue
+        row.lms_months = choix["months"]
+        row.rate = choix["price"]
+        row.price_list_rate = choix["price"]
