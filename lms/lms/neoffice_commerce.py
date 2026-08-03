@@ -18,7 +18,7 @@ Access itself is enforced elsewhere — see neoffice_video.get_course_access.
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils import add_months, flt, getdate, nowdate
+from frappe.utils import add_months, cint, flt, getdate, nowdate
 
 # 🔴 `insert_after: "description"` posait la section dans l'onglet **Détails**,
 # entre la description et la suite — et une Section Break n'ouvre pas seulement
@@ -733,3 +733,36 @@ def hold_the_offer_price(doc, method=None):
         row.lms_months = choix["months"]
         row.rate = choix["price"]
         row.price_list_rate = choix["price"]
+
+
+def course_offer_count(item_code: str) -> int:
+    """Combien d'offres vend cet article — pour la vignette du catalogue.
+
+    🔴 Une vignette affichait « CHF 90.00 » pour un cours vendu 90 ou 140 selon
+    la durée : le prix le plus bas présenté comme LE prix. Il y manquait le
+    « dès », et le client découvrait le reste sur la fiche.
+
+    ⚠️ Compté en UNE requête pour toute la page, pas une par vignette : un
+    catalogue de cent articles aurait payé deux cents allers-retours pour une
+    mention de trois lettres. Le résultat vit le temps de la requête HTTP.
+    """
+    if not item_code:
+        return 0
+    if not frappe.db.exists("DocType", "LMS Course Offer"):
+        return 0
+
+    cache = getattr(frappe.local, "_lms_offer_counts", None)
+    if cache is None:
+        rows = frappe.db.sql(
+            """
+            SELECT c.neo_item AS item, COUNT(*) AS n
+            FROM `tabLMS Course Offer` o
+            JOIN `tabLMS Course` c ON c.name = o.parent
+            WHERE IFNULL(c.neo_item, '') != ''
+            GROUP BY c.neo_item
+            """,
+            as_dict=True,
+        )
+        cache = {r.item: cint(r.n) for r in rows}
+        frappe.local._lms_offer_counts = cache
+    return cache.get(item_code, 0)

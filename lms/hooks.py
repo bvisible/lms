@@ -270,6 +270,8 @@ jinja = {
 		# Neoffice: les offres d'un cours, pour le sélecteur de la fiche boutique
 		"lms.lms.neoffice_commerce.offers_for",
 		"lms.lms.neoffice_commerce.course_sold_by",
+		# Combien d'offres vend un article — pour le « dès » des vignettes
+		"lms.lms.neoffice_commerce.course_offer_count",
 		"lms.lms.utils.get_lesson_count",
 		"lms.lms.utils.get_instructors",
 		"lms.lms.utils.get_lesson_index",
