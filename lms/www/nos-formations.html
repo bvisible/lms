@@ -24,6 +24,15 @@
 		border-top:1px solid var(--sand); padding-top:14px; }
 	.nf-price { font:400 27px/1 Georgia,serif; }
 	.nf-price small { font-size:14px; color:var(--muted); }
+	/* Les offres d'un même cours : une ligne chacune, la durée à gauche et le
+	   prix à droite — c'est ainsi qu'on compare deux formules. */
+	.nf-offers { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+	.nf-offer { display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+		padding:9px 13px; border:1px solid var(--sand,#e4ddd2); border-radius:10px;
+		text-decoration:none; color:inherit; background:#fff; }
+	.nf-offer:hover { border-color:var(--clay,#D68A59); }
+	.nf-offer-access { font-size:14px; }
+	.nf-offer-price { font-weight:600; white-space:nowrap; }
 	.nf-btn { display:inline-block; text-align:center; padding:11px 20px; border-radius:9px;
 		font:600 14px/1 Helvetica,Arial,sans-serif; text-decoration:none; transition:opacity .15s; }
 	.nf-btn:hover { opacity:.86; text-decoration:none; }
@@ -87,8 +96,23 @@
 					{% if c.access %}<span>{{ c.access }}</span>{% endif %}
 					{% if c.enable_certification %}<span>{{ _("Certificate") }}</span>{% endif %}
 				</div>
+				{#
+					Plusieurs offres pour un même cours — trois mois, un an,
+					permanent : un bouton unique ne peut pas poser un choix, une
+					liste si. Un seul bouton quand il n'y a qu'une offre.
+				#}
+				{% if c.offers | length > 1 %}
+				<div class="nf-offers">
+					{% for o in c.offers %}
+					<a class="nf-offer" href="{{ o.route }}">
+						<span class="nf-offer-access">{{ o.access }}</span>
+						<span class="nf-offer-price">{{ o.price_label }}</span>
+					</a>
+					{% endfor %}
+				</div>
+				{% endif %}
 				<div class="nf-actions">
-					{% if c.shop_url %}
+					{% if c.shop_url and c.offers | length <= 1 %}
 					<a class="nf-btn nf-btn-ink" href="{{ c.shop_url }}">{{ _("Buy") }}</a>
 					{% endif %}
 					<a class="nf-btn nf-btn-out" href="{{ c.lms_url }}">{{ _("See the programme") }}</a>

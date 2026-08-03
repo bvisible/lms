@@ -18,7 +18,7 @@ Access itself is enforced elsewhere — see neoffice_video.get_course_access.
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils import add_months, getdate, nowdate
+from frappe.utils import add_months, flt, getdate, nowdate
 
 # 🔴 `insert_after: "description"` posait la section dans l'onglet **Détails**,
 # entre la description et la suite — et une Section Break n'ouvre pas seulement
@@ -327,19 +327,62 @@ def on_payment_entry_submitted(doc, method=None):
 
 
 @frappe.whitelist(allow_guest=True)
+def offers_for(course: str) -> list:
+    """Toutes les offres qui vendent ce cours, de la moins chère à la plus chère.
+
+    🔴 Un cours peut se vendre en plusieurs offres — trois mois, un an,
+    permanent — et c'est même la raison pour laquelle la durée d'accès vit sur
+    l'ARTICLE et non sur le cours. Le code, lui, n'en lisait qu'une : un
+    `get_value` sans tri, donc **la première venue**. Mesuré sur osiris avec
+    deux offres réelles (12 mois à 180.–, 3 mois à 95.–) : le bouton « Acheter »
+    et le catalogue pointaient tous deux sur celle créée en DERNIER, et l'autre
+    n'existait plus pour personne.
+
+    Une offre sans fiche boutique publiée n'en est pas une : on ne peut pas
+    l'acheter, donc on ne l'annonce pas.
+    """
+    if not course:
+        return []
+
+    liste = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+    offres = []
+    for item in frappe.get_all(
+        "Item", filters={"lms_course": course, "disabled": 0}, fields=["name", "item_name", "lms_access_months"]
+    ):
+        route = frappe.db.get_value("Website Item", {"item_code": item.name, "published": 1}, "route")
+        if not route:
+            continue
+        prix = flt(
+            frappe.db.get_value(
+                "Item Price", {"item_code": item.name, "price_list": liste, "selling": 1}, "price_list_rate"
+            )
+        )
+        offres.append(
+            {
+                "item": item.name,
+                "label": item.item_name or item.name,
+                "months": int(item.lms_access_months or 0),
+                "price": prix,
+                "route": "/" + route.lstrip("/"),
+            }
+        )
+
+    # Du moins cher au plus cher : c'est l'ordre dans lequel on lit une gamme,
+    # et il rend le choix du bouton unique DÉTERMINISTE.
+    offres.sort(key=lambda o: (o["price"], o["months"]))
+    return offres
+
+
 def get_shop_route(course: str) -> str | None:
     """Public shop route of the Item selling this course, or None.
 
     The course page uses it to point its buy button at the cart. Without it the
     LMS falls back to its own checkout, and two purchase tunnels coexist for the
     same course — the LMS one bypassing the cart, TWINT, Stripe and the invoice.
+
+    Quand plusieurs offres existent, c'est **la moins chère** — « à partir de »,
+    la convention de toute gamme. Le catalogue, lui, les montre toutes : un
+    bouton unique ne peut pas poser un choix, une liste si.
     """
-    if not course:
-        return None
-
-    item = frappe.db.get_value("Item", {"lms_course": course, "disabled": 0}, "name")
-    if not item:
-        return None
-
-    route = frappe.db.get_value("Website Item", {"item_code": item, "published": 1}, "route")
-    return ("/" + route.lstrip("/")) if route else None
+    offres = offers_for(course)
+    return offres[0]["route"] if offres else None

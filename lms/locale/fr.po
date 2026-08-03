@@ -9984,3 +9984,7 @@ msgstr "Un article, une offre"
 #: lms/lms/neoffice_commerce.py
 msgid "{0} is already bookable ({1}), so it cannot also sell a course: an item carries one price, and a class and a filmed programme are rarely worth the same. Create a second item for the course."
 msgstr "{0} est déjà réservable ({1}) : il ne peut donc pas vendre un cours en plus. Un article porte un seul prix, et une séance et un programme filmé ne valent presque jamais la même chose. Créez un second article pour le cours."
+
+#: lms/www/nos_formations.py
+msgid "from {0}"
+msgstr "dès {0}"

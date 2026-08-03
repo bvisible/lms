@@ -48,18 +48,32 @@ def _courses(paid: bool) -> list:
         row.shop_url = None
         row.access = None
 
+        row.offers = []
+
         if paid:
-            item = frappe.db.get_value(
-                "Item", {"lms_course": row.name, "disabled": 0}, ["name", "lms_access_months"], as_dict=True
-            )
-            if item:
-                months = int(item.lms_access_months or 0)
-                row.access = frappe._("Permanent access") if not months else _n_months(months)
-                route = frappe.db.get_value(
-                    "Website Item", {"item_code": item.name, "published": 1}, "route"
+            # 🔴 Un cours peut se vendre en PLUSIEURS offres — trois mois, un an,
+            # permanent. Le code n'en lisait qu'une, sans tri : la première
+            # venue. Mesuré avec deux offres réelles (12 mois à 180.–, 3 mois à
+            # 95.–), la carte n'annonçait que celle créée en dernier, et le prix
+            # affiché venait du COURS, pas de l'article qu'on achetait.
+            from lms.lms.neoffice_commerce import offers_for
+
+            row.offers = offers_for(row.name)
+            for offre in row.offers:
+                offre["access"] = (
+                    frappe._("Permanent access") if not offre["months"] else _n_months(offre["months"])
                 )
-                if route:
-                    row.shop_url = "/" + route.lstrip("/")
+                offre["price_label"] = _price(offre["price"], row.currency)
+
+            if row.offers:
+                # Le prix annoncé est celui qu'on paiera — donc celui de
+                # l'article, jamais `course_price`, que rien ne tient à jour dès
+                # lors que la vente passe par la boutique.
+                row.price_label = row.offers[0]["price_label"]
+                if len(row.offers) > 1:
+                    row.price_label = frappe._("from {0}").format(row.price_label)
+                row.access = row.offers[0]["access"] if len(row.offers) == 1 else None
+                row.shop_url = row.offers[0]["route"]
 
     return rows
 
