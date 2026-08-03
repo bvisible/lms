@@ -407,6 +407,7 @@ def keep_the_course_price_honest(doc, method=None):
             doc.course_price = moins_chere
         if not doc.get("paid_course"):
             doc.paid_course = 1
+        _align_the_item_price(offres[0])
         return
 
     if doc.get("paid_course") and doc.get("published"):
@@ -419,6 +420,31 @@ def keep_the_course_price_honest(doc, method=None):
             title=_("Paid, and unbuyable"),
             indicator="orange",
         )
+
+
+def _align_the_item_price(offre: dict) -> None:
+    """Le tarif de l'article suit l'offre la moins chère.
+
+    🔴 Vu à l'écran : l'en-tête de la fiche annonçait **CHF 180.00** — le prix
+    de liste de l'article — pendant que « 3 mois à 95.– » était coché juste en
+    dessous. Le sélecteur corrige l'affichage en JavaScript, mais un prix faux
+    entre le chargement et le script reste un prix faux ; et le catalogue, les
+    recommandations et le référencement lisent celui-là, pas le nôtre.
+
+    Le tarif de l'article devient donc le « à partir de » de la gamme. Il ne
+    décide plus de rien — la ligne de panier porte le prix de l'offre choisie —
+    mais il ne ment plus.
+    """
+    liste = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+    if not liste:
+        return
+    nom = frappe.db.get_value(
+        "Item Price", {"item_code": offre["item"], "price_list": liste, "selling": 1}, "name"
+    )
+    if not nom:
+        return
+    if flt(frappe.db.get_value("Item Price", nom, "price_list_rate")) != flt(offre["price"]):
+        frappe.db.set_value("Item Price", nom, "price_list_rate", flt(offre["price"]))
 
 
 def _the_selling_item(course: str) -> str | None:

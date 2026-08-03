@@ -23,6 +23,7 @@
 	{% for o in _offers %}
 	<label class="lms-offer{{ ' is-on' if loop.first else '' }}">
 		<input type="radio" name="lms-offer" value="{{ o.label }}" data-price="{{ o.price }}"
+			data-formatted="{{ frappe.format_value(o.price, {"fieldtype": "Currency"}) }}"
 			{{ 'checked' if loop.first else '' }}>
 		<span class="lms-offer-label">{{ o.label }}</span>
 		<span class="lms-offer-price">{{ frappe.format_value(o.price, {"fieldtype": "Currency"}) }}</span>
@@ -49,34 +50,61 @@
 
 <script>
 (function () {
-	const zone = document.getElementById("lms-offers");
-	if (!zone) return;
+	// 🔴 Ce script est inclus AVANT les boutons de la boutique dans la page :
+	// au moment où il s'exécutait, `.btn-add-to-cart` n'existait pas encore et
+	// le nettoyage ne trouvait rien. D'où deux boutons « Ajouter au panier »
+	// côte à côte, dont un qui ignorait l'offre choisie. On attend le DOM.
+	function demarrer() {
+		const zone = document.getElementById("lms-offers");
+		if (!zone) return;
 
-	// 🔴 Le bouton natif de la boutique ignore l'offre choisie : il ajoute
-	// l'article à son prix de liste. On le retire pour qu'il n'y ait qu'une
-	// seule façon d'acheter, et donc qu'un seul prix possible.
-	document.querySelectorAll(".btn-add-to-cart-list, .btn-add-to-cart").forEach((b) => {
-		if (!zone.contains(b)) b.remove();
-	});
+		// Tout le bloc d'achat de la boutique s'en va : son bouton ajoute
+		// l'article au prix de liste sans regarder l'offre, et son compteur de
+		// quantité n'a pas de sens — on n'achète pas deux fois le même accès.
+		document.querySelectorAll(".action-buttons").forEach((b) => {
+			if (!zone.contains(b)) b.remove();
+		});
 
-	zone.addEventListener("change", () => {
-		zone.querySelectorAll(".lms-offer").forEach((l) =>
-			l.classList.toggle("is-on", !!l.querySelector("input:checked"))
-		);
-	});
+		const prix = document.querySelector(".product-price");
 
-	zone.querySelector(".lms-offer-buy").addEventListener("click", function () {
-		const choix = zone.querySelector("input[name='lms-offer']:checked");
-		if (!choix) return;
-		const msg = zone.querySelector(".lms-offer-msg");
-		this.disabled = true;
-		msg.textContent = "{{ _('Adding…') }}";
-		frappe.call({
-			method: "lms.lms.neoffice_commerce.add_offer_to_cart",
-			args: { item_code: zone.dataset.item, offer: choix.value },
-		}).then(() => { window.location.href = "/cart"; })
-		  .catch(() => { this.disabled = false; msg.textContent = "{{ _('Could not add it to the cart.') }}"; });
-	});
+		function choisie() {
+			return zone.querySelector("input[name='lms-offer']:checked");
+		}
+
+		// 🔴 L'en-tête annonçait le prix de l'ARTICLE — 180 — pendant que
+		// « 3 mois » à 95 était coché juste en dessous. Le prix affiché doit
+		// être celui qu'on paiera, toujours.
+		function montrer() {
+			const c = choisie();
+			if (!c || !prix) return;
+			prix.textContent = c.dataset.formatted;
+			zone.querySelectorAll(".lms-offer").forEach((l) =>
+				l.classList.toggle("is-on", !!l.querySelector("input:checked"))
+			);
+		}
+
+		zone.addEventListener("change", montrer);
+		montrer();
+
+		zone.querySelector(".lms-offer-buy").addEventListener("click", function () {
+			const c = choisie();
+			if (!c) return;
+			const msg = zone.querySelector(".lms-offer-msg");
+			this.disabled = true;
+			msg.textContent = "{{ _('Adding…') }}";
+			frappe.call({
+				method: "lms.lms.neoffice_commerce.add_offer_to_cart",
+				args: { item_code: zone.dataset.item, offer: c.value },
+			}).then(() => { window.location.href = "/cart"; })
+			  .catch(() => { this.disabled = false; msg.textContent = "{{ _('Could not add it to the cart.') }}"; });
+		});
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", demarrer);
+	} else {
+		demarrer();
+	}
 })();
 </script>
 {% endif %}

@@ -10016,3 +10016,15 @@ msgstr "Offres"
 #: lms/lms/neoffice_commerce.py
 msgid "Offer"
 msgstr "Offre"
+
+#: lms/templates/includes/course_offers.html
+msgid "Choose your access"
+msgstr "Choisissez votre accès"
+
+#: lms/templates/includes/course_offers.html
+msgid "Adding…"
+msgstr "Ajout en cours…"
+
+#: lms/templates/includes/course_offers.html
+msgid "Could not add it to the cart."
+msgstr "Impossible de l'ajouter au panier."
