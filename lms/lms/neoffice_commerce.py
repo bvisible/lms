@@ -386,3 +386,39 @@ def get_shop_route(course: str) -> str | None:
     """
     offres = offers_for(course)
     return offres[0]["route"] if offres else None
+
+
+# ---------------------------------------------------------------------------
+# Making the catalogue reachable
+# ---------------------------------------------------------------------------
+
+
+def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
+    """Poser l'entrée « Nos formations » dans le menu du site, une fois.
+
+    🔴 La page existait et **rien ne pointait dessus**. Une page que personne ne
+    peut atteindre n'existe pas du point de vue d'un client, et le menu du site
+    est l'endroit où il regarde. Exactement la panne qu'avait déjà connue la
+    boutique — dont l'entrée avait disparu lors d'une refonte — et celle que
+    `neoffice_theme.booking.shop.ensure_shop_link` corrige pour « Réserver ».
+
+    Idempotent sur l'URL, pas sur le libellé : une entrée que le propriétaire a
+    renommée reste cette entrée, et en ajouter une seconde reviendrait à
+    discuter avec le site de ce que son propre menu raconte.
+
+    Délibérément une commande qu'on lance plutôt qu'un hook : une maison qui ne
+    vend aucun cours n'a pas à voir pousser « Nos formations » dans son menu, et
+    un menu est une chose que le propriétaire du site arrange.
+    """
+    settings = frappe.get_doc("Website Settings")
+    rows = settings.get("top_bar_items") or []
+
+    for row in rows:
+        if (row.url or "").rstrip("/") == url.rstrip("/"):
+            return row.label
+
+    label = label or _("Our courses")
+    settings.append("top_bar_items", {"label": label, "url": url})
+    settings.flags.ignore_permissions = True
+    settings.save(ignore_permissions=True)
+    return label
