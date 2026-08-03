@@ -417,7 +417,12 @@ def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
         if (row.url or "").rstrip("/") == url.rstrip("/"):
             return row.label
 
-    label = label or _("Our courses")
+    # ⚠️ Le libellé d'un menu est une **donnée**, pas un `df.label` : la barre du
+    # site l'affiche tel quel, sans le traduire. Il doit donc être stocké DÉJÀ
+    # traduit — et dans la langue du SITE, pas dans celle de la session qui
+    # lance la commande, qui n'en a souvent aucune. Sans le `lang`, l'entrée
+    # s'appelait « Our courses » au milieu d'un menu français. Mesuré.
+    label = label or _("Our courses", lang=frappe.db.get_default("lang") or "fr")
     settings.append("top_bar_items", {"label": label, "url": url})
     settings.flags.ignore_permissions = True
     settings.save(ignore_permissions=True)
