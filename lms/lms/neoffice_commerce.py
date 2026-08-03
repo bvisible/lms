@@ -20,30 +20,45 @@ from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.utils import add_months, getdate, nowdate
 
+# 🔴 `insert_after: "description"` posait la section dans l'onglet **Détails**,
+# entre la description et la suite — et une Section Break n'ouvre pas seulement
+# la sienne, elle FERME la précédente : « Marque », « PDF », « Média » et
+# « Article alcoolisé » se retrouvaient rangés sous « Cours en ligne », qui ne
+# les concerne en rien. Vu à l'écran le 2026-08-03.
+#
+# La place juste est l'onglet **Vente** : vendre un cours est un fait
+# commercial, au même titre que l'unité de vente ou la remise maximale. Posée
+# après `max_discount`, la section ferme proprement le bloc à deux colonnes et
+# la section « Détails du client » ferme la nôtre.
+#
+# ⚠️ PAS de `_()` sur les libellés : ils sont évalués à l'IMPORT du module, donc
+# sans langue d'utilisateur, et la traduction obtenue est écrite en dur dans le
+# Custom Field. On stocke l'anglais ; Frappe traduit au rendu, pour chacun dans
+# sa langue.
 ITEM_FIELDS = {
     "Item": [
         {
             "fieldname": "lms_section",
             "fieldtype": "Section Break",
-            "label": _("Online Course"),
-            "insert_after": "description",
+            "label": "Online Course",
+            "insert_after": "max_discount",
             "collapsible": 1,
         },
         {
             "fieldname": "lms_course",
             "fieldtype": "Link",
-            "label": _("Course"),
+            "label": "Course",
             "options": "LMS Course",
             "insert_after": "lms_section",
-            "description": _("Paying an invoice for this item enrols the buyer in this course."),
+            "description": "Paying an invoice for this item enrols the buyer in this course.",
         },
         {
             "fieldname": "lms_access_months",
             "fieldtype": "Int",
-            "label": _("Access Duration (months)"),
+            "label": "Access Duration (months)",
             "insert_after": "lms_course",
             "depends_on": "lms_course",
-            "description": _("0 means permanent access."),
+            "description": "0 means permanent access.",
         },
     ]
 }
@@ -52,6 +67,37 @@ ITEM_FIELDS = {
 def setup_custom_fields():
     """Idempotent — safe on every migrate."""
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
+    _put_the_section_back_where_it_belongs()
+
+
+def _put_the_section_back_where_it_belongs():
+    """Remettre la section au bon endroit sur ce qui est déjà installé.
+
+    `create_custom_fields` ne crée que ce qui manque : un champ déjà posé garde
+    la place qu'on lui avait donnée. Les instances installées avant la
+    correction gardaient donc « Cours en ligne » dans l'onglet Détails, où il
+    happait Marque, PDF et Média.
+
+    Fait ici plutôt que dans un patch : cette fonction tourne à chaque migrate
+    sur toute la flotte, et déplacer un champ est idempotent — au deuxième
+    passage il n'y a plus rien à faire.
+    """
+    bouge = False
+    for df in ITEM_FIELDS["Item"]:
+        nom = frappe.db.get_value("Custom Field", {"dt": "Item", "fieldname": df["fieldname"]}, "name")
+        if not nom:
+            continue
+        if frappe.db.get_value("Custom Field", nom, "insert_after") == df["insert_after"]:
+            continue
+        # Le champ d'ancrage doit exister, sinon le formulaire se réordonne au
+        # hasard : mieux vaut ne rien bouger que casser la mise en page.
+        if not frappe.get_meta("Item").get_field(df["insert_after"]):
+            continue
+        frappe.db.set_value("Custom Field", nom, "insert_after", df["insert_after"])
+        bouge = True
+
+    if bouge:
+        frappe.clear_cache(doctype="Item")
 
 
 # ---------------------------------------------------------------------------

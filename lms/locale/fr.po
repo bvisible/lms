@@ -9960,3 +9960,19 @@ msgstr "Chaque programme s'ouvre sur une leçon offerte, pour essayer avant d'ac
 #: lms/www/nos-formations.html
 msgid "Browse the whole catalogue"
 msgstr "Parcourir tout le catalogue"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Online Course"
+msgstr "Cours en ligne"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Access Duration (months)"
+msgstr "Durée d'accès (mois)"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Paying an invoice for this item enrols the buyer in this course."
+msgstr "Payer une facture portant cet article inscrit l'acheteur à ce cours."
+
+#: lms/lms/neoffice_commerce.py
+msgid "0 means permanent access."
+msgstr "0 signifie un accès permanent."
