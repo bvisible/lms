@@ -70,6 +70,43 @@ def setup_custom_fields():
     _put_the_section_back_where_it_belongs()
 
 
+def refuse_course_on_a_bookable_item(doc, method=None):
+    """Un article vend un cours OU se réserve, jamais les deux.
+
+    🔴 Un article porte **un seul prix**, et les deux offres n'ont aucune raison
+    de valoir la même chose. Mesuré le 2026-08-03 sur osiris : trois articles
+    vendaient un cours à 90/120/180 et ont reçu, en devenant réservables, le
+    prix de la **séance** — 35/28/22. La page du cours a continué d'annoncer
+    l'ancien prix pendant que le panier facturait le nouveau. Personne n'avait
+    rien fait de mal : rien n'interdisait la combinaison.
+
+    Le garde-fou vit des deux côtés — ici pour l'article qu'on rend vendeur d'un
+    cours, et dans `Booking Profile.validate` pour l'article qu'on rend
+    réservable. Quel que soit l'ordre, le second geste est refusé.
+
+    Pour vendre les deux, il faut **deux articles** : « le programme filmé » et
+    « la séance ». C'est d'ailleurs déjà la règle côté réservation, où un
+    article ne peut porter qu'une seule prestation.
+    """
+    if not doc.get("lms_course"):
+        return
+    if not frappe.db.exists("DocType", "Booking Profile"):
+        return
+
+    profil = frappe.db.get_value("Booking Profile", {"item": doc.name}, "name")
+    if not profil:
+        return
+
+    frappe.throw(
+        _(
+            "{0} is already bookable ({1}), so it cannot also sell a course: an item "
+            "carries one price, and a class and a filmed programme are rarely worth "
+            "the same. Create a second item for the course."
+        ).format(doc.name, profil),
+        title=_("One item, one offer"),
+    )
+
+
 def _put_the_section_back_where_it_belongs():
     """Remettre la section au bon endroit sur ce qui est déjà installé.
 

@@ -158,6 +158,14 @@ doc_events = {
 			"lms.lms.neoffice_commerce.on_payment_entry_submitted",
 		],
 	},
+	# Neoffice: un article vend un cours OU se réserve, jamais les deux. Un
+	# article porte un seul prix, et les deux offres n'ont aucune raison de
+	# valoir la même chose. Le garde-fou existe des deux côtés : celui-ci refuse
+	# le cours sur un article déjà réservable, et Booking Profile refuse
+	# l'inverse.
+	"Item": {
+		"validate": "lms.lms.neoffice_commerce.refuse_course_on_a_bookable_item",
+	},
 }
 
 # Scheduled Tasks
