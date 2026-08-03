@@ -166,6 +166,11 @@ doc_events = {
 	"Item": {
 		"validate": "lms.lms.neoffice_commerce.refuse_course_on_a_bookable_item",
 	},
+	# Neoffice: le prix annoncé par le cours doit être celui qu'on paiera, et un
+	# cours payant que personne ne peut acheter doit le dire.
+	"LMS Course": {
+		"validate": "lms.lms.neoffice_commerce.keep_the_course_price_honest",
+	},
 }
 
 # Scheduled Tasks

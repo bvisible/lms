@@ -368,6 +368,47 @@ def on_payment_entry_submitted(doc, method=None):
 
 
 @frappe.whitelist(allow_guest=True)
+def keep_the_course_price_honest(doc, method=None):
+    """Le prix annoncé par le cours doit être celui qu'on paiera.
+
+    🔑 Trois états possibles, et un seul est bâtard :
+
+    - **pas d'article** → le cours est ouvert, gratuit. Rien à faire : c'est le
+      cas de tous les cours d'introduction, et ça marche depuis toujours.
+    - **un article** → le cours est vendu, aux prix de sa table d'offres. Le
+      champ `course_price` reprend alors **la moins chère** — il ne peut plus
+      contredire la caisse.
+    - **payant mais sans article** → le cours réclame de l'argent que personne
+      ne peut lui donner. `paid_course` bloque l'inscription, la boutique n'a
+      rien à vendre, et le visiteur remplit un formulaire qui ne mène nulle
+      part. On le dit ici, au seul endroit où quelqu'un peut le corriger.
+
+    ⚠️ `paid_course` n'est PAS dérivé de la présence d'un article : c'est le
+    verrou du LMS lui-même, celui qui empêche de s'inscrire sans payer. Le
+    mettre à zéro ouvrirait le cours à tout le monde. Seul le PRIX est dérivé.
+    """
+    offres = offers_for(doc.name)
+
+    if offres:
+        moins_chere = offres[0]["price"]
+        if flt(doc.get("course_price")) != flt(moins_chere):
+            doc.course_price = moins_chere
+        if not doc.get("paid_course"):
+            doc.paid_course = 1
+        return
+
+    if doc.get("paid_course") and doc.get("published"):
+        frappe.msgprint(
+            _(
+                "This course is marked as paid but no article sells it: nobody can buy "
+                "it. Set the article and its offers in the « Selling » section, or "
+                "uncheck « Paid course » to open it."
+            ),
+            title=_("Paid, and unbuyable"),
+            indicator="orange",
+        )
+
+
 def _the_selling_item(course: str) -> str | None:
     """L'article qui vend ce cours, selon le cours lui-même.
 

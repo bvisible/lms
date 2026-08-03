@@ -9988,3 +9988,31 @@ msgstr "{0} est déjà réservable ({1}) : il ne peut donc pas vendre un cours e
 #: lms/www/nos_formations.py
 msgid "from {0}"
 msgstr "dès {0}"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Paid, and unbuyable"
+msgstr "Payant, et inachetable"
+
+#: lms/lms/neoffice_commerce.py
+msgid "This course is marked as paid but no article sells it: nobody can buy it. Set the article and its offers in the « Selling » section, or uncheck « Paid course » to open it."
+msgstr "Ce cours est marqué payant, mais aucun article ne le vend : personne ne peut l'acheter. Renseignez l'article et ses offres dans la section « Vente », ou décochez « Cours payant » pour l'ouvrir."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Selling"
+msgstr "Vente"
+
+#: lms/lms/neoffice_commerce.py
+msgid "The article that sells this course. Its shop page is where it is bought."
+msgstr "L'article qui vend ce cours. C'est sa fiche boutique qui sert à l'acheter."
+
+#: lms/lms/neoffice_commerce.py
+msgid "One line per access duration. Left empty, the article's own price applies."
+msgstr "Une ligne par durée d'accès. Laissée vide, le prix de l'article s'applique."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Offers"
+msgstr "Offres"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Offer"
+msgstr "Offre"
