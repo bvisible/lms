@@ -10,10 +10,15 @@
 	dans ce cas le bouton habituel de la boutique suffit, et poser un choix qui
 	n'en est pas un serait une question de plus pour rien.
 #}
-{% set _course = course_sold_by(doc.item_code) %}
+{# ⚠️ La variable de contexte de la page produit est `item_code`, pas
+   `doc.item_code` — c'est ce qu'utilise déjà le sélecteur de réservation.
+   Avec `ignore missing` sur l'include, une erreur ici ne dit RIEN : le
+   bloc disparaît simplement, et on cherche ailleurs. #}
+{% set _ic = item_code or (doc.item_code if doc else None) %}
+{% set _course = course_sold_by(_ic) if _ic else None %}
 {% set _offers = offers_for(_course) if _course else [] %}
 {% if _offers | length > 1 %}
-<div class="lms-offers" id="lms-offers" data-item="{{ doc.item_code }}">
+<div class="lms-offers" id="lms-offers" data-item="{{ _ic }}">
 	<div class="lms-offers-title">{{ _("Choose your access") }}</div>
 	{% for o in _offers %}
 	<label class="lms-offer{{ ' is-on' if loop.first else '' }}">
