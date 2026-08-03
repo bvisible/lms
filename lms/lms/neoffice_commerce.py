@@ -64,9 +64,50 @@ ITEM_FIELDS = {
 }
 
 
+# Le cours porte l'article et la gamme de prix — exactement comme une
+# `Booking Profile` porte son article et sa table de forfaits.
+#
+# 🔑 Pourquoi la table plutôt que plusieurs articles (Jérémy, 2026-08-03) :
+# « si on fait plusieurs articles on risque d'avoir des dérives sur les
+# articles ». C'est vrai et c'était déjà commencé — deux articles pour le même
+# cours Hatha avaient déjà deux noms, deux descriptions, deux images et deux
+# routes (`/cours/…` et `/services/…`). Un cours, un article, un texte ; les
+# durées sont des lignes, pas des produits.
+COURSE_FIELDS = {
+    "LMS Course": [
+        {
+            "fieldname": "neo_shop_section",
+            "fieldtype": "Section Break",
+            "label": "Selling",
+            "insert_after": "currency",
+            "collapsible": 1,
+        },
+        {
+            "fieldname": "neo_item",
+            "fieldtype": "Link",
+            "label": "Item",
+            "options": "Item",
+            "insert_after": "neo_shop_section",
+            "description": "The article that sells this course. Its shop page is where it is bought.",
+        },
+        {
+            "fieldname": "neo_offers",
+            "fieldtype": "Table",
+            "label": "Offers",
+            "options": "LMS Course Offer",
+            "insert_after": "neo_item",
+            "depends_on": "neo_item",
+            "description": "One line per access duration. Left empty, the article's own price applies.",
+        },
+    ]
+}
+
+
 def setup_custom_fields():
     """Idempotent — safe on every migrate."""
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
+    if frappe.db.exists("DocType", "LMS Course Offer"):
+        create_custom_fields(COURSE_FIELDS, ignore_validate=True)
     _put_the_section_back_where_it_belongs()
 
 
@@ -327,6 +368,22 @@ def on_payment_entry_submitted(doc, method=None):
 
 
 @frappe.whitelist(allow_guest=True)
+def _the_selling_item(course: str) -> str | None:
+    """L'article qui vend ce cours, selon le cours lui-même.
+
+    Le lien vit désormais sur le COURS — `LMS Course.neo_item` — exactement
+    comme `Booking Profile.item` : la chose vendue désigne son article, et non
+    l'inverse. Tant qu'un cours n'a pas été repris, on retombe sur l'ancien sens
+    (`Item.lms_course`) pour ne casser aucune vente en cours.
+    """
+    if not frappe.get_meta("LMS Course").has_field("neo_item"):
+        return None
+    item = frappe.db.get_value("LMS Course", course, "neo_item")
+    if item and frappe.db.get_value("Item", item, "disabled") == 0:
+        return item
+    return None
+
+
 def offers_for(course: str) -> list:
     """Toutes les offres qui vendent ce cours, de la moins chère à la plus chère.
 
@@ -345,6 +402,40 @@ def offers_for(course: str) -> list:
         return []
 
     liste = frappe.db.get_single_value("Selling Settings", "selling_price_list")
+
+    # 🔑 Le modèle voulu : UN article sur le cours, et une table de durées —
+    # comme une prestation réservable porte son article et ses forfaits. Le prix
+    # de l'article devient secondaire : il ne sert que là où la table est vide.
+    porteur = _the_selling_item(course)
+    lignes = frappe.get_all(
+        "LMS Course Offer",
+        filters={"parent": course, "parenttype": "LMS Course"},
+        fields=["label", "months", "price"],
+        order_by="idx asc",
+    ) if frappe.db.exists("DocType", "LMS Course Offer") else []
+
+    if porteur and lignes:
+        route = frappe.db.get_value("Website Item", {"item_code": porteur, "published": 1}, "route")
+        if not route:
+            return []
+        route = "/" + route.lstrip("/")
+        offres = [
+            {
+                "item": porteur,
+                "label": l.label,
+                "months": int(l.months or 0),
+                "price": flt(l.price),
+                # Une seule fiche boutique : c'est la DURÉE qui se choisit
+                # dessus, comme des dates se choisissent sur une location.
+                "route": route,
+            }
+            for l in lignes
+        ]
+        offres.sort(key=lambda o: (o["price"], o["months"]))
+        return offres
+
+    # Le chemin historique — un article par durée — reste lu tant que la flotte
+    # n'est pas passée à la table. Il n'est plus la façon de faire.
     offres = []
     for item in frappe.get_all(
         "Item", filters={"lms_course": course, "disabled": 0}, fields=["name", "item_name", "lms_access_months"]
