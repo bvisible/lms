@@ -267,6 +267,9 @@ update_website_context = [
 
 jinja = {
 	"methods": [
+		# Neoffice: les offres d'un cours, pour le sélecteur de la fiche boutique
+		"lms.lms.neoffice_commerce.offers_for",
+		"lms.lms.neoffice_commerce.course_sold_by",
 		"lms.lms.utils.get_lesson_count",
 		"lms.lms.utils.get_instructors",
 		"lms.lms.utils.get_lesson_index",

@@ -1,0 +1,77 @@
+{#
+	Le choix de la durée, sur la fiche boutique d'un cours.
+
+	🔑 Le pendant exact du calendrier d'une location : la page vend UN article,
+	et ce qu'on choisit dessus décide du prix et de ce qu'on reçoit. Sans ce
+	sélecteur, une fiche unique ne pourrait vendre qu'une seule durée — et il
+	faudrait de nouveau un article par durée, avec les dérives que ça entraîne.
+
+	Ne rend RIEN si l'article ne vend pas de cours, ou s'il n'a qu'une offre :
+	dans ce cas le bouton habituel de la boutique suffit, et poser un choix qui
+	n'en est pas un serait une question de plus pour rien.
+#}
+{% set _course = course_sold_by(doc.item_code) %}
+{% set _offers = offers_for(_course) if _course else [] %}
+{% if _offers | length > 1 %}
+<div class="lms-offers" id="lms-offers" data-item="{{ doc.item_code }}">
+	<div class="lms-offers-title">{{ _("Choose your access") }}</div>
+	{% for o in _offers %}
+	<label class="lms-offer{{ ' is-on' if loop.first else '' }}">
+		<input type="radio" name="lms-offer" value="{{ o.label }}" data-price="{{ o.price }}"
+			{{ 'checked' if loop.first else '' }}>
+		<span class="lms-offer-label">{{ o.label }}</span>
+		<span class="lms-offer-price">{{ frappe.format_value(o.price, {"fieldtype": "Currency"}) }}</span>
+	</label>
+	{% endfor %}
+	<button type="button" class="btn btn-primary lms-offer-buy">{{ _("Add to Cart") }}</button>
+	<div class="lms-offer-msg"></div>
+</div>
+
+<style>
+	.lms-offers { margin: 18px 0 6px; }
+	.lms-offers-title { font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+		color: #8a8378; margin-bottom: 9px; }
+	.lms-offer { display: flex; align-items: baseline; gap: 10px; padding: 11px 14px;
+		border: 1px solid #e4ddd2; border-radius: 10px; margin-bottom: 8px; cursor: pointer;
+		background: #fff; }
+	.lms-offer.is-on { border-color: #D68A59; box-shadow: 0 0 0 1px #D68A59 inset; }
+	.lms-offer input { margin: 0; }
+	.lms-offer-label { flex: 1; }
+	.lms-offer-price { font-weight: 600; white-space: nowrap; }
+	.lms-offer-buy { margin-top: 4px; }
+	.lms-offer-msg { font-size: 13px; color: #8a8378; margin-top: 8px; }
+</style>
+
+<script>
+(function () {
+	const zone = document.getElementById("lms-offers");
+	if (!zone) return;
+
+	// 🔴 Le bouton natif de la boutique ignore l'offre choisie : il ajoute
+	// l'article à son prix de liste. On le retire pour qu'il n'y ait qu'une
+	// seule façon d'acheter, et donc qu'un seul prix possible.
+	document.querySelectorAll(".btn-add-to-cart-list, .btn-add-to-cart").forEach((b) => {
+		if (!zone.contains(b)) b.remove();
+	});
+
+	zone.addEventListener("change", () => {
+		zone.querySelectorAll(".lms-offer").forEach((l) =>
+			l.classList.toggle("is-on", !!l.querySelector("input:checked"))
+		);
+	});
+
+	zone.querySelector(".lms-offer-buy").addEventListener("click", function () {
+		const choix = zone.querySelector("input[name='lms-offer']:checked");
+		if (!choix) return;
+		const msg = zone.querySelector(".lms-offer-msg");
+		this.disabled = true;
+		msg.textContent = "{{ _('Adding…') }}";
+		frappe.call({
+			method: "lms.lms.neoffice_commerce.add_offer_to_cart",
+			args: { item_code: zone.dataset.item, offer: choix.value },
+		}).then(() => { window.location.href = "/cart"; })
+		  .catch(() => { this.disabled = false; msg.textContent = "{{ _('Could not add it to the cart.') }}"; });
+	});
+})();
+</script>
+{% endif %}
