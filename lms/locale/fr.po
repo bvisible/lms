@@ -10136,3 +10136,15 @@ msgstr "Numéro de compte Infomaniak"
 #: lms/public/js/neoffice_lms_settings.js
 msgid "Open the Infomaniak manager"
 msgstr "Ouvrir le manager Infomaniak"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Closes account creation for the WHOLE website — saving copies this switch into Website Settings, so the shop and the customer portal stop accepting new accounts too, not only the courses."
+msgstr "Ferme la création de compte pour TOUT le site — l'enregistrement recopie cet interrupteur dans les paramètres du site web, donc la boutique et le portail client cessent eux aussi d'accepter de nouveaux comptes, pas seulement les formations."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Adds a category question to the sign-up form. Careful: filling this — or the content beside it — makes the course module's form REPLACE the site's standard sign-up form, for every visitor."
+msgstr "Ajoute une question de catégorie au formulaire d'inscription. Attention : la cocher — ou remplir le contenu à côté — fait REMPLACER le formulaire d'inscription du site par celui du module de formation, pour tous les visiteurs."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Shown on the sign-up form. As soon as it holds anything, the course module's form replaces the site's standard one, for every visitor. Leave it empty when accounts are created by the shop or by the ERP."
+msgstr "Affiché sur le formulaire d'inscription. Dès qu'il contient quelque chose, le formulaire du module de formation remplace celui du site, pour tous les visiteurs. Laissez-le vide quand les comptes sont créés par la boutique ou par l'ERP."

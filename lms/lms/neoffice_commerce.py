@@ -226,6 +226,7 @@ def setup_custom_fields():
     _move_the_catalogue_section()
     _hide_the_inert_switches()
     _fold_the_lms_checkout_away()
+    _tell_the_truth_about_signup()
     _seed_the_singles()
     _switch_on_where_there_are_courses()
     if frappe.db.exists("DocType", "LMS Course Offer"):
@@ -363,6 +364,42 @@ def _fold_the_lms_checkout_away():
             "currency is the company's, decided by the shop.",
             "Text",
         )
+    if bouge:
+        frappe.clear_cache(doctype="LMS Settings")
+
+
+# L'onglet « Paramètres d'inscription ». Rien n'y est inerte — c'est même
+# l'inverse, et c'est le problème : **deux de ces trois cases débordent
+# largement des formations**, ce que leur onglet ne laisse pas soupçonner.
+#
+# 🔑 Jérémy, le 2026-08-04 : *« il faudrait voir ce que ça fait parce que nous,
+# on utilise l'inscription de l'ERP, donc je ne sais pas. »*
+#
+# Vérifié dans le code, pas deviné :
+#   `disable_signup`        → recopié dans **Website Settings** à chaque
+#                             enregistrement (`lms_settings.py:validate_signup`)
+#                             : la création de compte se ferme pour TOUT le
+#                             site, boutique et portail compris.
+#   `user_category` /       → le crochet `signup_form_template` de `hooks.py`
+#   `custom_signup_content`   fait servir le formulaire du module de formation
+#                             **à la place de celui du site** dès que l'un des
+#                             deux est renseigné (`plugins.show_custom_signup`,
+#                             lu par `frappe/www/login.py`).
+#
+# On ne les masque donc pas : on écrit ce qu'elles font vraiment.
+VERITES_INSCRIPTION = {
+    "disable_signup": "Closes account creation for the WHOLE website — saving copies this switch into Website Settings, so the shop and the customer portal stop accepting new accounts too, not only the courses.",
+    "user_category": "Adds a category question to the sign-up form. Careful: filling this — or the content beside it — makes the course module's form REPLACE the site's standard sign-up form, for every visitor.",
+    "custom_signup_content": "Shown on the sign-up form. As soon as it holds anything, the course module's form replaces the site's standard one, for every visitor. Leave it empty when accounts are created by the shop or by the ERP.",
+}
+
+
+def _tell_the_truth_about_signup():
+    meta = frappe.get_meta("LMS Settings")
+    bouge = False
+    for champ, texte in VERITES_INSCRIPTION.items():
+        if meta.get_field(champ):
+            bouge |= _property_setter(champ, "description", texte, "Text")
     if bouge:
         frappe.clear_cache(doctype="LMS Settings")
 
