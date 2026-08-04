@@ -160,7 +160,32 @@ def setup_custom_fields():
 #
 # 🔑 Un interrupteur qui ne fait rien est pire qu'un manque : on l'essaie, il ne
 # se passe rien, et on doute de tout l'écran.
-INERTES = ("default_home", "persona_captured", "demo_data_present")
+INERTES = (
+    "default_home",
+    "persona_captured",
+    "demo_data_present",
+    # L'onglet « Batch Settings » : des cases seulement DÉCLARÉES dans le fichier
+    # de types du SPA (`LMSSettings.ts`), lues par personne.
+    "show_day_view",
+    "show_dashboard",
+    "show_courses",
+    "show_students",
+    "show_assessments",
+    "show_discussions",
+    "show_emails",
+    # Les modèles de demande de mentorat : aucun consommateur.
+    "mentor_request_creation",
+    "mentor_request_status_update",
+)
+
+# 🔴 L'onglet « Barre latérale » entier. `DesktopLayout.vue` monte
+# **NeoCockpitLMSSidebar** à la place de l'`AppSidebar` d'origine, et notre barre
+# construit ses entrées elle-même — elle ne lit aucune de ces cases. Les régler
+# ne change rien à ce que voit l'apprenant.
+#
+# Jérémy, en regardant l'écran : *« il y a encore un menu barre latérale où je
+# ne sais pas comment nous on l'a bougé, est-ce que ça marche ? »* — non.
+ONGLETS_INERTES = ("sidebar_tab", "sidebar_section")
 
 
 def _hide_the_inert_switches():
@@ -171,7 +196,15 @@ def _hide_the_inert_switches():
     """
     meta = frappe.get_meta("LMS Settings")
     bouge = False
-    for champ in INERTES:
+
+    # L'onglet de la barre latérale : on masque le Tab Break, tout ce qui suit
+    # part avec lui jusqu'au suivant.
+    onglet = next(
+        (f.fieldname for f in meta.fields
+         if f.fieldtype == "Tab Break" and (f.label or "") == "Sidebar"),
+        None,
+    )
+    for champ in list(INERTES) + ([onglet] if onglet else []):
         if not meta.get_field(champ):
             continue
         nom = "LMS Settings-%s-hidden" % champ
