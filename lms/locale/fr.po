@@ -10148,3 +10148,15 @@ msgstr "Ajoute une question de catégorie au formulaire d'inscription. Attention
 #: lms/lms/neoffice_commerce.py
 msgid "Shown on the sign-up form. As soon as it holds anything, the course module's form replaces the site's standard one, for every visitor. Leave it empty when accounts are created by the shop or by the ERP."
 msgstr "Affiché sur le formulaire d'inscription. Dès qu'il contient quelque chose, le formulaire du module de formation remplace celui du site, pour tous les visiteurs. Laissez-le vide quand les comptes sont créés par la boutique ou par l'ERP."
+
+#: lms/lms/workspace/training
+msgid "Enrollment"
+msgstr "Inscriptions"
+
+#: lms/lms/workspace/training
+msgid "Course settings"
+msgstr "Paramètres des formations"
+
+#: lms/lms/workspace/training
+msgid "Public catalogue"
+msgstr "Catalogue public"
