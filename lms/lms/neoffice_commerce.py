@@ -131,9 +131,30 @@ def setup_custom_fields():
     """Idempotent — safe on every migrate."""
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
     create_custom_fields(SETTINGS_FIELDS, ignore_validate=True)
+    _switch_on_where_there_are_courses()
     if frappe.db.exists("DocType", "LMS Course Offer"):
         create_custom_fields(COURSE_FIELDS, ignore_validate=True)
     _put_the_section_back_where_it_belongs()
+
+
+def _switch_on_where_there_are_courses():
+    """Une instance qui montrait déjà ses formations doit continuer.
+
+    🔴 **Le `default` d'un Custom Field ne s'applique PAS à un Single qui existe
+    déjà.** `LMS Settings` est un Single créé de longue date : la case est
+    arrivée à zéro malgré `"default": "1"`, la page a répondu 404 et l'entrée du
+    menu a disparu — sur une instance où les formations marchaient la minute
+    d'avant. Mesuré sur osiris.
+
+    On ne pose donc la valeur qu'une fois, et seulement là où il y a quelque
+    chose à montrer : un site sans cours publié reste éteint, ce qui est le bon
+    défaut pour tous les autres.
+    """
+    if frappe.db.exists("Singles", {"doctype": "LMS Settings", "field": "neo_show_on_website"}):
+        return
+    if not frappe.db.count("LMS Course", {"published": 1}):
+        return
+    frappe.db.set_single_value("LMS Settings", "neo_show_on_website", 1)
 
 
 def refuse_course_on_a_bookable_item(doc, method=None):
