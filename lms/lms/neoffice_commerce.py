@@ -139,10 +139,57 @@ def setup_custom_fields():
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
     create_custom_fields(SETTINGS_FIELDS, ignore_validate=True)
     _move_the_catalogue_section()
+    _hide_the_inert_switches()
     _switch_on_where_there_are_courses()
     if frappe.db.exists("DocType", "LMS Course Offer"):
         create_custom_fields(COURSE_FIELDS, ignore_validate=True)
     _put_the_section_back_where_it_belongs()
+
+
+# Trois cases de l'onglet « Général » qui n'ont rien à y faire — vérifié le
+# 2026-08-03 en cherchant leur consommateur dans tout le module, bundles exclus.
+#
+#   default_home       — AUCUN code ne le lit. Il ne fait rien.
+#   persona_captured   — drapeau ÉCRIT par le code (`utils.py:persona_captured`)
+#   demo_data_present  — drapeau ÉCRIT par le code au retrait des données de démo
+#
+# Les deux drapeaux ne sont pas des réglages : ce sont des marques que le
+# logiciel se pose à lui-même. Les cocher ne fait rien, les décocher non plus —
+# sauf semer le doute, parce que « Données de démonstration présentes » a l'air
+# de promettre un nettoyage.
+#
+# 🔑 Un interrupteur qui ne fait rien est pire qu'un manque : on l'essaie, il ne
+# se passe rien, et on doute de tout l'écran.
+INERTES = ("default_home", "persona_captured", "demo_data_present")
+
+
+def _hide_the_inert_switches():
+    """Masquer ce qui ne répond pas. Par Property Setter : rien n'est perdu.
+
+    On ne touche pas au doctype amont — un `Property Setter` se retire d'un
+    clic, et une fusion depuis l'amont ne se bat contre rien.
+    """
+    meta = frappe.get_meta("LMS Settings")
+    bouge = False
+    for champ in INERTES:
+        if not meta.get_field(champ):
+            continue
+        nom = "LMS Settings-%s-hidden" % champ
+        if frappe.db.exists("Property Setter", nom):
+            continue
+        frappe.get_doc({
+            "doctype": "Property Setter",
+            "name": nom,
+            "doctype_or_field": "DocField",
+            "doc_type": "LMS Settings",
+            "field_name": champ,
+            "property": "hidden",
+            "property_type": "Check",
+            "value": "1",
+        }).insert(ignore_permissions=True)
+        bouge = True
+    if bouge:
+        frappe.clear_cache(doctype="LMS Settings")
 
 
 def _move_the_catalogue_section():
