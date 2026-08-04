@@ -26,6 +26,25 @@ function nb_no_autofill(frm, fieldname, kind) {
 		"data-1p-ignore": "true",
 		"data-form-type": "other",
 	});
+
+	// 🔴 Et ça ne suffit toujours pas. Chrome IGNORE `autocomplete` sur ce qu'il
+	// prend pour des identifiants — mesuré ici même : « Daniel » revenait dans
+	// le numéro de compte et un mot de passe enregistré dans la clé, libellés
+	// changés et attributs posés. Ce qu'il respecte, en revanche, c'est
+	// `readonly` : un champ en lecture seule n'est jamais rempli. On le libère
+	// au premier focus — clic ou tabulation — donc la saisie reste normale.
+	if (!input.data("nb-guarded")) {
+		input.data("nb-guarded", true);
+		input.attr("readonly", true);
+		input.on("focus", function () {
+			$(this).removeAttr("readonly");
+		});
+		// Ce que le navigateur a déjà versé avant qu'on arrive n'est pas la
+		// valeur du document : on remet l'écran d'accord avec la base.
+		if (field.value !== undefined) {
+			input.val(field.value === null ? "" : field.value);
+		}
+	}
 	// Le contrôle mot de passe de Frappe note la force de ce qu'on tape et
 	// conseille « des symboles, des chiffres et des majuscules ». Une clé d'API
 	// ne se choisit pas : le conseil est faux, et la barre bleue fait croire
