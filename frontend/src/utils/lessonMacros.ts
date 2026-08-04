@@ -88,6 +88,17 @@ export function convertBodyToBlocks(lessonData: LessonBodyData): EditorBlock[] {
 					quiz: quiz,
 				},
 			})
+		} else if (block.includes('{{ SecureVideo')) {
+			// //// Neoffice — sans cette branche, la macro tombait dans le
+			// `else` final et devenait un bloc de texte : l'apprenant LISAIT
+			// `{{ SecureVideo("…") }}` au lieu de voir la vidéo, dès qu'une
+			// leçon héritée passait une fois par l'éditeur.
+			blocks.push({
+				type: 'secureVideo',
+				data: {
+					media: getMacroArg(block) ?? '',
+				},
+			})
 		} else if (block.includes('{{ Video')) {
 			let video = getMacroArg(block) ?? ''
 			blocks.push({

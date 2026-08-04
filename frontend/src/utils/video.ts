@@ -51,6 +51,9 @@ export function hasVideoContent(lesson: LessonLike | null | undefined): boolean 
 			return blocks.some(
 				(block: { type?: string; data?: { file_type?: string } }) =>
 					block.type === 'embed' ||
+					// The protected-video block counts too, or a lesson made of
+					// one Infomaniak video would look like a lesson with none.
+					block.type === 'secureVideo' ||
 					(block.type === 'upload' &&
 						VIDEO_FILE_TYPES.includes(block.data?.file_type ?? ''))
 			)

@@ -545,7 +545,12 @@ const renderEditor = (holder, content) => {
 		document.getElementById(holder).innerHTML = ''
 	return new EditorJS({
 		holder: holder,
-		tools: getEditorTools(false, {}, { studentView: isStudentView.value }),
+		// //// Neoffice — `lessonName` : le bloc vidéo protégée en a besoin pour
+		// demander son lien signé, que le serveur refuse sans la leçon.
+		tools: getEditorTools(false, {}, {
+			studentView: isStudentView.value,
+			lessonName: lesson.data?.name || '',
+		}),
 		data: sanitizeEditorJs(JSON.parse(content)),
 		readOnly: true,
 		defaultBlock: 'embed',

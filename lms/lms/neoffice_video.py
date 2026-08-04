@@ -27,6 +27,7 @@ pour brancher un compte vidéo, et personne ne devine une clé qu'aucun écran
 ne montre.
 """
 
+import json
 import re
 
 import frappe
@@ -519,8 +520,33 @@ def on_payment_entry_submitted(doc, method=None):
 
 
 def extract_media_ids(body: str) -> list:
-    """Media ids referenced by a lesson body."""
-    return SECURE_VIDEO_RE.findall(body or "")
+    """Media ids referenced by a lesson — macro form AND editor block.
+
+    Two shapes, because a lesson has two possible bodies:
+
+    - `body`, l'écriture historique : une ligne `{{ SecureVideo("id") }}` ;
+    - `content`, ce que produit l'éditeur par blocs : un bloc
+      `{"type": "secureVideo", "data": {"media": "id"}}`.
+
+    🔴 Ce garde-fou est ce qui empêche `get_playback_url` de signer n'importe
+    quel média du catalogue. S'il ne connaît qu'une des deux formes, une vidéo
+    posée depuis l'éditeur se voit répondre « cette vidéo n'appartient pas à la
+    leçon » — refus au visionnage, sur une leçon parfaitement valide.
+    """
+    trouves = list(SECURE_VIDEO_RE.findall(body or ""))
+
+    texte = (body or "").lstrip()
+    if texte.startswith("{"):
+        try:
+            blocs = json.loads(texte).get("blocks") or []
+        except (ValueError, AttributeError):
+            blocs = []
+        for bloc in blocs:
+            if isinstance(bloc, dict) and bloc.get("type") == "secureVideo":
+                media = (bloc.get("data") or {}).get("media")
+                if media and media not in trouves:
+                    trouves.append(media)
+    return trouves
 
 
 # allow_guest, like upstream's get_lesson: an anonymous visitor must be able to

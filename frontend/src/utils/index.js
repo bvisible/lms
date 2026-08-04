@@ -24,6 +24,8 @@ import dayjs from '@/utils/dayjs'
 import Embed from '@editorjs/embed'
 import SimpleImage from '@editorjs/simple-image'
 import Table from '@editorjs/table'
+// //// Neoffice — le bloc « Vidéo protégée » (Infomaniak VOD).
+import { SecureVideoBlock } from '@/utils/secureVideoBlock'
 import DOMPurify from 'dompurify'
 
 const readOnlyMode = window.read_only_mode
@@ -141,7 +143,10 @@ const INLINE_TOOLBAR_ORDER = [
 export function getEditorTools(
 	isInstructorEditor = false,
 	uploadContext = {},
-	{ studentView = false } = {}
+	// //// Neoffice — `lessonName` voyage jusqu'au bloc vidéo : le serveur
+	// refuse de signer un média que la leçon ne cite pas, et un bloc EditorJS
+	// vit hors de l'arbre Vue, donc ni provide ni inject ne l'atteignent.
+	{ studentView = false, lessonName = '' } = {}
 ) {
 	return {
 		header: {
@@ -171,6 +176,11 @@ export function getEditorTools(
 			inlineToolbar: INLINE_TOOLBAR_ORDER,
 		},
 		quiz: Quiz,
+		// //// Neoffice
+		secureVideo: {
+			class: SecureVideoBlock,
+			config: { lessonName },
+		},
 		// The submission renders in an iframe — a separate app instance — so
 		// provide/inject can't reach it. Pass Student View through the tool
 		// config and on into the iframe URL.
