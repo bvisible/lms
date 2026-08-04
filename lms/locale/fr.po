@@ -10254,12 +10254,12 @@ msgid "This file is {0}. The server refuses uploads over {1} — ask your admini
 msgstr "Ce fichier pèse {0}. Le serveur refuse les dépôts au-delà de {1} — demandez à votre administrateur de relever la limite, ou déposez-le dans le manager Infomaniak."
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "{0} of {1} videos used on the « {2} » plan. The file goes to your Infomaniak space, and is removed from this server afterwards."
-msgstr "{0} vidéos sur {1} utilisées avec le forfait « {2} ». Le fichier part vers votre espace Infomaniak, puis il est retiré de ce serveur."
+msgid "{0} of {1} uploads used on the « {2} » plan ({3} videos in the space). A deleted video does not give its slot back."
+msgstr "{0} dépôts sur {1} utilisés avec le forfait « {2} » ({3} vidéos dans l'espace). Supprimer une vidéo ne rend pas sa place."
 
 #: lms/lms/neoffice_video.py
-msgid "The video space is full: {0} of {1} videos used on the « {2} » plan."
-msgstr "L'espace vidéo est plein : {0} vidéos sur {1} avec le forfait « {2} »."
+msgid "This plan allows {0} uploads in all, and {1} have been used. Deleting a video does not give its slot back — the plan has to be raised."
+msgstr "Ce forfait autorise {0} dépôts en tout, et {1} ont été utilisés. Supprimer une vidéo ne rend pas sa place — il faut relever le forfait."
 
 #: lms/lms/neoffice_video.py
 msgid "File not found."

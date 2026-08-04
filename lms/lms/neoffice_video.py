@@ -232,20 +232,27 @@ def list_folders() -> list:
 
 
 def _space_left() -> dict:
-    """Combien de vidéos l'abonnement autorise encore.
+    """Combien de dépôts l'abonnement autorise encore.
 
-    Le forfait de démonstration en accepte **cinq**. Découvrir la limite en
-    plein téléversement d'un fichier de 800 Mo serait une façon coûteuse de
-    l'apprendre.
+    🔴 **Le compteur qui compte est `medias_uploaded`, pas `medias_count`.**
+    Mesuré le 2026-08-04 : trois vidéos présentes, `medias_count` = 3, et
+    pourtant le dépôt suivant est refusé — `medias_uploaded` valait 5, plafond
+    du forfait DEMO. Autrement dit **le forfait compte les dépôts À VIE :
+    supprimer une vidéo ne rend pas sa place.**
+
+    Lire le mauvais compteur promettait « encore deux vidéos » puis échouait au
+    bout du téléversement, sur un 401. Une limite doit se dire avant l'envoi,
+    et se dire juste.
     """
     canal = _request("GET", "")
     pack = (canal or {}).get("pack") or {}
     plafond = ((pack.get("limits") or {}).get("media")) or 0
-    utilises = cint((canal or {}).get("medias_count"))
+    deposes = cint((canal or {}).get("medias_uploaded"))
     return {
-        "used": utilises,
+        "used": deposes,
+        "present": cint((canal or {}).get("medias_count")),
         "limit": plafond,
-        "left": (plafond - utilises) if plafond else None,
+        "left": (plafond - deposes) if plafond else None,
         "pack": pack.get("name"),
     }
 
@@ -282,8 +289,8 @@ def start_upload(file_url: str, folder: str = None, title: str = None) -> dict:
     place = _space_left()
     if place["left"] is not None and place["left"] <= 0:
         frappe.throw(
-            _("The video space is full: {0} of {1} videos used on the « {2} » plan.").format(
-                place["used"], place["limit"], place["pack"] or "—"
+            _("This plan allows {0} uploads in all, and {1} have been used. Deleting a video does not give its slot back — the plan has to be raised.").format(
+                place["limit"], place["used"]
             )
         )
 

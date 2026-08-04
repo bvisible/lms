@@ -173,8 +173,8 @@ function nb_upload_video() {
 					const p = s.message || {};
 					if (p.limit) {
 						d.set_df_property("video", "description",
-							__("{0} of {1} videos used on the « {2} » plan. The file goes to your Infomaniak space, and is removed from this server afterwards.",
-								[p.used, p.limit, p.pack || "—"]));
+							__("{0} of {1} uploads used on the « {2} » plan ({3} videos in the space). A deleted video does not give its slot back.",
+								[p.used, p.limit, p.pack || "—", p.present]));
 					}
 				},
 			});
