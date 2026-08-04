@@ -10056,3 +10056,75 @@ msgstr "Deux façons de payer le même cours"
 #: lms/lms/neoffice_commerce.py
 msgid "A payment gateway here opens the course module's OWN checkout, which knows nothing about the cart, TWINT, the card terminal or invoicing. In Neoffice a course is sold as an article — see the « Selling » section of the course. Leave this empty unless you really want two ways to buy the same course."
 msgstr "Une passerelle ici ouvre l'encaissement propre au module de formation, qui ignore le panier, TWINT, le terminal de carte et la facturation. Dans Neoffice, un cours se vend en article — voir la section « Vente » du cours. Laissez ce champ vide, sauf à vouloir vraiment deux façons d'acheter le même cours."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Videos (Infomaniak VOD)"
+msgstr "Vidéos (Infomaniak VOD)"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the <a href='https://manager.infomaniak.com' target='_blank' rel='noopener'>Infomaniak manager</a>, under Streaming / VOD and, for the key, your profile's API tokens."
+msgstr "Où sont hébergées les vidéos des leçons. Laissez vide pour garder ce que contient la configuration du site — remplir ici prend le dessus. Les trois valeurs viennent du <a href='https://manager.infomaniak.com' target='_blank' rel='noopener'>manager Infomaniak</a>, sous Streaming / VOD et, pour la clé, les jetons d'API de votre profil."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Infomaniak video channel"
+msgstr "Canal vidéo Infomaniak"
+
+#: lms/lms/neoffice_commerce.py
+msgid "The channel number of the VOD space, from the Infomaniak manager."
+msgstr "Le numéro du canal de l'espace VOD, tel qu'il apparaît dans le manager Infomaniak."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Every call carries it; without it the API answers a bare « access denied »."
+msgstr "Chaque appel le porte ; sans lui, l'API répond « accès refusé » sans autre explication."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Infomaniak API key"
+msgstr "Clé d'API Infomaniak"
+
+#: lms/lms/neoffice_commerce.py
+msgid "An Infomaniak token carrying the VOD scope. It never leaves the server — the player receives a link signed for five minutes, never the key."
+msgstr "Un jeton Infomaniak portant la portée VOD. Il ne quitte jamais le serveur — le lecteur reçoit un lien signé pour cinq minutes, jamais la clé."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Sell the courses through the shop"
+msgstr "Vendre les formations par la boutique"
+
+#: lms/lms/neoffice_commerce.py
+msgid "On, a course is bought like any other article — cart, VAT, TWINT, card terminal, invoice — and everything below is left aside. Off, the course module takes the money itself through its own gateway, and none of that applies."
+msgstr "Coché, une formation s'achète comme n'importe quel article — panier, TVA, TWINT, terminal de paiement, facture — et tout ce qui suit reste de côté. Décoché, le module de formation encaisse lui-même par sa propre passerelle, et rien de tout cela ne s'applique."
+
+#: lms/lms/neoffice_commerce.py
+msgid "Labels the prices shown in the course catalogue. The actual billing currency is the company's, decided by the shop."
+msgstr "Libelle les prix affichés dans le catalogue des formations. La devise réellement facturée est celle de la société, décidée par la boutique."
+
+#: lms/lms/neoffice_video.py
+msgid "Video hosting is not configured. Fill Channel, Account and Access token under Learning › Settings › Videos."
+msgstr "L'hébergement des vidéos n'est pas configuré. Renseignez le canal, le compte et le jeton d'accès sous Formations › Paramètres › Vidéos."
+
+#: lms/lms/neoffice_video.py
+msgid "Infomaniak refused the call — the channel, the account or the token is wrong. Their exact answer is in the Error Log."
+msgstr "Infomaniak a refusé l'appel — le canal, le compte ou le jeton est faux. Leur réponse exacte est dans le journal des erreurs."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Test the video connection"
+msgstr "Tester la connexion vidéo"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Videos"
+msgstr "Vidéos"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Calling Infomaniak…"
+msgstr "Appel d'Infomaniak…"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Videos are connected"
+msgstr "Les vidéos sont connectées"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "No answer"
+msgstr "Pas de réponse"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Channel {0}, account {1} — {2} media in the space."
+msgstr "Canal {0}, compte {1} — {2} média(s) dans l'espace."

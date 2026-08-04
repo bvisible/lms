@@ -144,29 +144,40 @@ SETTINGS_FIELDS = {
             "fieldtype": "Section Break",
             "label": "Videos (Infomaniak VOD)",
             "insert_after": "neo_show_on_website",
-            "collapsible": 1,
-            "description": "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over.",
+            # Ouverte. Repliée, elle cachait la seule réponse à « où se règlent
+            # les vidéos ? » derrière un chevron que personne n'ouvre.
+            "collapsible": 0,
+            # Le lien va vers la racine du manager, volontairement : les chemins
+            # internes d'Infomaniak bougent, et un lien mort dans une aide vaut
+            # moins que pas de lien du tout.
+            "description": "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the <a href='https://manager.infomaniak.com' target='_blank' rel='noopener'>Infomaniak manager</a>, under Streaming / VOD and, for the key, your profile's API tokens.",
         },
+        # ⚠️ Les libellés évitent « compte », « identifiant », « jeton » seuls :
+        # Chrome a pris « Compte » + un champ masqué pour un formulaire de
+        # connexion et y a versé un login enregistré (« Daniel » + un mot de
+        # passe), par-dessus la vraie valeur. Nommer les champs par leur
+        # fournisseur suffit à casser l'heuristique — et le script du doctype
+        # coupe le remplissage pour de bon.
         {
             "fieldname": "neo_vod_channel",
             "fieldtype": "Data",
-            "label": "Channel",
+            "label": "Infomaniak video channel",
             "insert_after": "neo_video_section",
             "description": "The channel number of the VOD space, from the Infomaniak manager.",
         },
         {
             "fieldname": "neo_vod_account",
             "fieldtype": "Data",
-            "label": "Account",
+            "label": "Infomaniak account number",
             "insert_after": "neo_vod_channel",
-            "description": "The Infomaniak account number. Every call carries it; without it the API answers a bare « access denied ».",
+            "description": "Every call carries it; without it the API answers a bare « access denied ».",
         },
         {
             "fieldname": "neo_vod_token",
             "fieldtype": "Password",
-            "label": "Access token",
+            "label": "Infomaniak API key",
             "insert_after": "neo_vod_account",
-            "description": "An Infomaniak token carrying the VOD scope. It never leaves the server — the player receives a link signed for five minutes, never the token.",
+            "description": "An Infomaniak token carrying the VOD scope. It never leaves the server — the player receives a link signed for five minutes, never the key.",
         },
         # ------------------------------------------------------------------
         # L'interrupteur de la caisse, en tête de l'onglet des paiements.
