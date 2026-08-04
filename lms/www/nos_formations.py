@@ -18,10 +18,57 @@ no_cache = 1
 
 def get_context(context):
     context.no_cache = 1
+
+    # 🔴 L'interrupteur d'abord : une maison qui ne vend pas de formation ne doit
+    # pas exposer une page de catalogue vide. C'est exactement ce que fait la
+    # boutique avec `Webshop Settings.enabled` — sans quoi un visiteur tombe sur
+    # une promesse que personne ne tient.
+    if not showing_courses():
+        raise frappe.DoesNotExistError
+
+    context.no_cache = 1
     context.free_courses = _courses(paid=False)
     context.paid_courses = _courses(paid=True)
+
+    # Les catégories réellement portées par des cours publiés — jamais la liste
+    # brute du doctype, qui traîne encore « Web Development » et « Finance »
+    # depuis les données de démonstration du LMS. Une catégorie vide est un
+    # filtre qui ne rend rien : mieux vaut ne pas la proposer.
+    toutes = context.free_courses + context.paid_courses
+    vues, ordre = {}, []
+    for c in toutes:
+        if not c.get("category"):
+            continue
+        if c.category not in vues:
+            vues[c.category] = 0
+            ordre.append(c.category)
+        vues[c.category] += 1
+    context.categories = [{"name": n, "count": vues[n]} for n in sorted(ordre)]
+
+    # Le filtre passe par l'URL : un lien vers « /nos-formations?categorie=Hatha
+    # Yoga » se partage et se met en favori, ce qu'un filtre en JavaScript ne
+    # permet pas.
+    choisie = (frappe.form_dict.get("categorie") or "").strip()
+    context.chosen_category = choisie if choisie in vues else None
+    if context.chosen_category:
+        context.free_courses = [c for c in context.free_courses if c.get("category") == choisie]
+        context.paid_courses = [c for c in context.paid_courses if c.get("category") == choisie]
+
+    context.nothing_yet = not toutes
     context.title = frappe.db.get_single_value("Website Settings", "app_name") or "Formations"
     return context
+
+
+def showing_courses() -> bool:
+    """Le site montre-t-il ses formations ?
+
+    Deux conditions, et la seconde compte autant que la première : l'interrupteur
+    doit être mis, ET il doit y avoir au moins un cours publié. Une page de
+    catalogue vide annonce un métier qu'on n'exerce pas.
+    """
+    if not frappe.db.get_single_value("LMS Settings", "neo_show_on_website"):
+        return False
+    return bool(frappe.db.count("LMS Course", {"published": 1}))
 
 
 def _courses(paid: bool) -> list:

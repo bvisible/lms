@@ -13,6 +13,17 @@
 	.nf-lead { font-size:19px; line-height:1.65; color:var(--muted); max-width:62ch; margin:0 0 8px; }
 	.nf-h2 { font:400 clamp(25px,3vw,33px)/1.2 Georgia,serif; margin:72px 0 8px; }
 	.nf-sub { color:var(--muted); margin:0 0 30px; max-width:60ch; }
+	/* Les catégories : des onglets sobres, pas des boutons criards. La
+	   sélection se marque par l'encre, pas par une couleur de plus. */
+	.nf-cats { display:flex; flex-wrap:wrap; gap:8px; margin:26px 0 34px; }
+	.nf-cat { display:inline-flex; align-items:center; gap:7px; padding:7px 14px;
+		border:1px solid var(--sand,#e4ddd2); border-radius:999px; font-size:14px;
+		text-decoration:none; color:inherit; background:#fff; }
+	.nf-cat:hover { border-color:var(--clay,#D68A59); }
+	.nf-cat.is-on { background:#141414; border-color:#141414; color:#fff; }
+	.nf-cat-n { font-size:12px; opacity:.6; }
+	.nf-cat.is-on .nf-cat-n { opacity:.7; }
+	.nf-empty { margin:30px 0; color:var(--muted); }
 	.nf-grid { display:grid; gap:26px; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); }
 	.nf-card { background:var(--bright); border:1px solid var(--sand); border-radius:14px; overflow:hidden;
 		display:flex; flex-direction:column; }
@@ -54,6 +65,39 @@
 	<p class="nf-lead">
 		{{ _("Illustrated guides, filmed sessions and progressive programmes. Start with the free courses — no account needed to read them — and go further when you feel like it.") }}
 	</p>
+
+	{#
+		Les catégories, en filtre.
+
+		🔑 Le filtre passe par l'URL et non par du JavaScript : « ?categorie=Hatha
+		Yoga » se partage, se met en favori et s'indexe. Un filtre en JS ne donne
+		aucune de ces trois choses.
+
+		Seules les catégories PORTÉES par un cours publié sont proposées : le
+		doctype en traîne encore sept venues des données de démonstration du LMS
+		(« Finance », « Web Development »…), et un filtre qui ne rend rien est
+		une porte peinte sur un mur.
+	#}
+	{% if categories | length > 1 %}
+	<nav class="nf-cats" aria-label="{{ _('Categories') }}">
+		<a class="nf-cat{{ ' is-on' if not chosen_category else '' }}" href="/nos-formations">
+			{{ _("All") }}
+		</a>
+		{% for cat in categories %}
+		<a class="nf-cat{{ ' is-on' if chosen_category == cat.name else '' }}"
+			href="/nos-formations?categorie={{ cat.name | urlencode }}">
+			{{ cat.name }} <span class="nf-cat-n">{{ cat.count }}</span>
+		</a>
+		{% endfor %}
+	</nav>
+	{% endif %}
+
+	{% if chosen_category and not free_courses and not paid_courses %}
+	<p class="nf-empty">
+		{{ _("No course in this category yet.") }}
+		<a href="/nos-formations">{{ _("See them all") }}</a>
+	</p>
+	{% endif %}
 
 	{% if free_courses %}
 	<h2 class="nf-h2">{{ _("Start free") }}</h2>

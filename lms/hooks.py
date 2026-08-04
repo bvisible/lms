@@ -179,6 +179,12 @@ doc_events = {
 	"Quotation": {
 		"before_validate": "lms.lms.neoffice_commerce.hold_the_offer_price",
 	},
+	# Neoffice: le menu du site suit l'interrupteur « Montrer les formations ».
+	# On met ET on retire : décocher la case et laisser l'entrée mènerait le
+	# visiteur à une page qui n'existe plus.
+	"LMS Settings": {
+		"on_update": "lms.lms.neoffice_commerce.sync_courses_link",
+	},
 }
 
 # Scheduled Tasks

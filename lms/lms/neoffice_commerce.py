@@ -103,9 +103,34 @@ COURSE_FIELDS = {
 }
 
 
+# Le site montre-t-il ses formations ? La boutique a `Webshop Settings.enabled`
+# depuis toujours ; les formations n'avaient rien, et une maison qui n'en vend
+# pas se retrouvait avec une entrée de menu et une page de catalogue vide.
+SETTINGS_FIELDS = {
+    "LMS Settings": [
+        {
+            "fieldname": "neo_website_section",
+            "fieldtype": "Section Break",
+            "label": "The public catalogue",
+            "insert_after": "allow_guest_access",
+            "collapsible": 0,
+        },
+        {
+            "fieldname": "neo_show_on_website",
+            "fieldtype": "Check",
+            "label": "Show the courses on the website",
+            "insert_after": "neo_website_section",
+            "default": "1",
+            "description": "Adds « Our courses » to the site menu and opens /nos-formations. Off, the page and the menu entry disappear.",
+        },
+    ]
+}
+
+
 def setup_custom_fields():
     """Idempotent — safe on every migrate."""
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
+    create_custom_fields(SETTINGS_FIELDS, ignore_validate=True)
     if frappe.db.exists("DocType", "LMS Course Offer"):
         create_custom_fields(COURSE_FIELDS, ignore_validate=True)
     _put_the_section_back_where_it_belongs()
@@ -597,6 +622,35 @@ def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
     settings.flags.ignore_permissions = True
     settings.save(ignore_permissions=True)
     return label
+
+
+def sync_courses_link(doc=None, method=None, url: str = "/nos-formations") -> None:
+    """Le menu suit l'interrupteur — on met, on retire.
+
+    🔑 `ensure_courses_link` ne fait qu'ajouter : c'est une commande qu'on lance
+    une fois. Ici c'est l'inverse — un réglage qu'on bascule, et le menu doit
+    suivre **dans les deux sens**. Décocher la case et laisser l'entrée mènerait
+    le visiteur à une page qui n'existe plus.
+
+    Posé sur `LMS Settings.on_update` : le geste et sa conséquence au même
+    endroit, sans rien à relancer à la main.
+    """
+    from lms.www.nos_formations import showing_courses
+
+    montrer = showing_courses()
+    settings = frappe.get_doc("Website Settings")
+    rows = settings.get("top_bar_items") or []
+    presente = [r for r in rows if (r.url or "").rstrip("/") == url.rstrip("/")]
+
+    if montrer and not presente:
+        ensure_courses_link(url=url)
+        return
+
+    if not montrer and presente:
+        for r in presente:
+            settings.remove(r)
+        settings.flags.ignore_permissions = True
+        settings.save(ignore_permissions=True)
 
 
 # ---------------------------------------------------------------------------

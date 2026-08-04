@@ -10028,3 +10028,23 @@ msgstr "Ajout en cours…"
 #: lms/templates/includes/course_offers.html
 msgid "Could not add it to the cart."
 msgstr "Impossible de l'ajouter au panier."
+
+#: lms/www/nos-formations.html
+msgid "The public catalogue"
+msgstr "Le catalogue public"
+
+#: lms/www/nos-formations.html
+msgid "Show the courses on the website"
+msgstr "Montrer les formations sur le site"
+
+#: lms/www/nos-formations.html
+msgid "Adds « Our courses » to the site menu and opens /nos-formations. Off, the page and the menu entry disappear."
+msgstr "Ajoute « Nos formations » au menu du site et ouvre /nos-formations. Décochée, la page et l'entrée de menu disparaissent."
+
+#: lms/www/nos-formations.html
+msgid "No course in this category yet."
+msgstr "Aucune formation dans cette catégorie pour l'instant."
+
+#: lms/www/nos-formations.html
+msgid "See them all"
+msgstr "Voir toutes les formations"
