@@ -386,6 +386,42 @@ def _seed_the_singles():
         if devise:
             frappe.db.set_single_value("LMS Settings", "default_currency", devise)
 
+    _remonter_la_config_video(reglages)
+
+
+def _remonter_la_config_video(reglages):
+    """Faire remonter à l'écran ce qui était caché dans `site_config.json`.
+
+    🔑 Jérémy, le 2026-08-04, devant les trois champs neufs : *« c'est bon mais
+    vide… »* — et il a raison. Les vidéos jouaient, la configuration existait,
+    mais dans un fichier que l'écran ne montrait pas. Un formulaire vide dit
+    « rien n'est réglé », ce qui était faux : c'est le même mensonge que la
+    période de regroupement affichée à blanc ce matin.
+
+    On recopie donc une fois, champ par champ, et seulement ce qui manque. Le
+    fichier reste lu ensuite — rien ne casse si quelqu'un vide un champ.
+    """
+    paires = (
+        ("neo_vod_channel", "infomaniak_vod_channel"),
+        ("neo_vod_account", "infomaniak_vod_account"),
+        ("neo_vod_token", "infomaniak_vod_token"),
+    )
+    a_poser = {
+        champ: frappe.conf.get(cle)
+        for champ, cle in paires
+        if not reglages.get(champ) and frappe.conf.get(cle)
+    }
+    if not a_poser:
+        return
+
+    for champ, valeur in a_poser.items():
+        reglages.set(champ, valeur)
+    reglages.flags.ignore_permissions = True
+    reglages.flags.ignore_mandatory = True
+    reglages.save(ignore_permissions=True)
+    frappe.logger().info("LMS: video configuration lifted out of site_config ({0})".format(
+        ", ".join(a_poser)))
+
 
 def sells_through_the_shop() -> bool:
     """La boutique encaisse-t-elle les cours ? Oui, sauf décision contraire.
