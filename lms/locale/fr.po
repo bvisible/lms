@@ -10180,3 +10180,23 @@ msgstr "encodage en cours"
 #: lms/public/js/neoffice_lms_settings.js
 msgid "Paste the line into the lesson, where the video should play."
 msgstr "Collez la ligne dans la leçon, à l'endroit où la vidéo doit se jouer."
+
+#: frontend/src/utils/secureVideoBlock.js
+msgid "Protected video"
+msgstr "Vidéo protégée"
+
+#: frontend/src/utils/secureVideoBlock.js
+msgid "Choose a video"
+msgstr "Choisissez une vidéo"
+
+#: frontend/src/utils/secureVideoBlock.js
+msgid "Loading the videos…"
+msgstr "Chargement des vidéos…"
+
+#: frontend/src/utils/secureVideoBlock.js
+msgid "No video in the space yet. Upload them in the Infomaniak manager."
+msgstr "Aucune vidéo dans l'espace pour l'instant. Déposez-les dans le manager Infomaniak."
+
+#: frontend/src/utils/secureVideoBlock.js
+msgid "The video space did not answer. Check Learning › Settings › Videos."
+msgstr "L'espace vidéo n'a pas répondu. Vérifiez Formations › Paramètres › Vidéos."
