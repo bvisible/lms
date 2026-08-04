@@ -44,6 +44,8 @@ web_include_js = []
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
+# //// Neoffice — le bouton de test des vidéos, hors du fichier amont.
+doctype_js = {"LMS Settings": "public/js/neoffice_lms_settings.js"}
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

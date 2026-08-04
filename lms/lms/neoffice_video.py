@@ -13,10 +13,18 @@ existing one dies within 300 seconds.
 Everything lives in a dedicated module on purpose: this fork tracks upstream
 closely, so the touch points inside upstream files stay one-liners.
 
-Site config keys:
-    infomaniak_vod_channel   e.g. 15883
-    infomaniak_vod_account   e.g. 21501
-    infomaniak_vod_token     Bearer token carrying the VOD scope
+Où se règle l'hébergeur des vidéos :
+
+    Formations › Paramètres › Le catalogue public › **Vidéos (Infomaniak VOD)**
+        neo_vod_channel · neo_vod_account · neo_vod_token
+
+    …et à défaut, les clés historiques de `site_config.json` :
+        infomaniak_vod_channel · infomaniak_vod_account · infomaniak_vod_token
+
+L'écran passe devant le fichier. Le fichier reste lu — les instances déjà
+posées ne bougent pas — mais personne ne devrait avoir besoin d'un terminal
+pour brancher un compte vidéo, et personne ne devine une clé qu'aucun écran
+ne montre.
 """
 
 import re
@@ -174,13 +182,64 @@ def access_denied_message(access: dict) -> str:
 
 
 def _config() -> dict:
+    """L'écran d'abord, le fichier ensuite.
+
+    Un réglage laissé vide n'écrase rien : on retombe sur `site_config.json`,
+    champ par champ. Une instance déjà configurée continue donc de jouer ses
+    vidéos sans qu'on aille rien retaper.
+    """
     conf = frappe.conf
-    channel = conf.get("infomaniak_vod_channel")
-    account = conf.get("infomaniak_vod_account")
-    token = conf.get("infomaniak_vod_token")
+    reglages = frappe.get_cached_doc("LMS Settings")
+
+    channel = reglages.get("neo_vod_channel") or conf.get("infomaniak_vod_channel")
+    account = reglages.get("neo_vod_account") or conf.get("infomaniak_vod_account")
+    token = None
+    if reglages.get("neo_vod_token"):
+        token = reglages.get_password("neo_vod_token", raise_exception=False)
+    token = token or conf.get("infomaniak_vod_token")
+
     if not (channel and account and token):
-        frappe.throw(_("Video hosting is not configured on this site."))
+        frappe.throw(
+            _(
+                "Video hosting is not configured. Fill Channel, Account and Access token "
+                "under Learning › Settings › Videos."
+            )
+        )
     return {"channel": channel, "account": account, "token": token}
+
+
+@frappe.whitelist()
+def check_connection() -> dict:
+    """Le bouton « Tester » : est-ce que ce compte répond, vraiment ?
+
+    Trois champs recopiés à la main, c'est trois occasions de se tromper, et
+    l'erreur ne se voit qu'au moment où un apprenant ouvre une leçon. Un aller-
+    retour tout de suite vaut mieux qu'une panne découverte par le client.
+    """
+    frappe.only_for(("System Manager", "Moderator", "Course Creator"))
+    # Volontairement HORS du try : « les trois champs ne sont pas remplis » est
+    # une phrase utile, et la masquer derrière « le service a refusé » ferait
+    # chercher une panne réseau là où il manque une valeur.
+    cfg = _config()
+    try:
+        reponse = _request("GET", "/media", params={"limit": 1}, envelope=True)
+    except Exception:
+        return {
+            "ok": False,
+            "channel": cfg["channel"],
+            "account": cfg["account"],
+            "message": _(
+                "Infomaniak refused the call — the channel, the account or the token "
+                "is wrong. Their exact answer is in the Error Log."
+            ),
+        }
+    total = reponse.get("total") if isinstance(reponse, dict) else None
+    return {
+        "ok": True,
+        "channel": cfg["channel"],
+        "account": cfg["account"],
+        "media_count": total,
+    }
 
 
 def _request(

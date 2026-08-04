@@ -130,8 +130,79 @@ SETTINGS_FIELDS = {
             "default": "1",
             "description": "Adds « Our courses » to the site menu and opens /nos-formations. Off, the page and the menu entry disappear.",
         },
+        # ------------------------------------------------------------------
+        # Les vidéos. La configuration existait — dans `site_config.json`,
+        # c'est-à-dire nulle part pour qui n'a pas de terminal.
+        #
+        # 🔑 Jérémy, le 2026-08-04 : *« on n'a rien par rapport à Infomaniak.
+        # Comment ça se passe pour les liens avec le système d'Infomaniak pour
+        # les vidéos ? »* — la question qu'on se pose forcément devant un écran
+        # de réglages qui n'en parle pas.
+        # ------------------------------------------------------------------
+        {
+            "fieldname": "neo_video_section",
+            "fieldtype": "Section Break",
+            "label": "Videos (Infomaniak VOD)",
+            "insert_after": "neo_show_on_website",
+            "collapsible": 1,
+            "description": "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over.",
+        },
+        {
+            "fieldname": "neo_vod_channel",
+            "fieldtype": "Data",
+            "label": "Channel",
+            "insert_after": "neo_video_section",
+            "description": "The channel number of the VOD space, from the Infomaniak manager.",
+        },
+        {
+            "fieldname": "neo_vod_account",
+            "fieldtype": "Data",
+            "label": "Account",
+            "insert_after": "neo_vod_channel",
+            "description": "The Infomaniak account number. Every call carries it; without it the API answers a bare « access denied ».",
+        },
+        {
+            "fieldname": "neo_vod_token",
+            "fieldtype": "Password",
+            "label": "Access token",
+            "insert_after": "neo_vod_account",
+            "description": "An Infomaniak token carrying the VOD scope. It never leaves the server — the player receives a link signed for five minutes, never the token.",
+        },
+        # ------------------------------------------------------------------
+        # L'interrupteur de la caisse, en tête de l'onglet des paiements.
+        # ------------------------------------------------------------------
+        {
+            "fieldname": "neo_sell_via_shop",
+            "fieldtype": "Check",
+            "label": "Sell the courses through the shop",
+            # Après le Tab Break, donc AU-DESSUS de `payment_section` — que le
+            # script amont masque quand l'app Payments manque. Dedans, notre
+            # interrupteur disparaîtrait avec elle.
+            "insert_after": "payment_settings_tab",
+            "default": "1",
+            "description": "On, a course is bought like any other article — cart, VAT, TWINT, card terminal, invoice — and everything below is left aside. Off, the course module takes the money itself through its own gateway, and none of that applies.",
+        },
     ]
 }
+
+
+# Les réglages de la caisse du module de formation. Ils ne servent QUE lorsque
+# c'est lui qui encaisse — c'est-à-dire jamais chez nous. On ne les supprime pas
+# (ils sont à l'amont), on les efface de l'écran tant que la boutique vend.
+#
+# `default_currency` n'en est PAS : la fiche du cours s'en sert pour libeller un
+# prix, et le catalogue public l'affiche. Il reste visible.
+CAISSE_DU_LMS = (
+    "payment_gateway",
+    "exception_country",
+    "apply_gst",
+    "show_usd_equivalent",
+    "apply_rounding",
+    "send_payment_reminders_for_batch",
+    "send_payment_reminders_for_course",
+    "no_payments_app",
+    "payments_app_is_not_installed",
+)
 
 
 def setup_custom_fields():
@@ -140,6 +211,8 @@ def setup_custom_fields():
     create_custom_fields(SETTINGS_FIELDS, ignore_validate=True)
     _move_the_catalogue_section()
     _hide_the_inert_switches()
+    _fold_the_lms_checkout_away()
+    _seed_the_singles()
     _switch_on_where_there_are_courses()
     if frappe.db.exists("DocType", "LMS Course Offer"):
         create_custom_fields(COURSE_FIELDS, ignore_validate=True)
@@ -223,6 +296,92 @@ def _hide_the_inert_switches():
         bouge = True
     if bouge:
         frappe.clear_cache(doctype="LMS Settings")
+
+
+def _property_setter(champ, propriete, valeur, type_="Data"):
+    """Poser une propriété sur un champ amont, sans toucher au doctype."""
+    nom = "LMS Settings-%s-%s" % (champ, propriete)
+    if frappe.db.exists("Property Setter", nom):
+        frappe.db.set_value("Property Setter", nom, "value", valeur)
+        return False
+    frappe.get_doc({
+        "doctype": "Property Setter",
+        "name": nom,
+        "doctype_or_field": "DocField",
+        "doc_type": "LMS Settings",
+        "field_name": champ,
+        "property": propriete,
+        "property_type": type_,
+        "value": valeur,
+    }).insert(ignore_permissions=True)
+    return True
+
+
+def _fold_the_lms_checkout_away():
+    """Tant que la boutique vend, la caisse du module de formation s'efface.
+
+    🔑 Jérémy, le 2026-08-04, devant l'onglet « Paramètres de paiement » :
+    *« là on ne met rien, donc on est d'accord (…) je pense qu'il faut un bouton
+    pour désactiver tout ça, puis utiliser le shop, parce qu'actuellement ce
+    n'est pas clair. »*
+
+    Un écran de réglages qu'on remplit pour rien est une invitation à se
+    tromper : régler une passerelle ici ouvrirait un second tunnel d'achat, qui
+    ne connaît ni le panier, ni la TVA, ni TWINT, ni la facture. On ne supprime
+    rien pour autant — l'interrupteur rend tout le bloc, à qui le veut
+    vraiment.
+    """
+    meta = frappe.get_meta("LMS Settings")
+    bouge = False
+    for champ in CAISSE_DU_LMS:
+        if not meta.get_field(champ):
+            continue
+        bouge |= _property_setter(champ, "depends_on", "eval:!doc.neo_sell_via_shop")
+
+    if meta.get_field("default_currency"):
+        # Elle survit à l'effacement : le catalogue public libelle ses prix
+        # avec, et la fiche du cours la reprend. Dire à quoi elle sert évite de
+        # la croire liée à la caisse qui vient de disparaître.
+        bouge |= _property_setter(
+            "default_currency",
+            "description",
+            "Labels the prices shown in the course catalogue. The actual billing "
+            "currency is the company's, decided by the shop.",
+            "Text",
+        )
+    if bouge:
+        frappe.clear_cache(doctype="LMS Settings")
+
+
+# 🔴 Quatrième fois dans la même semaine : **le `default` d'un champ ne
+# s'applique pas à un Single qui existe déjà**. Sans ce semis,
+# `neo_sell_via_shop` naît à 0 sur toutes les instances en service — donc « la
+# boutique ne vend pas », donc la caisse du LMS réapparaît et le bouton d'achat
+# cesse de pointer sur le panier. Le contraire de ce qu'on installe.
+def _seed_the_singles():
+    reglages = frappe.get_single("LMS Settings")
+
+    if reglages.get("neo_sell_via_shop") in (None, "", 0, "0"):
+        frappe.db.set_single_value("LMS Settings", "neo_sell_via_shop", 1)
+
+    if not reglages.get("default_currency"):
+        devise = frappe.get_cached_value(
+            "Company", frappe.defaults.get_user_default("Company"), "default_currency"
+        ) if frappe.defaults.get_user_default("Company") else None
+        devise = devise or frappe.db.get_value("Company", {}, "default_currency")
+        if devise:
+            frappe.db.set_single_value("LMS Settings", "default_currency", devise)
+
+
+def sells_through_the_shop() -> bool:
+    """La boutique encaisse-t-elle les cours ? Oui, sauf décision contraire.
+
+    Le silence vaut oui : une instance mise à jour n'a pas encore le champ, et
+    répondre non ferait basculer son bouton d'achat vers une caisse que
+    personne n'a configurée.
+    """
+    valeur = frappe.db.get_single_value("LMS Settings", "neo_sell_via_shop")
+    return valeur is None or bool(cint(valeur))
 
 
 def _move_the_catalogue_section():
@@ -612,8 +771,15 @@ def warn_about_the_second_tunnel(doc, method=None):
     Aujourd'hui il dort : aucune passerelle réglée, zéro `LMS Payment`, et les
     trois cours payants pointent vers la boutique. On le dit avant qu'il ne se
     réveille, pas après.
+
+    Depuis l'arrivée de l'interrupteur, l'avertissement ne se déclenche plus que
+    sur la **contradiction** : une passerelle réglée alors que la boutique est
+    censée vendre. Éteindre l'interrupteur est un choix assumé, et on ne
+    sermonne pas quelqu'un qui vient de le faire exprès.
     """
     if not doc.get("payment_gateway"):
+        return
+    if not sells_through_the_shop():
         return
 
     frappe.msgprint(
@@ -735,7 +901,13 @@ def get_shop_route(course: str) -> str | None:
     Quand plusieurs offres existent, c'est **la moins chère** — « à partir de »,
     la convention de toute gamme. Le catalogue, lui, les montre toutes : un
     bouton unique ne peut pas poser un choix, une liste si.
+
+    Et si l'interrupteur « Vendre les cours par la boutique » est éteint, on ne
+    renvoie rien : c'est là tout l'effet du bouton, et il vaut mieux qu'il en
+    ait un.
     """
+    if not sells_through_the_shop():
+        return None
     offres = offers_for(course)
     return offres[0]["route"] if offres else None
 
