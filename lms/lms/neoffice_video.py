@@ -34,7 +34,7 @@ import frappe
 import requests
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils import add_months, flt, getdate, nowdate
+from frappe.utils import add_months, cint, flt, getdate, nowdate
 
 API_BASE = "https://api.infomaniak.com/1/vod/channel"
 API_TIMEOUT = 20
@@ -207,6 +207,175 @@ def _config() -> dict:
             )
         )
     return {"channel": channel, "account": account, "token": token}
+
+
+@frappe.whitelist()
+def list_folders() -> list:
+    """Les dossiers de l'espace vidéo, et lesquels sont protégés.
+
+    Le dossier n'est pas un rangement décoratif : la **restriction se pose sur
+    le dossier**, et le média en hérite. Déposer dans `/cours` rend la vidéo
+    injouable sans jeton ; déposer dans `/teasers` la laisse publique. Choisir
+    le dossier, c'est donc choisir qui pourra voir — d'où sa place dans la
+    fenêtre de dépôt plutôt que dans un réglage caché.
+    """
+    frappe.only_for(("System Manager", "Moderator", "Course Creator"))
+    dossiers = _request("GET", "/folder")
+    return [
+        {
+            "id": d.get("id"),
+            "path": d.get("path") or "/",
+            "protected": bool(d.get("key_restricted")),
+        }
+        for d in (dossiers if isinstance(dossiers, list) else [])
+    ]
+
+
+def _space_left() -> dict:
+    """Combien de vidéos l'abonnement autorise encore.
+
+    Le forfait de démonstration en accepte **cinq**. Découvrir la limite en
+    plein téléversement d'un fichier de 800 Mo serait une façon coûteuse de
+    l'apprendre.
+    """
+    canal = _request("GET", "")
+    pack = (canal or {}).get("pack") or {}
+    plafond = ((pack.get("limits") or {}).get("media")) or 0
+    utilises = cint((canal or {}).get("medias_count"))
+    return {
+        "used": utilises,
+        "limit": plafond,
+        "left": (plafond - utilises) if plafond else None,
+        "pack": pack.get("name"),
+    }
+
+
+@frappe.whitelist()
+def space_left() -> dict:
+    frappe.only_for(("System Manager", "Moderator", "Course Creator"))
+    return _space_left()
+
+
+UPLOAD_STATUS_TTL = 3600
+
+
+def _status_key(jeton: str) -> str:
+    return "neoffice_vod_upload:{0}".format(jeton)
+
+
+@frappe.whitelist()
+def start_upload(file_url: str, folder: str = None, title: str = None) -> dict:
+    """Envoyer chez Infomaniak un fichier déjà déposé sur le site.
+
+    🔑 Jérémy, le 2026-08-04 : *« il faut pouvoir téléverser depuis Neoffice »*.
+
+    ⚠️ **En tâche de fond, et ce n'est pas un luxe.** Une vidéo de cours pèse
+    des centaines de mégaoctets ; l'envoyer depuis la requête web tiendrait un
+    worker plusieurs minutes et finirait tué par le délai de garde bien avant la
+    fin. On rend donc un jeton tout de suite, et l'écran suit l'avancement.
+
+    Le fichier local est supprimé une fois la vidéo chez Infomaniak : le garder
+    doublerait le stockage, sur le disque de l'instance, pour rien.
+    """
+    frappe.only_for(("System Manager", "Moderator", "Course Creator"))
+
+    place = _space_left()
+    if place["left"] is not None and place["left"] <= 0:
+        frappe.throw(
+            _("The video space is full: {0} of {1} videos used on the « {2} » plan.").format(
+                place["used"], place["limit"], place["pack"] or "—"
+            )
+        )
+
+    nom = frappe.db.get_value("File", {"file_url": file_url}, "name")
+    if not nom:
+        frappe.throw(_("File not found."))
+
+    jeton = frappe.generate_hash(length=12)
+    frappe.cache().set_value(
+        _status_key(jeton),
+        {"state": "queued", "file": file_url},
+        expires_in_sec=UPLOAD_STATUS_TTL,
+    )
+    frappe.enqueue(
+        "lms.lms.neoffice_video.run_upload",
+        queue="long",
+        timeout=3600,
+        jeton=jeton,
+        file_name=nom,
+        folder=folder,
+        title=title,
+        user=frappe.session.user,
+    )
+    return {"token": jeton}
+
+
+def run_upload(jeton: str, file_name: str, folder: str = None, title: str = None, user: str = None):
+    """La tâche de fond. Ne lève jamais : elle raconte, dans le statut."""
+
+    def dire(**etat):
+        frappe.cache().set_value(_status_key(jeton), etat, expires_in_sec=UPLOAD_STATUS_TTL)
+
+    try:
+        fichier = frappe.get_doc("File", file_name)
+        chemin = fichier.get_full_path()
+        dire(state="uploading", file=fichier.file_url, size=fichier.file_size)
+
+        cfg = _config()
+        params = {"account": cfg["account"]}
+        if folder:
+            params["folder"] = folder
+
+        with open(chemin, "rb") as flux:
+            reponse = requests.post(
+                "{0}/{1}/upload".format(API_BASE, cfg["channel"]),
+                headers={"Authorization": "Bearer {0}".format(cfg["token"])},
+                params=params,
+                # Le nom du fichier devient le nom du média chez Infomaniak.
+                files={"file": (title or fichier.file_name, flux, "video/mp4")},
+                # (connexion, lecture) : le second doit couvrir l'envoi entier.
+                timeout=(30, 3000),
+            )
+
+        corps = {}
+        try:
+            corps = reponse.json()
+        except ValueError:
+            pass
+
+        if reponse.status_code >= 400 or corps.get("result") == "error":
+            frappe.log_error(
+                "Infomaniak VOD upload",
+                "HTTP {0}\n{1}".format(reponse.status_code, reponse.text[:2000]),
+            )
+            dire(state="failed", message=_("Infomaniak refused the file. See the Error Log."))
+            return
+
+        media = corps.get("data") or {}
+        # Le fichier a fait le voyage : le garder ici doublerait le stockage.
+        try:
+            fichier.delete(ignore_permissions=True)
+            frappe.db.commit()
+        except Exception:
+            frappe.log_error("VOD upload: local file kept", frappe.get_traceback())
+
+        dire(
+            state="done",
+            media=media.get("id"),
+            name=media.get("name"),
+            folder=(media.get("folder") or {}).get("path"),
+            protected=bool(media.get("key_restricted")),
+        )
+    except Exception:
+        frappe.log_error("Infomaniak VOD upload", frappe.get_traceback())
+        dire(state="failed", message=_("The upload failed. See the Error Log."))
+
+
+@frappe.whitelist()
+def upload_status(token: str) -> dict:
+    """Où en est le dépôt. L'écran interroge, la tâche répond."""
+    frappe.only_for(("System Manager", "Moderator", "Course Creator"))
+    return frappe.cache().get_value(_status_key(token)) or {"state": "unknown"}
 
 
 @frappe.whitelist()

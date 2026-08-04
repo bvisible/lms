@@ -10200,3 +10200,75 @@ msgstr "Aucune vidéo dans l'espace pour l'instant. Déposez-les dans le manager
 #: frontend/src/utils/secureVideoBlock.js
 msgid "The video space did not answer. Check Learning › Settings › Videos."
 msgstr "L'espace vidéo n'a pas répondu. Vérifiez Formations › Paramètres › Vidéos."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Upload a video"
+msgstr "Téléverser une vidéo"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Video file"
+msgstr "Fichier vidéo"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "The file goes to your Infomaniak space, and is removed from this server afterwards."
+msgstr "Le fichier part vers votre espace Infomaniak, puis il est retiré de ce serveur."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Folder"
+msgstr "Dossier"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "protected"
+msgstr "protégé"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "public"
+msgstr "public"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "A protected folder makes the video unplayable without a signed link — that is where course videos belong. A public folder is for free teasers."
+msgstr "Un dossier protégé rend la vidéo injouable sans lien signé — c'est là que vont les vidéos de cours. Un dossier public sert aux extraits gratuits."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Send to Infomaniak"
+msgstr "Envoyer chez Infomaniak"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Sending…"
+msgstr "Envoi…"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Sending to Infomaniak — this can take a few minutes."
+msgstr "Envoi chez Infomaniak — cela peut prendre quelques minutes."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "« {0} » is on Infomaniak, in {1}."
+msgstr "« {0} » est chez Infomaniak, dans {1}."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "The upload failed."
+msgstr "Le téléversement a échoué."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "This file is {0}. The server refuses uploads over {1} — ask your administrator to raise the limit, or upload it in the Infomaniak manager."
+msgstr "Ce fichier pèse {0}. Le serveur refuse les dépôts au-delà de {1} — demandez à votre administrateur de relever la limite, ou déposez-le dans le manager Infomaniak."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "{0} of {1} videos used on the « {2} » plan. The file goes to your Infomaniak space, and is removed from this server afterwards."
+msgstr "{0} vidéos sur {1} utilisées avec le forfait « {2} ». Le fichier part vers votre espace Infomaniak, puis il est retiré de ce serveur."
+
+#: lms/lms/neoffice_video.py
+msgid "The video space is full: {0} of {1} videos used on the « {2} » plan."
+msgstr "L'espace vidéo est plein : {0} vidéos sur {1} avec le forfait « {2} »."
+
+#: lms/lms/neoffice_video.py
+msgid "File not found."
+msgstr "Fichier introuvable."
+
+#: lms/lms/neoffice_video.py
+msgid "Infomaniak refused the file. See the Error Log."
+msgstr "Infomaniak a refusé le fichier. Voir le journal des erreurs."
+
+#: lms/lms/neoffice_video.py
+msgid "The upload failed. See the Error Log."
+msgstr "Le téléversement a échoué. Voir le journal des erreurs."

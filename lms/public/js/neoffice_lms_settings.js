@@ -55,6 +55,133 @@ function nb_no_autofill(frm, fieldname, kind) {
 	}
 }
 
+// ⚠️ **nginx refuse les corps de plus de 50 Mo** (`client_max_body_size`, valeur
+// du gabarit bench). Une vidéo de cours en pèse dix fois plus, et le refus
+// arrive sous forme d'une page 413 illisible. On le dit AVANT le dépôt, avec le
+// poids du fichier choisi : un message clair vaut mieux qu'un échec au bout de
+// trois minutes d'attente.
+const NB_UPLOAD_MAX = 50 * 1024 * 1024;
+
+function nb_taille(octets) {
+	if (!octets) return "";
+	const mo = octets / (1024 * 1024);
+	return mo >= 1024 ? (mo / 1024).toFixed(1) + " Go" : Math.round(mo) + " Mo";
+}
+
+function nb_upload_video() {
+	frappe.call({
+		method: "lms.lms.neoffice_video.list_folders",
+		freeze: true,
+		freeze_message: __("Calling Infomaniak…"),
+		callback(r) {
+			const dossiers = r.message || [];
+			// Le dossier décide de la protection : le média hérite de la
+			// restriction du dossier. Ce n'est pas un rangement, c'est un droit.
+			const options = dossiers.map((d) => ({
+				value: d.id,
+				label: d.path + (d.protected ? " — " + __("protected") : " — " + __("public")),
+			}));
+			const protege = (dossiers.find((d) => d.protected) || {}).id;
+
+			const d = new frappe.ui.Dialog({
+				title: __("Upload a video"),
+				fields: [
+					{
+						fieldname: "video",
+						fieldtype: "Attach",
+						label: __("Video file"),
+						reqd: 1,
+						description: __("The file goes to your Infomaniak space, and is removed from this server afterwards."),
+					},
+					{
+						fieldname: "folder",
+						fieldtype: "Select",
+						label: __("Folder"),
+						options: options,
+						default: protege,
+						description: __("A protected folder makes the video unplayable without a signed link — that is where course videos belong. A public folder is for free teasers."),
+					},
+					{ fieldtype: "HTML", fieldname: "etat" },
+				],
+				primary_action_label: __("Send to Infomaniak"),
+				primary_action(v) {
+					if (!v.video) return;
+					const etat = d.fields_dict.etat.$wrapper;
+					d.get_primary_btn().prop("disabled", true);
+					etat.html(`<div class="text-muted">${__("Sending…")}</div>`);
+					frappe.call({
+						method: "lms.lms.neoffice_video.start_upload",
+						args: { file_url: v.video, folder: v.folder },
+						callback(res) {
+							const jeton = (res.message || {}).token;
+							if (!jeton) return;
+							// La tâche tourne en fond : un fichier de 800 Mo
+							// dépasse largement le délai de garde d'une requête
+							// web. On demande où elle en est.
+							const suivre = setInterval(() => {
+								frappe.call({
+									method: "lms.lms.neoffice_video.upload_status",
+									args: { token: jeton },
+									callback(s) {
+										const out = s.message || {};
+										if (out.state === "done") {
+											clearInterval(suivre);
+											d.hide();
+											frappe.show_alert({
+												message: __("« {0} » is on Infomaniak, in {1}.",
+													[out.name, out.folder || "/"]),
+												indicator: "green",
+											}, 10);
+										} else if (out.state === "failed") {
+											clearInterval(suivre);
+											d.get_primary_btn().prop("disabled", false);
+											etat.html(`<div class="text-danger">${out.message || __("The upload failed.")}</div>`);
+										} else {
+											etat.html(`<div class="text-muted">${__("Sending to Infomaniak — this can take a few minutes.")}</div>`);
+										}
+									},
+								});
+							}, 3000);
+						},
+					});
+				},
+			});
+
+			// Prévenir sur le poids AVANT de lancer quoi que ce soit.
+			d.fields_dict.video.df.onchange = () => {
+				const url = d.get_value("video");
+				if (!url) return;
+				frappe.db.get_value("File", { file_url: url }, "file_size").then((f) => {
+					const taille = (f.message || {}).file_size;
+					if (taille > NB_UPLOAD_MAX) {
+						d.fields_dict.etat.$wrapper.html(
+							`<div class="text-danger">${__("This file is {0}. The server refuses uploads over {1} — ask your administrator to raise the limit, or upload it in the Infomaniak manager.",
+								[nb_taille(taille), nb_taille(NB_UPLOAD_MAX)])}</div>`
+						);
+					} else {
+						d.fields_dict.etat.$wrapper.html(
+							`<div class="text-muted">${nb_taille(taille)}</div>`
+						);
+					}
+				});
+			};
+
+			d.show();
+			frappe.call({
+				method: "lms.lms.neoffice_video.space_left",
+				callback(s) {
+					const p = s.message || {};
+					if (p.limit) {
+						d.set_df_property("video", "description",
+							__("{0} of {1} videos used on the « {2} » plan. The file goes to your Infomaniak space, and is removed from this server afterwards.",
+								[p.used, p.limit, p.pack || "—"]));
+					}
+				},
+			});
+		},
+	});
+}
+
 frappe.ui.form.on("LMS Settings", {
 	refresh(frm) {
 		["neo_vod_channel", "neo_vod_account"].forEach((f) => nb_no_autofill(frm, f));
@@ -73,6 +200,8 @@ frappe.ui.form.on("LMS Settings", {
 		// faut-il pouvoir la lire quelque part : sans cet écran il fallait
 		// aller chercher un identifiant de treize caractères dans le manager
 		// Infomaniak, dans un autre onglet, et le retaper sans se tromper.
+		frm.add_custom_button(__("Upload a video"), () => nb_upload_video(), __("Videos"));
+
 		frm.add_custom_button(__("The available videos"), () => {
 			frappe.call({
 				method: "lms.lms.neoffice_video.list_media",
