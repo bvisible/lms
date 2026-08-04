@@ -80,8 +80,9 @@ frappe.ui.form.on("LMS Settings", {
 						title: out.ok ? __("Videos are connected") : __("No answer"),
 						indicator: out.ok ? "green" : "red",
 						message: out.ok
-							? __("Channel {0}, account {1} — {2} media in the space.",
-								[out.channel, out.account, out.media_count == null ? "?" : out.media_count])
+							? __("Connected to « {0} » — channel {1}, account {2}, {3} media in the space.",
+								[out.name, out.channel, out.account,
+									out.media_count == null ? "?" : out.media_count])
 							: out.message,
 					});
 				},

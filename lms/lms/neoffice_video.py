@@ -222,7 +222,12 @@ def check_connection() -> dict:
     # chercher une panne réseau là où il manque une valeur.
     cfg = _config()
     try:
-        reponse = _request("GET", "/media", params={"limit": 1}, envelope=True)
+        # ⚠️ `limit=1` seul fait répondre 422 `validation_rule_offset` : leur
+        # pagination veut les deux bornes ou aucune. On demande donc la liste
+        # entière — un espace de cours en compte quelques dizaines, pas des
+        # milliers.
+        espace = _request("GET", "")
+        medias = _request("GET", "/media")
     except Exception:
         return {
             "ok": False,
@@ -233,12 +238,12 @@ def check_connection() -> dict:
                 "is wrong. Their exact answer is in the Error Log."
             ),
         }
-    total = reponse.get("total") if isinstance(reponse, dict) else None
     return {
         "ok": True,
         "channel": cfg["channel"],
         "account": cfg["account"],
-        "media_count": total,
+        "name": (espace or {}).get("channel_name") or (espace or {}).get("slug") or "",
+        "media_count": len(medias) if isinstance(medias, list) else None,
     }
 
 

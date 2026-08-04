@@ -10126,8 +10126,8 @@ msgid "No answer"
 msgstr "Pas de réponse"
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "Channel {0}, account {1} — {2} media in the space."
-msgstr "Canal {0}, compte {1} — {2} média(s) dans l'espace."
+msgid "Connected to « {0} » — channel {1}, account {2}, {3} media in the space."
+msgstr "Connecté à « {0} » — canal {1}, compte {2}, {3} média(s) dans l'espace."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Infomaniak account number"
