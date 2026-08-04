@@ -112,7 +112,14 @@ SETTINGS_FIELDS = {
             "fieldname": "neo_website_section",
             "fieldtype": "Section Break",
             "label": "The public catalogue",
-            "insert_after": "allow_guest_access",
+            # 🔴 PAS après `allow_guest_access` : une Section Break n'ouvre pas
+            # seulement la sienne, elle FERME la précédente — « Ne pas permettre
+            # d'avancer les vidéos », « Désactiver la PWA » et le reste du bloc
+            # général se retrouvaient rangés sous « Le catalogue public ». Le
+            # même piège que sur la fiche article ce matin, refait le soir même.
+            # Posée sur le DERNIER champ du bloc général, elle est fermée par la
+            # section « Notifications » qui suit.
+            "insert_after": "livecode_url",
             "collapsible": 0,
         },
         {
@@ -131,10 +138,30 @@ def setup_custom_fields():
     """Idempotent — safe on every migrate."""
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
     create_custom_fields(SETTINGS_FIELDS, ignore_validate=True)
+    _move_the_catalogue_section()
     _switch_on_where_there_are_courses()
     if frappe.db.exists("DocType", "LMS Course Offer"):
         create_custom_fields(COURSE_FIELDS, ignore_validate=True)
     _put_the_section_back_where_it_belongs()
+
+
+def _move_the_catalogue_section():
+    """Remettre la section au bon endroit là où elle a déjà été posée."""
+    nom = frappe.db.get_value("Custom Field", {"dt": "LMS Settings", "fieldname": "neo_website_section"}, "name")
+    if not nom:
+        return
+    if frappe.db.get_value("Custom Field", nom, "insert_after") == "livecode_url":
+        return
+    if not frappe.get_meta("LMS Settings").get_field("livecode_url"):
+        return
+    frappe.db.set_value("Custom Field", nom, "insert_after", "livecode_url")
+    frappe.db.set_value(
+        "Custom Field",
+        {"dt": "LMS Settings", "fieldname": "neo_show_on_website"},
+        "insert_after",
+        "neo_website_section",
+    )
+    frappe.clear_cache(doctype="LMS Settings")
 
 
 def _switch_on_where_there_are_courses():
