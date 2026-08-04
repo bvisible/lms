@@ -10160,3 +10160,23 @@ msgstr "Paramètres des formations"
 #: lms/lms/workspace/training
 msgid "Public catalogue"
 msgstr "Catalogue public"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "The available videos"
+msgstr "Les vidéos disponibles"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "No video"
+msgstr "Aucune vidéo"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "The space holds no video yet. Upload them in the Infomaniak manager."
+msgstr "L'espace ne contient encore aucune vidéo. Déposez-les dans le manager Infomaniak."
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "still encoding"
+msgstr "encodage en cours"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Paste the line into the lesson, where the video should play."
+msgstr "Collez la ligne dans la leçon, à l'endroit où la vidéo doit se jouer."

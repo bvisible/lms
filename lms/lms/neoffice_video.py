@@ -209,6 +209,38 @@ def _config() -> dict:
 
 
 @frappe.whitelist()
+def list_media() -> list:
+    """Les vidéos de l'espace, avec la ligne à coller dans la leçon.
+
+    🔑 Jérémy, le 2026-08-04 : *« on met où dans l'ERP ? pas vu »* — et il n'y
+    avait rien à voir. Poser une vidéo demandait de taper à la main
+    `{{ SecureVideo("1jijk03umkoek") }}`, avec un identifiant qu'on ne pouvait
+    lire que dans le manager Infomaniak, dans un autre onglet. Personne
+    n'invente une chaîne de treize caractères.
+
+    On rend donc la liste, et surtout **la ligne toute faite** : l'auteur
+    copie, colle dans sa leçon, et n'a jamais à connaître la syntaxe.
+
+    `state` 192 = prêt à jouer. Les autres valeurs sont des étapes d'encodage —
+    une vidéo qu'on collerait maintenant ne jouerait pas encore.
+    """
+    frappe.only_for(("System Manager", "Moderator", "Course Creator"))
+    medias = _request("GET", "/media")
+    sortie = []
+    for m in medias if isinstance(medias, list) else []:
+        sortie.append(
+            {
+                "id": m.get("id"),
+                "name": m.get("name") or m.get("id"),
+                "duration": m.get("duration"),
+                "ready": m.get("state") == 192,
+                "macro": '{{ SecureVideo("%s") }}' % m.get("id"),
+            }
+        )
+    return sortie
+
+
+@frappe.whitelist()
 def check_connection() -> dict:
     """Le bouton « Tester » : est-ce que ce compte répond, vraiment ?
 

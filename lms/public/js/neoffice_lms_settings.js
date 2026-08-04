@@ -69,6 +69,51 @@ frappe.ui.form.on("LMS Settings", {
 			window.open("https://manager.infomaniak.com", "_blank", "noopener");
 		}, __("Videos"));
 
+		// Poser une vidéo dans une leçon, c'est y coller une ligne. Encore
+		// faut-il pouvoir la lire quelque part : sans cet écran il fallait
+		// aller chercher un identifiant de treize caractères dans le manager
+		// Infomaniak, dans un autre onglet, et le retaper sans se tromper.
+		frm.add_custom_button(__("The available videos"), () => {
+			frappe.call({
+				method: "lms.lms.neoffice_video.list_media",
+				freeze: true,
+				freeze_message: __("Calling Infomaniak…"),
+				callback(r) {
+					const medias = r.message || [];
+					if (!medias.length) {
+						frappe.msgprint({
+							title: __("No video"),
+							indicator: "blue",
+							message: __("The space holds no video yet. Upload them in the Infomaniak manager."),
+						});
+						return;
+					}
+					const d = new frappe.ui.Dialog({
+						title: __("The available videos"),
+						size: "large",
+						fields: [{ fieldtype: "HTML", fieldname: "liste" }],
+					});
+					const lignes = medias.map((m) => `
+						<tr>
+							<td>${frappe.utils.escape_html(m.name)}
+								${m.ready ? "" : `<span class="text-muted small"> — ${__("still encoding")}</span>`}</td>
+							<td><code>${frappe.utils.escape_html(m.macro)}</code></td>
+							<td class="text-right">
+								<button class="btn btn-xs btn-default nb-copy"
+									data-macro="${frappe.utils.escape_html(m.macro)}">${__("Copy")}</button>
+							</td>
+						</tr>`).join("");
+					d.fields_dict.liste.$wrapper.html(`
+						<p class="text-muted">${__("Paste the line into the lesson, where the video should play.")}</p>
+						<table class="table table-sm"><tbody>${lignes}</tbody></table>`);
+					d.$wrapper.on("click", ".nb-copy", function () {
+						frappe.utils.copy_to_clipboard($(this).data("macro"));
+					});
+					d.show();
+				},
+			});
+		}, __("Videos"));
+
 		frm.add_custom_button(__("Test the video connection"), () => {
 			frappe.call({
 				method: "lms.lms.neoffice_video.check_connection",
