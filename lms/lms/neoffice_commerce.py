@@ -520,6 +520,35 @@ def _align_the_item_price(offre: dict) -> None:
         frappe.db.set_value("Item Price", nom, "price_list_rate", flt(offre["price"]))
 
 
+def warn_about_the_second_tunnel(doc, method=None):
+    """Régler une passerelle ici rouvre un second tunnel de paiement.
+
+    🔴 Le module de formation a son propre encaissement (`LMS Payment` + l'app
+    `payments`). Neoffice ne l'utilise pas : un cours se vend **en article**, par
+    le panier, avec TVA, TWINT, terminal et facture. Les deux peuvent pourtant
+    coexister — et alors le même cours s'achète de deux façons, dont une qui ne
+    laisse aucune trace comptable.
+
+    Aujourd'hui il dort : aucune passerelle réglée, zéro `LMS Payment`, et les
+    trois cours payants pointent vers la boutique. On le dit avant qu'il ne se
+    réveille, pas après.
+    """
+    if not doc.get("payment_gateway"):
+        return
+
+    frappe.msgprint(
+        _(
+            "A payment gateway here opens the course module's OWN checkout, which "
+            "knows nothing about the cart, TWINT, the card terminal or invoicing. "
+            "In Neoffice a course is sold as an article — see the « Selling » "
+            "section of the course. Leave this empty unless you really want two "
+            "ways to buy the same course."
+        ),
+        title=_("Two checkouts for the same course"),
+        indicator="orange",
+    )
+
+
 def _the_selling_item(course: str) -> str | None:
     """L'article qui vend ce cours, selon le cours lui-même.
 

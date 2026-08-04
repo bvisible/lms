@@ -10048,3 +10048,11 @@ msgstr "Aucune formation dans cette catégorie pour l'instant."
 #: lms/www/nos-formations.html
 msgid "See them all"
 msgstr "Voir toutes les formations"
+
+#: lms/lms/neoffice_commerce.py
+msgid "Two checkouts for the same course"
+msgstr "Deux façons de payer le même cours"
+
+#: lms/lms/neoffice_commerce.py
+msgid "A payment gateway here opens the course module's OWN checkout, which knows nothing about the cart, TWINT, the card terminal or invoicing. In Neoffice a course is sold as an article — see the « Selling » section of the course. Leave this empty unless you really want two ways to buy the same course."
+msgstr "Une passerelle ici ouvre l'encaissement propre au module de formation, qui ignore le panier, TWINT, le terminal de carte et la facturation. Dans Neoffice, un cours se vend en article — voir la section « Vente » du cours. Laissez ce champ vide, sauf à vouloir vraiment deux façons d'acheter le même cours."

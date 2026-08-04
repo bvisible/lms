@@ -184,6 +184,9 @@ doc_events = {
 	# visiteur à une page qui n'existe plus.
 	"LMS Settings": {
 		"on_update": "lms.lms.neoffice_commerce.sync_courses_link",
+		# Neoffice: régler une passerelle ici rouvrirait le tunnel de paiement du
+		# module, qui ignore le panier, TWINT, le terminal et la facturation.
+		"validate": "lms.lms.neoffice_commerce.warn_about_the_second_tunnel",
 	},
 }
 
