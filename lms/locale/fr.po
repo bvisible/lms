@@ -10062,8 +10062,8 @@ msgid "Videos (Infomaniak VOD)"
 msgstr "Vidéos (Infomaniak VOD)"
 
 #: lms/lms/neoffice_commerce.py
-msgid "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the <a href='https://manager.infomaniak.com' target='_blank' rel='noopener'>Infomaniak manager</a>, under Streaming / VOD and, for the key, your profile's API tokens."
-msgstr "Où sont hébergées les vidéos des leçons. Laissez vide pour garder ce que contient la configuration du site — remplir ici prend le dessus. Les trois valeurs viennent du <a href='https://manager.infomaniak.com' target='_blank' rel='noopener'>manager Infomaniak</a>, sous Streaming / VOD et, pour la clé, les jetons d'API de votre profil."
+msgid "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the Infomaniak manager: Streaming / VOD gives the channel and the account, and the API tokens of your profile give the key."
+msgstr "Où sont hébergées les vidéos des leçons. Laissez vide pour garder ce que contient la configuration du site — remplir ici prend le dessus. Les trois valeurs viennent du manager Infomaniak : Streaming / VOD donne le canal et le compte, les jetons d'API de votre profil donnent la clé."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Infomaniak video channel"
@@ -10132,3 +10132,7 @@ msgstr "Canal {0}, compte {1} — {2} média(s) dans l'espace."
 #: lms/lms/neoffice_commerce.py
 msgid "Infomaniak account number"
 msgstr "Numéro de compte Infomaniak"
+
+#: lms/public/js/neoffice_lms_settings.js
+msgid "Open the Infomaniak manager"
+msgstr "Ouvrir le manager Infomaniak"

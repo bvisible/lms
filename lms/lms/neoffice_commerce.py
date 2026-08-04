@@ -147,10 +147,13 @@ SETTINGS_FIELDS = {
             # Ouverte. Repliée, elle cachait la seule réponse à « où se règlent
             # les vidéos ? » derrière un chevron que personne n'ouvre.
             "collapsible": 0,
-            # Le lien va vers la racine du manager, volontairement : les chemins
-            # internes d'Infomaniak bougent, et un lien mort dans une aide vaut
-            # moins que pas de lien du tout.
-            "description": "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the <a href='https://manager.infomaniak.com' target='_blank' rel='noopener'>Infomaniak manager</a>, under Streaming / VOD and, for the key, your profile's API tokens.",
+            # ⚠️ **Pas de HTML ici.** Une balise dans une description passe par
+            # l'assainisseur de Frappe, qui la réécrit — guillemets simples
+            # changés en doubles — et la chaîne stockée ne correspond alors plus
+            # au `msgid` du fichier de traduction : le texte reste en anglais
+            # sans que rien ne signale l'écart. Le lien vers le manager est un
+            # BOUTON (voir `neoffice_lms_settings.js`), pas un morceau de donnée.
+            "description": "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the Infomaniak manager: Streaming / VOD gives the channel and the account, and the API tokens of your profile give the key.",
         },
         # ⚠️ Les libellés évitent « compte », « identifiant », « jeton » seuls :
         # Chrome a pris « Compte » + un champ masqué pour un formulaire de

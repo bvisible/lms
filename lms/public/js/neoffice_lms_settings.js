@@ -41,6 +41,15 @@ frappe.ui.form.on("LMS Settings", {
 		["neo_vod_channel", "neo_vod_account"].forEach((f) => nb_no_autofill(frm, f));
 		nb_no_autofill(frm, "neo_vod_token", "secret");
 
+		// Le lien vers le manager est ici et pas dans la description du champ :
+		// une balise dans une description est réécrite par l'assainisseur, et la
+		// traduction ne retrouve plus sa chaîne. Racine du manager exprès — les
+		// chemins internes d'Infomaniak bougent, un lien mort aide moins que pas
+		// de lien.
+		frm.add_custom_button(__("Open the Infomaniak manager"), () => {
+			window.open("https://manager.infomaniak.com", "_blank", "noopener");
+		}, __("Videos"));
+
 		frm.add_custom_button(__("Test the video connection"), () => {
 			frappe.call({
 				method: "lms.lms.neoffice_video.check_connection",
