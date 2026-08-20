@@ -25,6 +25,9 @@ from frappe.utils import (
 	validate_email_address,
 )
 from frappe.utils.html_utils import sanitize_html
+
+#//// Neoffice — les prix rendus au public portent leur devise (voir la fonction).
+from lms.lms.neoffice_commerce import montant_lisible
 from pypika import Case
 from pypika import functions as fn
 
@@ -837,7 +840,10 @@ def get_course_card_details(courses: list) -> list:
 			course.amount, course.currency = check_multicurrency(
 				course.course_price, course.currency, None, course.amount_usd
 			)
-			course.price = fmt_money(course.amount, 0, course.currency)
+			#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+			#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+			#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			course.price = montant_lisible(course.amount, course.currency)
 
 	return courses
 
@@ -990,7 +996,10 @@ def get_course_details(course: str):
 		"""course_details.course_price, course_details.currency = check_multicurrency(
 				course_details.course_price, course_details.currency, None, course_details.amount_usd
 		)"""
-		course_details.price = fmt_money(course_details.course_price, 0, course_details.currency)
+		#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+		#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+		#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		course_details.price = montant_lisible(course_details.course_price, course_details.currency)
 
 	if frappe.session.user == "Guest":
 		course_details.is_instructor = False
@@ -1400,7 +1409,10 @@ def get_batch_details(batch: str):
 		batch_details.amount, batch_details.currency = check_multicurrency(
 			batch_details.amount, batch_details.currency, None, batch_details.amount_usd
 		)
-		batch_details.price = fmt_money(batch_details.amount, 0, batch_details.currency)
+		#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+		#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+		#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		batch_details.price = montant_lisible(batch_details.amount, batch_details.currency)
 
 	if batch_details.seat_count:
 		batch_details.seats_left = batch_details.seat_count - len(batch_students)
@@ -2616,7 +2628,10 @@ def get_batch_card_details(batches: list) -> list:
 			batch.amount, batch.currency = check_multicurrency(
 				batch.amount, batch.currency, None, batch.amount_usd
 			)
-			batch.price = fmt_money(batch.amount, 0, batch.currency)
+			#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+			#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+			#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			batch.price = montant_lisible(batch.amount, batch.currency)
 
 	return batches
 

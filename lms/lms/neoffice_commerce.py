@@ -1147,6 +1147,30 @@ def course_sold_by(item_code: str) -> str | None:
     return frappe.db.get_value("Item", item_code, "lms_course")
 
 
+def montant_lisible(valeur, devise: str = None) -> str:
+    """Un prix pour un client : avec sa devise, toujours.
+
+    🔴 `fmt_money` retire le symbole dès que le défaut global
+    `hide_currency_symbol` vaut « Yes » — ce qui est le cas sur nos instances,
+    et se défend au DESK : chaque colonne y annonce déjà sa monnaie en en-tête.
+    Sur la fiche publique d'un cours, il ne restait que « 90 ». Quatre-vingt-dix
+    quoi ? La boutique, à deux clics de là, affiche « CHF 90.00 » pour le même
+    cours. Constaté le 2026-08-20 sur osiris.
+
+    On formate donc le nombre sans devise, puis on remet la devise à la main,
+    du côté que la fiche Currency indique. Deux décimales comme la boutique :
+    deux prix pour un même cours ne doivent pas s'écrire différemment.
+    """
+    from frappe.utils import flt, fmt_money
+
+    nombre = fmt_money(flt(valeur), 2)
+    if not devise:
+        return nombre
+    symbole = frappe.db.get_value("Currency", devise, "symbol", cache=True) or devise
+    a_droite = frappe.db.get_value("Currency", devise, "symbol_on_right", cache=True)
+    return f"{nombre} {_(symbole)}" if a_droite else f"{_(symbole)} {nombre}"
+
+
 def _pin_guest_cart() -> None:
     """Un seul identifiant d'invité pour toute la requête.
 
