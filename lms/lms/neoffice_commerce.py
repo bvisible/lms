@@ -1147,6 +1147,65 @@ def course_sold_by(item_code: str) -> str | None:
     return frappe.db.get_value("Item", item_code, "lms_course")
 
 
+def _pin_guest_cart() -> None:
+    """Un seul identifiant d'invité pour toute la requête.
+
+    Webshop frappe l'identifiant d'un visiteur sans compte quand il manque —
+    mais il ne peut le poser que sur la RÉPONSE. Dans la même requête,
+    `frappe.request.cookies` n'en a donc toujours aucun, et chaque appel en
+    invente un nouveau : deux paniers pour un seul visiteur, dont un invisible.
+
+    On le frappe une fois et on le remet dans les cookies de CETTE requête,
+    ce que webshop lirait si le navigateur l'avait déjà appris.
+    """
+    if frappe.session.user != "Guest" or not getattr(frappe, "request", None):
+        return
+    if frappe.request.cookies.get("guest_session_id"):
+        return
+    try:
+        from webshop.webshop.shopping_cart.guest_cart import get_guest_session_id
+        from werkzeug.datastructures import ImmutableMultiDict
+
+        cookies = dict(frappe.request.cookies)
+        cookies["guest_session_id"] = get_guest_session_id()
+        frappe.request.cookies = ImmutableMultiDict(cookies)
+    except Exception:
+        # Un visiteur n'a pas à voir une trace d'exécution parce que son panier
+        # s'est dédoublé : la suite sait travailler sans cet épinglage.
+        frappe.log_error("LMS: identifiant de panier invité", frappe.get_traceback())
+
+
+def _panier_du_visiteur():
+    """Le panier ouvert — celui d'un client connecté, ou celui d'un invité.
+
+    🔴 `_get_cart_quotation()` ne convient pas à un visiteur sans compte : elle
+    OUVRE le panier au lieu de le retrouver, et l'ouvrir exige un client, donc
+    un contact, donc un lien — d'où « Link Document Type doit être défini en
+    premier », affiché en pleine figure d'un visiteur qui voulait acheter un
+    cours. `update_cart` vient pourtant de faire le travail juste avant : le
+    devis existe, il suffit de le lire. Constaté le 2026-08-20 sur osiris.
+    """
+    from webshop.webshop.shopping_cart.cart import _get_cart_quotation
+
+    if frappe.session.user != "Guest":
+        return _get_cart_quotation()
+
+    jeton = None
+    try:
+        jeton = frappe.request.cookies.get("guest_session_id") if frappe.request else None
+    except Exception:
+        jeton = None
+    if not jeton:
+        return None
+    nom = frappe.db.get_value(
+        "Quotation",
+        {"guest_session_id": jeton, "docstatus": 0, "status": "Draft"},
+        "name",
+        order_by="modified desc",
+    )
+    return frappe.get_doc("Quotation", nom) if nom else None
+
+
 @frappe.whitelist(allow_guest=True)
 def add_offer_to_cart(item_code: str, offer: str):
     """Mettre au panier la durée choisie sur la fiche boutique.
@@ -1166,11 +1225,14 @@ def add_offer_to_cart(item_code: str, offer: str):
     if not choix:
         frappe.throw(_("Unknown offer: {0}").format(offer))
 
-    from webshop.webshop.shopping_cart.cart import _get_cart_quotation, update_cart
+    from webshop.webshop.shopping_cart.cart import update_cart
 
+    _pin_guest_cart()
     update_cart(item_code, qty=1)
 
-    doc = _get_cart_quotation()
+    doc = _panier_du_visiteur()
+    if not doc:
+        frappe.throw(_("Your basket could not be opened."))
     ligne = None
     for row in doc.items or []:
         if row.item_code == item_code:
