@@ -978,6 +978,7 @@ def offers_for(course: str) -> list:
     return offres
 
 
+@frappe.whitelist(allow_guest=True)
 def get_shop_route(course: str) -> str | None:
     """Public shop route of the Item selling this course, or None.
 
@@ -992,6 +993,16 @@ def get_shop_route(course: str) -> str | None:
     Et si l'interrupteur « Vendre les cours par la boutique » est éteint, on ne
     renvoie rien : c'est là tout l'effet du bouton, et il vaut mieux qu'il en
     ait un.
+
+    🔴 Ouverte aux visiteurs, et il fallait déjà qu'elle soit ouverte tout
+    court : le décorateur manquait, donc `CourseCardOverlay.vue` recevait un
+    403 et retombait sur le tunnel du LMS — précisément les deux tunnels que
+    ce fichier existe pour éviter, celui du LMS ne connaissant ni le panier,
+    ni TWINT, ni Stripe, ni la facture. Constaté le 2026-08-20 sur osiris,
+    depuis la fiche d'un cours à 90.–.
+
+    Elle ne révèle rien : la route d'un article DÉJÀ publié dans la boutique,
+    que n'importe qui peut lire en parcourant le catalogue.
     """
     if not sells_through_the_shop():
         return None
