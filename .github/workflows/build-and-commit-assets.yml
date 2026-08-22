@@ -66,7 +66,12 @@ jobs:
 
       - name: Build lms SPA
         working-directory: apps/lms
-        run: yarn build
+        # FORCE_REBUILD bypasses the commit-the-build gate in the root
+        # package.json: the checkout always carries committed artifacts, so a
+        # plain `yarn build` would skip and this release would silently package
+        # whatever build-frontend.yml last committed (stale if that workflow
+        # failed or its paths filter missed the change). CI never skips.
+        run: FORCE_REBUILD=1 yarn build
 
       - name: Package assets
         run: |
