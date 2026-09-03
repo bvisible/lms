@@ -76,6 +76,7 @@ doctype_js = {"LMS Settings": "public/js/neoffice_lms_settings.js"}
 #//// after_migrate; a fresh site ran the setup wizard before any migrate and the Item hook
 #//// keep_the_course_price_honest died on "Unknown column lms_access_months" (CI, 2026-09-03).
 after_install = [
+	"lms.lms.neoffice_video.setup_custom_fields",
 	"lms.lms.neoffice_commerce.setup_custom_fields",
 	"lms.lms.neoffice_commerce.setup_cart_fields",
 	"lms.install.after_install",
