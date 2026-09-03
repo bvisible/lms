@@ -15,7 +15,7 @@ jobs:
     uses: bvisible/neoffice-ci/.github/workflows/frappe-app-ci.yml@main
     with:
       app: lms
-      install_apps: payments
+      install_apps: erpnext,payments
       skip_build: true
       upstream_preview: true
     secrets: inherit
