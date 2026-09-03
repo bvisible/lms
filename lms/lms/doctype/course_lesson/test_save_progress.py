@@ -189,6 +189,7 @@ class TestSaveProgressEnrollmentLifecycle(BaseTestUtils):
 			}
 		).insert(ignore_permissions=True)
 		self.cleanup_items.append(("Webhook", webhook.name))
+		#//// Neoffice — frappe.client_cache is a v16 API; guard with frappe.cache() fallback on v15 (528d8588 "fix(install): the LMS Enrollment access fields are created at install too; v16 client_cache guarded in a test")
 		# frappe.client_cache is a v16 API; on v15 the webhook cache lives in frappe.cache
 		_cache = getattr(frappe, "client_cache", None) or frappe.cache()
 		_cache.delete_value("webhooks")
