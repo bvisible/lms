@@ -788,7 +788,9 @@ def on_payment_entry_submitted(doc, method=None):
 # ---------------------------------------------------------------------------
 
 
-@frappe.whitelist(allow_guest=True)
+#//// Neoffice — this is a `LMS Course.validate` hook, not an endpoint: the copy-pasted
+#//// @frappe.whitelist(allow_guest=True) let anyone call it anonymously with a string `doc`
+#//// (AttributeError → 500 + Error Log per call). Tracker #226.
 def keep_the_course_price_honest(doc, method=None):
     """Le prix annoncé par le cours doit être celui qu'on paiera.
 

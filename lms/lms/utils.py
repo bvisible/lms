@@ -32,7 +32,9 @@ from frappe.utils import (
 from frappe.utils.html_utils import sanitize_html
 
 #//// Neoffice — les prix rendus au public portent leur devise (voir la fonction).
-from lms.lms.neoffice_commerce import montant_lisible
+#//// Neoffice — the price label helper lives in our neoffice_commerce module; it is imported lazily
+#//// where it is used (see montant_lisible() calls) so an import error in our code cannot take the
+#//// whole app down with it: lms.lms.utils is imported by hooks, www controllers and the API (#226).
 from pypika import Case
 from pypika import functions as fn
 
@@ -850,6 +852,8 @@ def get_course_card_details(courses: list) -> list:
 			#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
 			#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
 			#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			from lms.lms.neoffice_commerce import montant_lisible
+
 			course.price = montant_lisible(course.amount, course.currency)
 
 	return courses
@@ -1006,6 +1010,8 @@ def get_course_details(course: str):
 		#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
 		#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
 		#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		from lms.lms.neoffice_commerce import montant_lisible
+
 		course_details.price = montant_lisible(course_details.course_price, course_details.currency)
 
 	if frappe.session.user == "Guest":
@@ -1424,6 +1430,8 @@ def get_batch_details(batch: str):
 		#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
 		#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
 		#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		from lms.lms.neoffice_commerce import montant_lisible
+
 		batch_details.price = montant_lisible(batch_details.amount, batch_details.currency)
 
 	if batch_details.seat_count:
@@ -2643,6 +2651,8 @@ def get_batch_card_details(batches: list) -> list:
 			#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
 			#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
 			#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			from lms.lms.neoffice_commerce import montant_lisible
+
 			batch.price = montant_lisible(batch.amount, batch.currency)
 
 	return batches
