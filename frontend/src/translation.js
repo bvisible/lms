@@ -1,4 +1,9 @@
 import { createResource } from 'frappe-ui'
+//// Neoffice — c1d10eb2 « menu en anglais à la première visite d'un visiteur anonyme ».
+//// Upstream only sets `window.translatedMessages` and never says when it landed, so any
+//// label computed once (a Vue computed, a prop handed to a non-Vue widget — our cockpit
+//// menu) froze in English on a cold visit. `translationsReady` is the missing signal.
+//// Worth proposing upstream; until then it is ours.
 import { ref } from 'vue'
 
 /**
@@ -47,6 +52,7 @@ function fetchTranslations(lang) {
 		auto: true,
 		transform: (data) => {
 			window.translatedMessages = data
+			//// Neoffice — c1d10eb2: the other half of `translationsReady` above.
 			translationsReady.value = true
 		},
 	})

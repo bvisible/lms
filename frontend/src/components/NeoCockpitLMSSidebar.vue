@@ -1,3 +1,11 @@
+<!-- //// Neoffice — added file (no upstream equivalent), 2c0b294c, then 39bc2311
+//// (menu declared explicitly, like Drive), c5cdc270 (no desk icons for a learner),
+//// c1d10eb2 (menu in English on an anonymous visitor's first visit) and b0bf03f1
+//// (course categories in the sidebar).
+//// The LMS-side adapter of the cockpit: it builds the nav from the LMS routes and hands
+//// it to NeoCockpitBridge, and renders upstream's <AppSidebar> when the bundle fails,
+//// so a cockpit outage degrades to the upstream sidebar instead of an empty page.
+//// At the merge: kept whole. -->
 <template>
 	<AppSidebar v-if="failed" />
 	<NeoCockpitBridge

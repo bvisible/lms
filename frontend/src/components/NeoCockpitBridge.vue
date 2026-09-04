@@ -1,3 +1,8 @@
+<!-- //// Neoffice — added file (no upstream equivalent), 2c0b294c.
+//// Mounts the shared NeoCockpit React bundle (`/assets/frappe/js/lib/neocockpit.global.js`,
+//// family A of the cockpit consumers) inside the Vue tree: one fixed URL, so re-vendoring
+//// that single file in frappe updates the LMS, Drive, CRM, wiki… in one move.
+//// At the merge: kept whole, upstream has nothing to say about it. -->
 <template>
   <div
     ref="host"

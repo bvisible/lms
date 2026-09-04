@@ -192,6 +192,11 @@ const outline = createResource({
 	auto: false,
 }) as Resource<OutlineChapter[]>
 
+//// Neoffice — 74ad6ff0 « course outline 500 — fetch only once the course is loaded ».
+//// Comment only: upstream has since arrived at the same `watch`, so the code no longer
+//// diverges — only this explanation of WHY `auto` must stay false does. Keeping it is
+//// what stops the next `auto: true` from coming back. Server side of the same fix:
+//// lms/lms/utils.py get_course_outline (course defaults to None).
 // Fetch the outline only once the course (and thus its name) is loaded.
 // With auto:true the request fired before props.course.data was ready,
 // sending no `course` → HTTP 500 → "Course Content coming soon!".

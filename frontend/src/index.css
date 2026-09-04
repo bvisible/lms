@@ -32,6 +32,12 @@ label.block:not([data-slot='label']) {
 	z-index: 1;
 }
 
+/* //// Neoffice — 322dc266 « blue accent -> clay (Neoffice Design System) ». Upstream
+   //// ships frappe-ui's blue as the accent; blue is not a Neoffice brand colour (it is
+   //// only the muted "info" status), so the semantic --*-blue-* tokens are re-pointed at
+   //// clay #D68A59. Nothing upstream is deleted — the token values are overridden after
+   //// frappe-ui's, which is why this block must stay BELOW the framework import.
+   //// At the merge: keep ours; re-check only if frappe-ui renames these tokens. */
 /* === Neoffice Design System — recolor the frappe-ui blue accent to clay
    #D68A59. Override the semantic --*-blue-* tokens so links/active/focus/
    accent surfaces become warm clay instead of frappe blue (light + dark).
