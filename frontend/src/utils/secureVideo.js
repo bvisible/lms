@@ -1,3 +1,8 @@
+//// Neoffice — added file (no upstream equivalent), 36c69d63 / a789500f.
+//// The registry of Infomaniak players mounted on the page. Upstream collects watch time
+//// by walking the DOM (<video>) and the Plyr instances; a vendor iframe is neither, so
+//// it has to announce itself here or the lesson would look like a lesson without video.
+//// At the merge: kept whole.
 /**
  * Registry of subscription-gated Infomaniak videos mounted on the page.
  *

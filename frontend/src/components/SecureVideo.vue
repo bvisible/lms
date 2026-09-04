@@ -1,3 +1,11 @@
+<!-- //// Neoffice — added file (no upstream equivalent), 36c69d63 « cours vidéo privés
+//// adossés à l'abonnement (Infomaniak VOD) », then a789500f (resume where the learner
+//// stopped).
+//// The player for a `key_restricted` Infomaniak video: it asks the server for a
+//// short-lived HMAC link (lms.lms.neoffice_video), plays it in the vendor iframe and
+//// reports position over postMessage. Upstream's players (<video>, Plyr, YouTube) all
+//// assume a URL anyone can fetch, which is precisely what a paid course must not have.
+//// At the merge: kept whole. -->
 <template>
 	<div class="secure-video">
 		<div

@@ -1,3 +1,9 @@
+//// Neoffice — added file (no upstream equivalent), 8aa18a4b « un bloc « Vidéo protégée »
+//// dans l'éditeur de leçon ».
+//// The EditorJS tool that puts a protected video in a lesson. An EditorJS block lives
+//// outside the Vue tree, so it mounts its own app (createApp) and re-installs the
+//// translation plugin — neither provide/inject nor the global `__` reach it otherwise.
+//// At the merge: kept whole; only its registration in utils/index.js meets upstream.
 import { createApp, h } from 'vue'
 import { call } from 'frappe-ui'
 import { MonitorPlay } from 'lucide-vue-next'
