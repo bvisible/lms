@@ -25,6 +25,12 @@
 		<div v-else-if="block.includes('{{ Quiz')">
 			<Quiz :quiz="getId(block)" />
 		</div>
+		<!-- //// Neoffice — 36c69d63 / a789500f: the `{{ SecureVideo("…") }}` branch. Upstream
+		//// only knows YouTube, a raw <video> and Plyr, all of them fed a URL anyone can
+		//// fetch — unusable for a paid course. This branch hands the media id to
+		//// SecureVideo.vue, which trades it for a short-lived signed Infomaniak link.
+		//// It must stay ABOVE the `{{ Video` branch: `block.includes('{{ Video')` is a
+		//// substring test and would swallow `{{ SecureVideo`. -->
 		<div v-else-if="block.includes('{{ SecureVideo')">
 			<SecureVideo
 				:media="getId(block)"
@@ -70,6 +76,7 @@
 </template>
 <script setup>
 import Quiz from '@/components/QuizBlock.vue'
+//// Neoffice — 36c69d63: the player for subscription-gated Infomaniak videos.
 import SecureVideo from '@/components/SecureVideo.vue'
 import PdfBlock from '@/components/PdfBlock.vue'
 import MarkdownIt from 'markdown-it'
@@ -77,6 +84,9 @@ import { useScreenSize } from '@/utils/composables'
 import { getMacroArg } from '@/utils/lessonMacros'
 import { sanitizeRichHTML } from '@/utils/sanitizeRichHTML'
 
+//// Neoffice — a789500f: upstream declares no emit here. The Infomaniak iframe is the
+//// only player whose end-of-video the parent cannot observe from the DOM, so it has to
+//// be forwarded; Lesson.vue turns it into markProgress() + trackVideoWatchDuration().
 const emit = defineEmits(['video-ended'])
 
 const screenSize = useScreenSize()
@@ -105,6 +115,9 @@ const props = defineProps({
 		type: String,
 		required: false,
 	},
+	//// Neoffice — 36c69d63 / a789500f: two props upstream does not have. `lessonName`
+	//// because the server refuses to sign a media the lesson does not cite, and `videos`
+	//// (LMS Video Watch Duration rows) so playback resumes where the learner stopped.
 	lessonName: {
 		type: String,
 		required: false,
@@ -117,6 +130,7 @@ const props = defineProps({
 	},
 })
 
+//// Neoffice — a789500f: the resume position, read from the watch-duration rows.
 // The registry stores secure videos under `infomaniak:<media>`.
 const watchedSeconds = (media) => {
 	const row = props.videos?.find((v) => v.source === `infomaniak:${media}`)
@@ -127,6 +141,9 @@ const getYouTubeVideoSource = (block) => {
 	if (block.includes('{{')) {
 		block = getId(block)
 	}
+	//// Neoffice — 36c69d63: upstream embeds `youtube.com`; we embed `youtube-nocookie.com`
+	//// so no Google cookie is dropped before the visitor presses play (same change in
+	//// lms/plugins.py). At the merge: keep ours, upstream's host is the regression.
 	// nocookie: no Google cookie before the visitor presses play.
 	return `https://www.youtube-nocookie.com/embed/${block}`
 }

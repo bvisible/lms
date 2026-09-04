@@ -1,3 +1,9 @@
+//// Neoffice — added file (no upstream equivalent), 23db77a3, then f54b1a51, 8f21c065,
+//// 94eb465e, fe726a28, 90b267aa.
+//// The desk-side form script for LMS Settings: the Infomaniak credentials, the
+//// connection test and the video list. Deliberately NOT in upstream's lms_settings.js
+//// (it is bound through the `doctype_js` hook instead), so this fork never fights a
+//// merge over a file upstream edits.
 // Copyright (c) 2026, Neoffice and contributors
 // For license information, please see license.txt
 //

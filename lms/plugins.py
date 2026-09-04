@@ -174,6 +174,12 @@ def exercise_renderer(argument):
 
 
 def youtube_video_renderer(video_id):
+	#//// Neoffice — 36c69d63: `youtube.com` → `youtube-nocookie.com` in the iframe src
+	#//// below, so embedding a lesson video sets no Google cookie before the visitor
+	#//// presses play. The changed line lives inside this f-string and cannot carry its
+	#//// own marker; same change in frontend/src/components/LessonContent.vue.
+	#//// (Untouched upstream defect, left as found: `class="youtube-video` on the next
+	#//// lines is missing its closing quote, which swallows the `allow` attribute.)
 	return f"""
     <iframe width="100%" height="400"
         src="https://www.youtube-nocookie.com/embed/{video_id}"

@@ -41,6 +41,7 @@ export function hasVideoContent(lesson: LessonLike | null | undefined): boolean 
 	if (!lesson) return false
 	if (lesson.youtube) return true
 	if (lesson.videos?.length) return true
+	//// Neoffice — 36c69d63: the macro name added to upstream's alternation.
 	// SecureVideo is the Neoffice macro for subscription-gated Infomaniak videos;
 	// without it here, those lessons lose the Video Statistics affordance.
 	if (lesson.body && /\{\{ (YouTubeVideo|SecureVideo|Video)\(/.test(lesson.body))
@@ -51,6 +52,7 @@ export function hasVideoContent(lesson: LessonLike | null | undefined): boolean 
 			return blocks.some(
 				(block: { type?: string; data?: { file_type?: string } }) =>
 					block.type === 'embed' ||
+					//// Neoffice — 8aa18a4b: the EditorJS block type added to upstream's test.
 					// The protected-video block counts too, or a lesson made of
 					// one Infomaniak video would look like a lesson with none.
 					block.type === 'secureVideo' ||

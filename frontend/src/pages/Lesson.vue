@@ -252,6 +252,11 @@
 							v-else
 							class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
 						>
+							<!-- //// Neoffice — 36c69d63 / a789500f: three attributes below are ours
+							//// (:lessonName, :videos, @video-ended). They cannot carry a marker of
+							//// their own — a comment between the attributes of an opening tag is not
+							//// valid markup — so this one stands for them; see NEOFFICE_FORK_MARKERS.md.
+							//// (Their indentation is one level too deep: cosmetic, left as committed.) -->
 							<LessonContent
 								v-if="lesson.data?.body"
 								:content="lesson.data.body"
@@ -357,6 +362,7 @@ import {
 	shouldStartDwellTimer,
 	shouldAttachVideoFallback,
 } from '@/utils/lessonProgress'
+//// Neoffice — 36c69d63: the registry of Infomaniak players (added file).
 import {
 	getSecureVideoDetails,
 	secureVideoSources,
@@ -718,6 +724,7 @@ const trackVideoWatchDuration = () => {
 	if (!lesson.data?.membership) return
 	let videoDetails = getVideoDetails()
 	videoDetails = videoDetails.concat(getPlyrSourceDetails())
+	//// Neoffice — a789500f: the third source of watch time, next to <video> and Plyr.
 	// Infomaniak iframes report their position over postMessage, not through
 	// the DOM, so they are collected from their own registry.
 	videoDetails = videoDetails.concat(getSecureVideoDetails())
@@ -727,6 +734,8 @@ const trackVideoWatchDuration = () => {
 	})
 }
 
+//// Neoffice — a789500f: upstream has no such handler; a vendor iframe reaching its end
+//// is invisible to the DOM listeners, so the lesson would never be marked complete.
 const onSecureVideoEnded = () => {
 	markProgress()
 	trackVideoWatchDuration()
@@ -786,6 +795,9 @@ watch(
 		// An Infomaniak iframe is neither a <video> nor a Plyr instance; without
 		// it here the dwell timer would mark a video lesson complete on its own.
 		const hasVideoListener =
+			//// Neoffice — a789500f: upstream tests only Plyr and <video>. Without the third
+			//// term an Infomaniak-only lesson counted as "no video", and the dwell timer marked
+			//// it complete on its own — the exact thing enforce_video_completion exists to stop.
 			plyrSources.value.length > 0 ||
 			secureVideoSources.value.length > 0 ||
 			!!document.querySelector('video')
