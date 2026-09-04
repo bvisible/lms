@@ -35,6 +35,12 @@
 					</router-link>
 					<CertificationLinks :courseName="course.data.name" class="w-full" />
 				</div>
+				<!-- //// Neoffice — d6d8abd2 « le bouton d'achat d'un cours part vers le panier ».
+				//// Upstream sends a paid course to its own Billing route. When an Item sells the
+				//// course we send the visitor to the shop product page instead, so the cart,
+				//// TWINT, Stripe, the invoice and the accounting entries all come with it.
+				//// At the merge: keep BOTH branches, and keep ours FIRST — upstream's router-link
+				//// below is the fallback, and the two are made exclusive by their order. -->
 				<!-- Neoffice: when an Item sells this course, buying goes through the
 				     shop cart — TWINT / Stripe / invoice / accounting all come with
 				     it. The LMS's own checkout is only the fallback, and having both
@@ -160,6 +166,8 @@
 	</div>
 </template>
 <script setup lang="ts">
+//// Neoffice — d6d8abd2: `watch` added to upstream's import; the shop route is fetched
+//// when the course resource resolves (see below).
 import { computed, inject, watch } from 'vue'
 import { Badge, Button, call, createResource, toast } from 'frappe-ui'
 import { useRouter } from 'vue-router'
@@ -186,6 +194,7 @@ const props = withDefaults(
 	{}
 )
 
+//// Neoffice — d6d8abd2: upstream has no shop route at all.
 // Resolved once per course; null when no Item sells it, in which case the LMS
 // checkout stays in place.
 const shopRoute = createResource({
@@ -241,6 +250,8 @@ const is_instructor = (): boolean => {
 	return user_is_instructor
 }
 
+//// Neoffice — d6d8abd2: fetch the shop route as soon as the course name lands.
+//// `immediate` covers the mount where it is already there.
 watch(
 	() => props.course.data?.name,
 	(name) => {
@@ -251,6 +262,8 @@ watch(
 
 const priceLabel = computed<string>(() => {
 	if (props.course.data?.paid_course) return props.course.data?.price || ''
+	//// Neoffice — 7aeaa695 « un cours gratuit affichait « Libre » au lieu de « Gratuit » ».
+	//// Upstream's source string is __('Free'); the note below says why we cannot use it.
 	// Neoffice: NOT __('Free') — Frappe merges every app's translations into one
 	// flat namespace, and `suite` legitimately renders "Free" as "Libre" for the
 	// calendar's Free/Busy status. Loaded after lms, it won, so a gratis course
