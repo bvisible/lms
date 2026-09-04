@@ -1,3 +1,7 @@
+<!-- //// Neoffice — added file (no upstream equivalent): the branch/remote contract of -->
+<!-- //// this fork and the commit-the-build pipeline, for whoever (human or agent) opens -->
+<!-- //// the repo next. Upstream ships no CLAUDE.md; at the merge this file survives. -->
+
 # Git Configuration
 
 ## Branch de production

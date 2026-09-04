@@ -12,6 +12,11 @@ export default defineConfig(async ({ mode }) => {
 		define: {
 			__VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
 		},
+		//// Neoffice — `build` block added (74adf2d4 « disable sourcemaps in production »,
+		//// 5b977601 « add target esnext and commonjsOptions »). Upstream leaves vite on its
+		//// defaults: sourcemaps on and a browserslist target, which needs ~3 GB and several
+		//// minutes. Our client instances are 2 vCPU / 4 GB, so the build died there. Drop
+		//// this once nothing but CI ever builds the SPA.
 		build: {
 			// Disable sourcemaps in production to reduce memory usage
 			sourcemap: isDev,
