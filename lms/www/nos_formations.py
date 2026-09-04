@@ -1,3 +1,9 @@
+#//// Neoffice — added file (no upstream equivalent), 6cc84787 « page publique de
+#//// présentation des formations (/nos-formations) », then 5cce6255, 43c00095, dbf971a0,
+#//// 9061b8d1, 7a226d63. Controller of the public catalogue page. Upstream serves its
+#//// catalogue from the SPA only, which a visitor with no account is not sent to and no
+#//// search engine indexes. At the merge: kept whole, there is no upstream file to
+#//// reconcile; its template is lms/www/nos-formations.html.
 # Copyright (c) 2026, Neoffice and contributors
 # For license information, please see license.txt
 

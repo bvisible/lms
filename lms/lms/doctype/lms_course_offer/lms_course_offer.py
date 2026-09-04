@@ -1,3 +1,9 @@
+#//// Neoffice — added file (no upstream equivalent), d3b10e3f « un cours porte son
+#//// article et sa table de durées ». Controller of the LMS Course Offer child table:
+#//// one access duration and its price, so a single Item sells three months, a year or
+#//// permanent access without multiplying articles — and without their descriptions
+#//// drifting apart. At the merge: kept whole; the DocType JSON beside it is listed in
+#//// NEOFFICE_FORK_MARKERS.md.
 # Copyright (c) 2026, Neoffice and contributors
 # For license information, please see license.txt
 

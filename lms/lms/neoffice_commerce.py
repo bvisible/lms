@@ -1,3 +1,13 @@
+#//// Neoffice — added file (no upstream equivalent). Landed with d3b10e3f « un cours
+#//// porte son article et sa table de durées » / eceb4034, then grown by the 2026-08
+#//// « formations » series (5213816b, 0541a6d5, d830e554, 23db77a3, ac912227, 7a226d63,
+#//// 9061b8d1, c203b62a, af7114c1, 94eb465e, ff0fa700, c1ce5a17, 796f67bd, 0b5ddd66).
+#//// Sells a course as an ordinary ERPNext Item, so the webshop cart, TWINT, Stripe, the
+#//// invoice and the accounting entries all apply to it. Upstream's paid_course flow
+#//// carries its own checkout (LMS Payment + the `payments` app) and knows none of that.
+#//// Kept in a module of its own so the touch points inside upstream files stay
+#//// one-liners. At the merge: kept whole — only its entries in hooks.py and its one
+#//// import in lms/lms/utils.py meet upstream.
 # Copyright (c) 2026, Neoffice and contributors
 # For license information, please see license.txt
 
