@@ -38,8 +38,9 @@ python3 fork_markers.py check --base 8e3b5d8eb4d3f26dbf14c0bf4d6522702d20ffbc --
   There is **no upstream backport** on this branch; nothing to drop at the merge for that reason.
 * Sampled with `git blame` (no `-w`) on unmarked hunks — every sampled line resolves to one of
   those 111 commits (`36c69d63`, `d6d8abd2`, `d3b10e3f`, `d8908dad`, `74ad6ff0`, `7aeaa695`…).
-* Files changed BASE..HEAD: **481**, of which **37 are source** and 444 are skipped by the
-  checker (438 built SPA files, 5 CI workflows, 1 PO file).
+* Files changed BASE..HEAD: **482** (this manifest included), of which **37 are source**; the
+  other 445 are skipped by the checker — 438 built SPA files, 5 CI workflows, 1 PO file, and
+  this file.
 
 ### Not-commentable divergences (JSON, binaries) — the checker reads these paths from here
 
