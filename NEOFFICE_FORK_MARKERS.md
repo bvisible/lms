@@ -29,6 +29,10 @@ python3 fork_markers.py check --base 8e3b5d8eb4d3f26dbf14c0bf4d6522702d20ffbc --
 
 ### Attribution proof
 
+*Measured on `541022e3`, the tip of `version-15` just before this marking pass. The absolute
+counts grow with every commit — re-measure them; what must stay true is the **ratio**: every
+commit since BASE is ours.*
+
 * `git rev-list 8e3b5d8e..origin/version-15` → **111 commits**.
 * `git rev-list origin/version-15 ^8e3b5d8e ^upstream/develop` → **111 commits**, the same set:
   since BASE our branch contains **no upstream commit at all**. Everything after the base is ours.
@@ -41,6 +45,10 @@ python3 fork_markers.py check --base 8e3b5d8eb4d3f26dbf14c0bf4d6522702d20ffbc --
 * Files changed BASE..HEAD: **482** (this manifest included), of which **37 are source**; the
   other 445 are skipped by the checker — 438 built SPA files, 5 CI workflows, 1 PO file, and
   this file.
+* State of the map after the pass: `check --base 8e3b5d8e --head <tip>` went from **57 unmarked
+  hunks to 5** — and those 5 are the build artifacts and the one unreachable hunk listed above,
+  each documented here. Marker lines went from **23 in 6 files to 241 in 31 files** (counted
+  outside `lms/public/frontend/`, `.github/` and this manifest).
 
 ### Not-commentable divergences (JSON, binaries) — the checker reads these paths from here
 
