@@ -28,5 +28,6 @@ class TestAuth(BaseTestUtils, FrappeAPITestCase):
 		frappe.session.user = "Administrator"
 
 	def tearDown(self):
+		# //// Neoffice — see the block marker above: restore block_endpoints value
 		frappe.conf.block_endpoints = self._block_endpoints_before
 		super().tearDown()
