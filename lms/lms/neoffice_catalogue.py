@@ -1,8 +1,8 @@
-#//// Neoffice — added file (no upstream equivalent), b0bf03f1 « catégories dans le menu
-#//// latéral ». The categories that actually hold a published course, for the NeoCockpit
-#//// sidebar. Upstream's api.py has no equivalent and lists its seven empty demo
-#//// categories; kept out of api.py so this fork's merge surface stays small.
-#//// At the merge: kept whole.
+# //// Neoffice — added file (no upstream equivalent), b0bf03f1 « catégories dans le menu
+# //// latéral ». The categories that actually hold a published course, for the NeoCockpit
+# //// sidebar. Upstream's api.py has no equivalent and lists its seven empty demo
+# //// categories; kept out of api.py so this fork's merge surface stays small.
+# //// At the merge: kept whole.
 # Copyright (c) 2026, Neoffice and contributors
 # For license information, please see license.txt
 

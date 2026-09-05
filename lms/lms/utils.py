@@ -18,11 +18,11 @@ from frappe.utils import (
 	fmt_money,
 	format_datetime,
 	get_datetime,
-	#//// Neoffice — d8908dad: `get_frappe_version` REMOVED from this import. Upstream still
-	#//// imports it from `frappe.utils`, where it only exists on frappe v16; on our v15 it
-	#//// lives in `frappe.pulse.utils`, so upstream's line makes the whole `lms.lms.utils`
-	#//// module fail to import. The two call sites below read `frappe.__version__` instead,
-	#//// which exists on both. At the merge: keep ours until the fleet runs frappe v16.
+	# //// Neoffice — d8908dad: `get_frappe_version` REMOVED from this import. Upstream still
+	# //// imports it from `frappe.utils`, where it only exists on frappe v16; on our v15 it
+	# //// lives in `frappe.pulse.utils`, so upstream's line makes the whole `lms.lms.utils`
+	# //// module fail to import. The two call sites below read `frappe.__version__` instead,
+	# //// which exists on both. At the merge: keep ours until the fleet runs frappe v16.
 	get_fullname,
 	getdate,
 	nowtime,
@@ -31,10 +31,10 @@ from frappe.utils import (
 )
 from frappe.utils.html_utils import sanitize_html
 
-#//// Neoffice — les prix rendus au public portent leur devise (voir la fonction).
-#//// Neoffice — the price label helper lives in our neoffice_commerce module; it is imported lazily
-#//// where it is used (see montant_lisible() calls) so an import error in our code cannot take the
-#//// whole app down with it: lms.lms.utils is imported by hooks, www controllers and the API (#226).
+# //// Neoffice — les prix rendus au public portent leur devise (voir la fonction).
+# //// Neoffice — the price label helper lives in our neoffice_commerce module; it is imported lazily
+# //// where it is used (see montant_lisible() calls) so an import error in our code cannot take the
+# //// whole app down with it: lms.lms.utils is imported by hooks, www controllers and the API (#226).
 from pypika import Case
 from pypika import functions as fn
 
@@ -646,7 +646,7 @@ def get_chart_date_range(from_date: str, to_date: str):
 
 
 def get_chart_filters(doctype: str, chart: object, datefield: str, from_date: str, to_date: str):
-	#//// Neoffice — d8908dad: upstream calls `get_frappe_version()`; see the import above.
+	# //// Neoffice — d8908dad: upstream calls `get_frappe_version()`; see the import above.
 	version = frappe.__version__
 	if version.startswith("15.") or version.startswith("14."):
 		filters = [([chart.document_type, "docstatus", "<", 2, False])]
@@ -666,7 +666,7 @@ def get_chart_details(
 	doctype: str, datefield: str, value_field: str, chart: object, from_date: str, to_date: str
 ):
 	filters = get_chart_filters(doctype, chart, datefield, from_date, to_date)
-	#//// Neoffice — d8908dad: upstream calls `get_frappe_version()`; see the import above.
+	# //// Neoffice — d8908dad: upstream calls `get_frappe_version()`; see the import above.
 	version = frappe.__version__
 	if version.startswith("15.") or version.startswith("14."):
 		return frappe.db.get_all(
@@ -849,9 +849,9 @@ def get_course_card_details(courses: list) -> list:
 			course.amount, course.currency = check_multicurrency(
 				course.course_price, course.currency, None, course.amount_usd
 			)
-			#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-			#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-			#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+			# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+			# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
 			from lms.lms.neoffice_commerce import montant_lisible
 
 			course.price = montant_lisible(course.amount, course.currency)
@@ -1007,9 +1007,9 @@ def get_course_details(course: str):
 		"""course_details.course_price, course_details.currency = check_multicurrency(
 				course_details.course_price, course_details.currency, None, course_details.amount_usd
 		)"""
-		#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-		#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-		#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+		# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+		# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
 		from lms.lms.neoffice_commerce import montant_lisible
 
 		course_details.price = montant_lisible(course_details.course_price, course_details.currency)
@@ -1058,15 +1058,15 @@ def get_categorized_courses(courses: list) -> dict:
 	}
 
 
-#//// Neoffice — 74ad6ff0 « course outline 500 — fetch only once the course is loaded ».
-#//// `course` gains a `= None` default. Upstream's parameter is required, and the SPA
-#//// creates this resource before the course name is resolved, so the first paint of
-#//// every course page raised a TypeError and answered 500 in the browser console.
+# //// Neoffice — 74ad6ff0 « course outline 500 — fetch only once the course is loaded ».
+# //// `course` gains a `= None` default. Upstream's parameter is required, and the SPA
+# //// creates this resource before the course name is resolved, so the first paint of
+# //// every course page raised a TypeError and answered 500 in the browser console.
 @frappe.whitelist(allow_guest=True)
 def get_course_outline(course: str = None, progress: bool = False) -> list:
 	"""Returns the course outline."""
 
-	#//// Neoffice — 74ad6ff0: the guard that goes with the `= None` default above.
+	# //// Neoffice — 74ad6ff0: the guard that goes with the `= None` default above.
 	if not course:
 		return []
 
@@ -1427,9 +1427,9 @@ def get_batch_details(batch: str):
 		batch_details.amount, batch_details.currency = check_multicurrency(
 			batch_details.amount, batch_details.currency, None, batch_details.amount_usd
 		)
-		#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-		#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-		#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+		# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+		# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
 		from lms.lms.neoffice_commerce import montant_lisible
 
 		batch_details.price = montant_lisible(batch_details.amount, batch_details.currency)
@@ -2648,9 +2648,9 @@ def get_batch_card_details(batches: list) -> list:
 			batch.amount, batch.currency = check_multicurrency(
 				batch.amount, batch.currency, None, batch.amount_usd
 			)
-			#//// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-			#//// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-			#//// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
+			# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
+			# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
 			from lms.lms.neoffice_commerce import montant_lisible
 
 			batch.price = montant_lisible(batch.amount, batch.currency)

@@ -72,9 +72,9 @@ doctype_js = {"LMS Settings": "public/js/neoffice_lms_settings.js"}
 # ------------
 
 # before_install = "lms.install.before_install"
-#//// Neoffice — our Item custom fields (lms_course, lms_access_months…) were created only in
-#//// after_migrate; a fresh site ran the setup wizard before any migrate and the Item hook
-#//// keep_the_course_price_honest died on "Unknown column lms_access_months" (CI, 2026-09-03).
+# //// Neoffice — our Item custom fields (lms_course, lms_access_months…) were created only in
+# //// after_migrate; a fresh site ran the setup wizard before any migrate and the Item hook
+# //// keep_the_course_price_honest died on "Unknown column lms_access_months" (CI, 2026-09-03).
 after_install = [
 	"lms.lms.neoffice_video.setup_custom_fields",
 	"lms.lms.neoffice_commerce.setup_custom_fields",
@@ -87,11 +87,11 @@ setup_wizard_complete = "lms.demo.demo_data.create_demo_data"
 after_migrate = [
 	"lms.sqlite.build_index_in_background",
 	"lms.lms.doctype.lms_payment.lms_payment.add_unique_payment_id_constraint",
-	#//// Neoffice — three entries added to upstream's after_migrate (36c69d63, d3b10e3f,
-	#//// 5213816b). They create the custom fields our code reads: the LMS Enrollment access
-	#//// dates, Item.lms_course / lms_access_months, and the chosen-offer marker carried by
-	#//// the Quotation / Sales Order / Sales Invoice items. Upstream knows none of them.
-	#//// At the merge: keep ours, appended after whatever upstream adds to the list.
+	# //// Neoffice — three entries added to upstream's after_migrate (36c69d63, d3b10e3f,
+	# //// 5213816b). They create the custom fields our code reads: the LMS Enrollment access
+	# //// dates, Item.lms_course / lms_access_months, and the chosen-offer marker carried by
+	# //// the Quotation / Sales Order / Sales Invoice items. Upstream knows none of them.
+	# //// At the merge: keep ours, appended after whatever upstream adds to the list.
 	# Neoffice: subscription-gated video access fields on LMS Enrollment
 	"lms.lms.neoffice_video.setup_custom_fields",
 	# Neoffice: Item.lms_course — the bridge that lets the webshop sell a course
@@ -150,14 +150,14 @@ doc_events = {
 		"validate": "lms.lms.user.validate_username_duplicates",
 		"before_insert": "lms.lms.user.add_lms_student_role",
 	},
-	#//// Neoffice — everything from here to the end of doc_events is ours (36c69d63,
-	#//// b2addb4a, d3b10e3f, 5213816b, ac912227, 7a226d63). Upstream's doc_events stops at
-	#//// "User": it has no notion of a course being sold as an ERPNext Item, so nothing
-	#//// upstream reacts to an invoice, a payment or a cart. Ours does: Sales Invoice and
-	#//// Payment Entry grant and extend course access, Item and LMS Course keep one article
-	#//// from selling both a course and a booking, Quotation holds the price of the chosen
-	#//// offer, LMS Settings syncs the website menu entry and warns about a second payment
-	#//// tunnel. At the merge: keep both sides, they touch disjoint doctypes.
+	# //// Neoffice — everything from here to the end of doc_events is ours (36c69d63,
+	# //// b2addb4a, d3b10e3f, 5213816b, ac912227, 7a226d63). Upstream's doc_events stops at
+	# //// "User": it has no notion of a course being sold as an ERPNext Item, so nothing
+	# //// upstream reacts to an invoice, a payment or a cart. Ours does: Sales Invoice and
+	# //// Payment Entry grant and extend course access, Item and LMS Course keep one article
+	# //// from selling both a course and a booking, Quotation holds the price of the chosen
+	# //// offer, LMS Settings syncs the website menu entry and warns about a second payment
+	# //// tunnel. At the merge: keep both sides, they touch disjoint doctypes.
 	# Neoffice: paying extends course access, exactly like it extends a cloud
 	# instance's validity — and, when the invoice sells a course as an Item,
 	# creates the enrolment in the first place.
@@ -299,9 +299,9 @@ update_website_context = [
 
 jinja = {
 	"methods": [
-		#//// Neoffice — three jinja methods prepended to upstream's list (eceb4034, 9061b8d1,
-		#//// c203b62a). The shop product page renders the duration selector and the "from
-		#//// <price>" badge from them; upstream's list starts at get_lesson_count below.
+		# //// Neoffice — three jinja methods prepended to upstream's list (eceb4034, 9061b8d1,
+		# //// c203b62a). The shop product page renders the duration selector and the "from
+		# //// <price>" badge from them; upstream's list starts at get_lesson_count below.
 		# Neoffice: les offres d'un cours, pour le sélecteur de la fiche boutique
 		"lms.lms.neoffice_commerce.offers_for",
 		"lms.lms.neoffice_commerce.course_sold_by",

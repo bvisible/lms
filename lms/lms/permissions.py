@@ -49,15 +49,15 @@ def resolve_lesson_access(lesson: str, *, user: str | None = None) -> tuple[bool
 		if can_modify_course(lesson_row.course):
 			return True, True
 		if get_membership(lesson_row.course, user):
-			#//// Neoffice — 36c69d63, then 314d9559 « un abonnement expiré ne doit pas fermer
-			#//// les leçons d'aperçu ». Upstream returns `False, True` on membership alone:
-			#//// once enrolled, always readable. Our courses are sold by period, so access has
-			#//// to expire — and the SAME guard as the playback token, or the lesson payload
-			#//// and the video would disagree. The deliberate absence of a `return` in the
-			#//// lapsed branch is the fix of 314d9559: a lapsed subscriber must still fall
-			#//// through to the preview gate below.
-			#//// At the merge: keep ours; upstream's single `return False, True` is the
-			#//// regression to watch for.
+			# //// Neoffice — 36c69d63, then 314d9559 « un abonnement expiré ne doit pas fermer
+			# //// les leçons d'aperçu ». Upstream returns `False, True` on membership alone:
+			# //// once enrolled, always readable. Our courses are sold by period, so access has
+			# //// to expire — and the SAME guard as the playback token, or the lesson payload
+			# //// and the video would disagree. The deliberate absence of a `return` in the
+			# //// lapsed branch is the fix of 314d9559: a lapsed subscriber must still fall
+			# //// through to the preview gate below.
+			# //// At the merge: keep ours; upstream's single `return False, True` is the
+			# //// regression to watch for.
 			# Neoffice: enrolment alone is not enough — a lapsed subscription closes
 			# the lesson. Deliberately the same guard the playback token uses, so the
 			# lesson payload and the video can never disagree.

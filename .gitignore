@@ -10,22 +10,22 @@ __pycache__/
 *$py.class
 node_modules
 package-lock.json
-#//// Neoffice — the three ignores below are commented out on purpose (cbb59d03,
-#//// « build(frontend): commit built frontend so instances pull, no rebuild on prod »).
-#//// Upstream ignores the vite output because every deployment builds it; our instances
-#//// only `git pull`, and a 2 vCPU / 4 GB VM OOMs on `yarn build`, so the artifacts are
-#//// committed instead (lms/public/frontend, lms/www/lms.html, lms/www/_lms.html) and a
-#//// CI bot refreshes them. At the merge: KEEP OUR SIDE — taking upstream's ignores back
-#//// would untrack the very files the fleet is served from.
+# //// Neoffice — the three ignores below are commented out on purpose (cbb59d03,
+# //// « build(frontend): commit built frontend so instances pull, no rebuild on prod »).
+# //// Upstream ignores the vite output because every deployment builds it; our instances
+# //// only `git pull`, and a 2 vCPU / 4 GB VM OOMs on `yarn build`, so the artifacts are
+# //// committed instead (lms/public/frontend, lms/www/lms.html, lms/www/_lms.html) and a
+# //// CI bot refreshes them. At the merge: KEEP OUR SIDE — taking upstream's ignores back
+# //// would untrack the very files the fleet is served from.
 # 2026-05-07 (NORA #28) — frontend build outputs are committed on this branch.
 # See docs/COMMIT-BUILD-PATTERN.md in neoffice-devops.
 # lms/public/frontend
 # lms/www/lms.html
 # lms/www/_lms.html
 frappe-ui
-#//// Neoffice — CLAUDE.md un-ignored (ca882638 added the ignore, 1a61b9b8 removed it)
-#//// so the commit-the-build pipeline is documented inside the repo it applies to.
-#//// The last line also gains a trailing newline upstream does not have; that is the
-#//// only reason the final hunk shows up — take upstream's byte at the merge, it is free.
+# //// Neoffice — CLAUDE.md un-ignored (ca882638 added the ignore, 1a61b9b8 removed it)
+# //// so the commit-the-build pipeline is documented inside the repo it applies to.
+# //// The last line also gains a trailing newline upstream does not have; that is the
+# //// only reason the final hunk shows up — take upstream's byte at the merge, it is free.
 # CLAUDE.md  # 2026-05-07 unshipped to document commit-the-build pipeline
 frappe-semgrep-rules

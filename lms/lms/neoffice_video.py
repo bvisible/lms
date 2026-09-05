@@ -1,11 +1,11 @@
-#//// Neoffice — added file (no upstream equivalent), 36c69d63 « cours vidéo privés
-#//// adossés à l'abonnement (Infomaniak VOD) », then a789500f, ee1215c9, af7114c1,
-#//// fe726a28, 90b267aa, d8e69707.
-#//// Everything the LMS needs to serve a video nobody can hotlink: the Infomaniak VOD
-#//// API client, the short-lived HMAC playback token, the LMS Enrollment access fields
-#//// (setup_custom_fields) and the invoice hooks that extend that access. Kept out of
-#//// upstream's api.py on purpose, so this fork's merge surface stays small.
-#//// At the merge: kept whole; only its entries in hooks.py meet upstream.
+# //// Neoffice — added file (no upstream equivalent), 36c69d63 « cours vidéo privés
+# //// adossés à l'abonnement (Infomaniak VOD) », then a789500f, ee1215c9, af7114c1,
+# //// fe726a28, 90b267aa, d8e69707.
+# //// Everything the LMS needs to serve a video nobody can hotlink: the Infomaniak VOD
+# //// API client, the short-lived HMAC playback token, the LMS Enrollment access fields
+# //// (setup_custom_fields) and the invoice hooks that extend that access. Kept out of
+# //// upstream's api.py on purpose, so this fork's merge surface stays small.
+# //// At the merge: kept whole; only its entries in hooks.py meet upstream.
 # Copyright (c) 2026, Neoffice and contributors
 # For license information, please see license.txt
 
