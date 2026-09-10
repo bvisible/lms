@@ -60,55 +60,62 @@ SHARE_CACHE_KEY = "neoffice_vod_share"
 
 # Custom fields rather than doctype edits: LMS Enrollment belongs to upstream,
 # and this fork merges from upstream regularly.
-ENROLLMENT_FIELDS = {
-    "LMS Enrollment": [
-        {
-            "fieldname": "neoffice_access_section",
-            "fieldtype": "Section Break",
-            "label": _("Subscription Access"),
-            "insert_after": "progress",
-        },
-        {
-            "fieldname": "subscription",
-            "fieldtype": "Link",
-            "label": _("Subscription"),
-            "options": "Subscription",
-            "insert_after": "neoffice_access_section",
-            "description": _("Paying for this subscription extends the access period."),
-        },
-        {
-            "fieldname": "access_from",
-            "fieldtype": "Date",
-            "label": _("Access From"),
-            "insert_after": "subscription",
-        },
-        {
-            "fieldname": "access_valid_till",
-            "fieldtype": "Date",
-            "label": _("Access Valid Till"),
-            "insert_after": "access_from",
-            "description": _("Empty means permanent access."),
-        },
-        # Idempotency key. Three hooks can carry the same payment (the invoice's
-        # on_submit and on_update_after_submit, plus the Payment Entry), so the
-        # period would be added several times without a record of what has
-        # already been applied.
-        {
-            "fieldname": "last_grant_invoice",
-            "fieldtype": "Data",
-            "label": _("Last Granting Invoice"),
-            "insert_after": "access_valid_till",
-            "read_only": 1,
-            "no_copy": 1,
-            "description": _("The invoice that last extended this access."),
-        },
-    ]
-}
+# A FUNCTION, not a module constant: `_()` at module level runs at IMPORT, and a
+# worker imports every app before it connects to a site. `frappe.cache` is None
+# there, so each of these labels logged "Unable to load translations" with a bare
+# AttributeError on every restart (neoffice-maintenance#325, #326) -- and any label
+# that did come back was frozen in whatever language was active at import, for the
+# lifetime of the process. Called per use, both go away.
+def enrollment_fields():
+    return {
+        "LMS Enrollment": [
+            {
+                "fieldname": "neoffice_access_section",
+                "fieldtype": "Section Break",
+                "label": _("Subscription Access"),
+                "insert_after": "progress",
+            },
+            {
+                "fieldname": "subscription",
+                "fieldtype": "Link",
+                "label": _("Subscription"),
+                "options": "Subscription",
+                "insert_after": "neoffice_access_section",
+                "description": _("Paying for this subscription extends the access period."),
+            },
+            {
+                "fieldname": "access_from",
+                "fieldtype": "Date",
+                "label": _("Access From"),
+                "insert_after": "subscription",
+            },
+            {
+                "fieldname": "access_valid_till",
+                "fieldtype": "Date",
+                "label": _("Access Valid Till"),
+                "insert_after": "access_from",
+                "description": _("Empty means permanent access."),
+            },
+            # Idempotency key. Three hooks can carry the same payment (the invoice's
+            # on_submit and on_update_after_submit, plus the Payment Entry), so the
+            # period would be added several times without a record of what has
+            # already been applied.
+            {
+                "fieldname": "last_grant_invoice",
+                "fieldtype": "Data",
+                "label": _("Last Granting Invoice"),
+                "insert_after": "access_valid_till",
+                "read_only": 1,
+                "no_copy": 1,
+                "description": _("The invoice that last extended this access."),
+            },
+        ]
+    }
 
 
 def setup_custom_fields():
     """Idempotent — safe to run on every migrate."""
-    create_custom_fields(ENROLLMENT_FIELDS, ignore_validate=True)
+    create_custom_fields(enrollment_fields(), ignore_validate=True)
 
 
 # ---------------------------------------------------------------------------
