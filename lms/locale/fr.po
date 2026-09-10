@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
@@ -6,29 +7,39 @@ msgstr ""
 "PO-Revision-Date: 2026-07-06 08:41\n"
 "Last-Translator: jannat@frappe.io\n"
 "Language-Team: French\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Crowdin-Project: frappe\n"
-"X-Crowdin-Project-ID: 639578\n"
-"X-Crowdin-Language: fr\n"
+"Generated-By: Babel 2.16.0\n"
 "X-Crowdin-File: /[frappe.lms] develop/lms/locale/main.pot\n"
 "X-Crowdin-File-ID: 90\n"
-"Language: fr_FR\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-Project: frappe\n"
+"X-Crowdin-Project-ID: 639578\n"
 
 #: lms/templates/emails/assignment_submission.html:5
 msgid " Please evaluate and grade it."
 msgstr " Veuillez l'évaluer et le noter."
 
 #: frontend/src/pages/Programs/ProgramEnrollment.vue:27
-msgid " designed as a learning path to guide your progress. You may take the courses in any order that suits you. "
-msgstr " conçu comme un parcours d'apprentissage pour guider votre progression. Vous pouvez suivre les cours dans l'ordre qui vous convient. "
+msgid ""
+" designed as a learning path to guide your progress. You may take the "
+"courses in any order that suits you. "
+msgstr ""
+" conçu comme un parcours d'apprentissage pour guider votre progression. Vous"
+" pouvez suivre les cours dans l'ordre qui vous convient. "
 
 #: frontend/src/pages/Programs/ProgramEnrollment.vue:20
-msgid " designed as a structured learning path to guide your progress. Courses in this program must be taken in order, and each course will unlock as you complete the previous one. "
-msgstr " conçu comme un parcours structuré pour guider votre progression. Les cours de ce programme doivent être suivis dans l'ordre : chacun se débloque lorsque vous terminez le précédent. "
+msgid ""
+" designed as a structured learning path to guide your progress. Courses in "
+"this program must be taken in order, and each course will unlock as you "
+"complete the previous one. "
+msgstr ""
+" conçu comme un parcours structuré pour guider votre progression. Les cours "
+"de ce programme doivent être suivis dans l'ordre : chacun se débloque "
+"lorsque vous terminez le précédent. "
 
 #: lms/templates/emails/published_batch_notification.html:19
 msgid " to "
@@ -41,7 +52,8 @@ msgstr " vous suivez un"
 #. Paragraph text in the Learning Workspace
 #: lms/lms/workspace/learning/learning.json
 msgid "<a href=\"/app/lms-settings/LMS%20Settings\">LMS Settings</a>"
-msgstr "<a href=\"/app/lms-settings/LMS%20Settings\">Paramètres des formations</a>"
+msgstr ""
+"<a href=\"/app/lms-settings/LMS%20Settings\">Paramètres des formations</a>"
 
 #. Paragraph text in the Learning Workspace
 #: lms/lms/workspace/learning/learning.json
@@ -66,8 +78,13 @@ msgstr "<a href=\"https://docs.frappe.io/learning\">Documentation</a>"
 #: frontend/src/components/Modals/EmailTemplateModal.vue:48
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplateAdd.vue:106
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplateEdit.vue:105
-msgid "<p>Dear {{ member_name }},</p>\\n\\n<p>You have been enrolled in our upcoming batch {{ batch_name }}.</p>\\n\\n<p>Thanks,</p>\\n<p>Frappe Learning</p>"
-msgstr "<p>Bonjour {{ member_name }},</p>\\n\\n<p>Vous avez été inscrit à notre prochaine session {{ batch_name }}.</p>\\n\\n<p>Merci,</p>\\n<p>Neoffice</p>"
+msgid ""
+"<p>Dear {{ member_name }},</p>\\n\\n<p>You have been enrolled in our "
+"upcoming batch {{ batch_name }}.</p>\\n\\n<p>Thanks,</p>\\n<p>Frappe "
+"Learning</p>"
+msgstr ""
+"<p>Bonjour {{ member_name }},</p>\\n\\n<p>Vous avez été inscrit à notre "
+"prochaine session {{ batch_name }}.</p>\\n\\n<p>Merci,</p>\\n<p>Neoffice</p>"
 
 #. Header text in the Learning Workspace
 #: lms/lms/workspace/learning/learning.json
@@ -85,20 +102,29 @@ msgid "<span style=\"font-size: 18px;\"><b>Statistics</b></span>"
 msgstr "<span style=\"font-size: 18px;\"><b>Statistiques</b></span>"
 
 #: lms/lms/doctype/lms_course/lms_course.py:78
-msgid "A course cannot have both paid certificate and certificate of completion."
-msgstr "Un cours ne peut pas avoir à la fois un certificat payant et une attestation de fin de parcours."
+msgid ""
+"A course cannot have both paid certificate and certificate of completion."
+msgstr ""
+"Un cours ne peut pas avoir à la fois un certificat payant et une attestation"
+" de fin de parcours."
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:218
-msgid "A new batch '{0}' has been published that might interest you. Check it out!"
-msgstr "Une nouvelle session « {0} » vient d'être publiée et pourrait vous intéresser. Allez y jeter un œil !"
+msgid ""
+"A new batch '{0}' has been published that might interest you. Check it out!"
+msgstr ""
+"Une nouvelle session « {0} » vient d'être publiée et pourrait vous "
+"intéresser. Allez y jeter un œil !"
 
 #: lms/templates/emails/published_batch_notification.html:7
 msgid "A new batch has been published on "
 msgstr "Une nouvelle session a été publiée sur "
 
 #: lms/lms/doctype/lms_course/lms_course.py:212
-msgid "A new course '{0}' has been published that might interest you. Check it out!"
-msgstr "Un nouveau cours « {0} » vient d'être publié et pourrait vous intéresser. Allez y jeter un œil !"
+msgid ""
+"A new course '{0}' has been published that might interest you. Check it out!"
+msgstr ""
+"Un nouveau cours « {0} » vient d'être publié et pourrait vous intéresser. "
+"Allez y jeter un œil !"
 
 #: lms/templates/emails/published_course_notification.html:7
 msgid "A new course has been published on "
@@ -142,7 +168,8 @@ msgstr "Compte"
 msgid "Account ID"
 msgstr "ID du compte"
 
-#. Label of the account_name (Data) field in DocType 'LMS Google Meet Settings'
+#. Label of the account_name (Data) field in DocType 'LMS Google Meet
+#. Settings'
 #. Label of the account_name (Data) field in DocType 'LMS Zoom Settings'
 #: frontend/src/components/Settings/GoogleMeetAccountForm.vue:26
 #: frontend/src/components/Settings/GoogleMeetSettings.vue:191
@@ -376,7 +403,8 @@ msgstr "Tous les programmes"
 
 #: lms/lms/doctype/lms_quiz/lms_quiz.py:58
 msgid "All questions should have the same marks if the limit is set."
-msgstr "Toutes les questions doivent avoir les mêmes notes si la limite est fixée."
+msgstr ""
+"Toutes les questions doivent avoir les mêmes notes si la limite est fixée."
 
 #. Label of the allow_guest_access (Check) field in DocType 'LMS Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
@@ -492,15 +520,24 @@ msgstr "Réponse"
 
 #: frontend/src/pages/PersonaForm.vue:18
 msgid "Answer a few quick questions so we can set Frappe Learning up for you"
-msgstr "Répondez à quelques questions rapides pour que nous puissions configurer Neoffice pour vous"
+msgstr ""
+"Répondez à quelques questions rapides pour que nous puissions configurer "
+"Neoffice pour vous"
 
 #: frontend/src/components/Settings/BrandSettings.vue:63
-msgid "Appears in the left sidebar. Recommended size is 32x32 px in PNG or SVG"
-msgstr "Apparaît dans la barre latérale gauche. Taille recommandée : 32x32 px en PNG ou SVG"
+msgid ""
+"Appears in the left sidebar. Recommended size is 32x32 px in PNG or SVG"
+msgstr ""
+"Apparaît dans la barre latérale gauche. Taille recommandée : 32x32 px en PNG"
+" ou SVG"
 
 #: frontend/src/components/Settings/BrandSettings.vue:97
-msgid "Appears next to the title in your browser tab. Recommended size is 32x32 px in PNG or ICO"
-msgstr "Apparaît à côté du titre dans l'onglet de votre navigateur. Taille recommandée : 32x32 px en PNG ou ICO"
+msgid ""
+"Appears next to the title in your browser tab. Recommended size is 32x32 px "
+"in PNG or ICO"
+msgstr ""
+"Apparaît à côté du titre dans l'onglet de votre navigateur. Taille "
+"recommandée : 32x32 px en PNG ou ICO"
 
 #: frontend/src/components/Settings/Coupons/CouponDetails.vue:79
 msgid "Applicable For"
@@ -557,16 +594,28 @@ msgid "Archived"
 msgstr "Archivé"
 
 #: frontend/src/components/UpcomingEvaluations.vue:197
-msgid "Are you sure you want to cancel this evaluation? This action cannot be undone."
-msgstr "Voulez-vous vraiment annuler cette évaluation ? Cette action est irréversible."
+msgid ""
+"Are you sure you want to cancel this evaluation? This action cannot be "
+"undone."
+msgstr ""
+"Voulez-vous vraiment annuler cette évaluation ? Cette action est "
+"irréversible."
 
 #: frontend/src/components/Sidebar/UserDropdown.vue:237
-msgid "Are you sure you want to clear the demo data? This would delete the course \"A guide  to Frappe Learning\" along with all its associated data. This action cannot be undone."
-msgstr "Voulez-vous vraiment effacer les données de démonstration ? Cela supprimera le cours « A guide  to Frappe Learning » et toutes ses données. Cette action est irréversible."
+msgid ""
+"Are you sure you want to clear the demo data? This would delete the course "
+"\"A guide  to Frappe Learning\" along with all its associated data. This "
+"action cannot be undone."
+msgstr ""
+"Voulez-vous vraiment effacer les données de démonstration ? Cela supprimera "
+"le cours « A guide  to Frappe Learning » et toutes ses données. Cette action"
+" est irréversible."
 
 #: frontend/src/pages/Programs/ProgramForm.vue:556
-msgid "Are you sure you want to delete this program? This action cannot be undone."
-msgstr "Voulez-vous vraiment supprimer ce programme ? Cette action est irréversible."
+msgid ""
+"Are you sure you want to delete this program? This action cannot be undone."
+msgstr ""
+"Voulez-vous vraiment supprimer ce programme ? Cette action est irréversible."
 
 #: frontend/src/pages/Programs/ProgramEnrollment.vue:33
 msgid "Are you sure you want to enroll?"
@@ -574,15 +623,21 @@ msgstr "Voulez-vous vraiment vous inscrire ?"
 
 #: frontend/src/components/Sidebar/UserDropdown.vue:180
 msgid "Are you sure you want to login to your Frappe Cloud dashboard?"
-msgstr "Êtes-vous sûr de vouloir vous connecter à votre tableau de bord Frappe Cloud ?"
+msgstr ""
+"Êtes-vous sûr de vouloir vous connecter à votre tableau de bord Frappe Cloud"
+" ?"
 
 #: frontend/src/components/Quiz.vue:416
 msgid "Are you sure you want to submit the quiz?"
 msgstr "Voulez-vous vraiment rendre le quiz ?"
 
 #: frontend/src/pages/Batches/components/BatchDashboard.vue:11
-msgid "As a part of this batch's curriculum you will have to complete the following courses and assessments."
-msgstr "Le programme de cette session vous demandera de suivre les cours et les évaluations ci-dessous."
+msgid ""
+"As a part of this batch's curriculum you will have to complete the following"
+" courses and assessments."
+msgstr ""
+"Le programme de cette session vous demandera de suivre les cours et les "
+"évaluations ci-dessous."
 
 #: frontend/src/pages/Lesson.vue:283
 msgid "Ask a question to get help from the community."
@@ -657,7 +712,8 @@ msgstr "Attribué pour"
 msgid "Assignment"
 msgstr "Attribution"
 
-#. Label of the assignment_attachment (Attach) field in DocType 'LMS Assignment
+#. Label of the assignment_attachment (Attach) field in DocType 'LMS
+#. Assignment
 #. Submission'
 #: lms/lms/doctype/lms_assignment_submission/lms_assignment_submission.json
 msgid "Assignment Attachment"
@@ -724,7 +780,8 @@ msgstr "Au moins une option doit être correcte pour cette question."
 
 #: lms/lms/doctype/lms_programming_exercise/lms_programming_exercise.py:15
 msgid "At least one test case is required for the programming exercise."
-msgstr "Au moins un cas de test est obligatoire pour un exercice de programmation."
+msgstr ""
+"Au moins un cas de test est obligatoire pour un exercice de programmation."
 
 #: frontend/src/components/Quiz.vue:442
 msgid "Attempted Questions"
@@ -949,7 +1006,8 @@ msgstr "Évaluateur de cohorte"
 msgid "Batch Feedback"
 msgstr "Avis sur la session"
 
-#. Label of the batch_name (Link) field in DocType 'LMS Certificate Evaluation'
+#. Label of the batch_name (Link) field in DocType 'LMS Certificate
+#. Evaluation'
 #: lms/lms/doctype/lms_certificate_evaluation/lms_certificate_evaluation.json
 msgid "Batch Name"
 msgstr "Nom du lot"
@@ -1009,7 +1067,9 @@ msgstr "Session publiée"
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:57
 msgid "Batch start time cannot be greater than or equal to end time."
-msgstr "L'heure de début de la session ne peut pas être postérieure ou égale à l'heure de fin."
+msgstr ""
+"L'heure de début de la session ne peut pas être postérieure ou égale à "
+"l'heure de fin."
 
 #: frontend/src/pages/Batches/BatchDetail.vue:266
 msgid "Batch unpublished"
@@ -1167,7 +1227,8 @@ msgstr "Tenue décontractée"
 #: frontend/src/pages/Courses/NewCourseModal.vue:15
 #: lms/lms/doctype/lms_batch/lms_batch.json
 #: lms/lms/doctype/lms_category/lms_category.json
-#: lms/lms/doctype/lms_course/lms_course.json lms/templates/signup-form.html:22
+#: lms/lms/doctype/lms_course/lms_course.json
+#: lms/templates/signup-form.html:22
 msgid "Category"
 msgstr "Catégorie"
 
@@ -1231,13 +1292,18 @@ msgid "Certificates generated successfully"
 msgstr "Les certificats ont bien été générés"
 
 #: frontend/src/pages/Courses/CoursePublishSettings.vue:140
-msgid "Certificates render from a Print Format. Build or customize templates from the desk."
-msgstr "Les certificats sont rendus depuis un modèle d'impression. Créez ou adaptez les modèles depuis le bureau."
+msgid ""
+"Certificates render from a Print Format. Build or customize templates from "
+"the desk."
+msgstr ""
+"Les certificats sont rendus depuis un modèle d'impression. Créez ou adaptez "
+"les modèles depuis le bureau."
 
 #. Label of the certification (Table) field in DocType 'User'
 #. Name of a DocType
 #. Label of the certification (Check) field in DocType 'LMS Batch'
-#. Label of the section_break_cssv (Section Break) field in DocType 'LMS Batch'
+#. Label of the section_break_cssv (Section Break) field in DocType 'LMS
+#. Batch'
 #. Label of the certification_section (Section Break) field in DocType 'LMS
 #. Enrollment'
 #. Label of a chart in the Learning Workspace
@@ -1268,16 +1334,24 @@ msgid "Certification Name"
 msgstr "Nom de la certification"
 
 #: lms/lms/doctype/lms_certificate/lms_certificate.py:94
-msgid "Certification cannot be issued as the member has not completed the course."
-msgstr "Le certificat ne peut pas être délivré : le membre n'a pas terminé le cours."
+msgid ""
+"Certification cannot be issued as the member has not completed the course."
+msgstr ""
+"Le certificat ne peut pas être délivré : le membre n'a pas terminé le cours."
 
 #: lms/lms/doctype/lms_certificate/lms_certificate.py:77
-msgid "Certification cannot be issued as the member is not enrolled in this batch."
-msgstr "Le certificat ne peut pas être délivré : le membre n'est pas inscrit à cette session."
+msgid ""
+"Certification cannot be issued as the member is not enrolled in this batch."
+msgstr ""
+"Le certificat ne peut pas être délivré : le membre n'est pas inscrit à cette"
+" session."
 
 #: lms/lms/doctype/lms_certificate/lms_certificate.py:84
-msgid "Certification cannot be issued as the member is not enrolled in this course."
-msgstr "Le certificat ne peut pas être délivré : le membre n'est pas inscrit à ce cours."
+msgid ""
+"Certification cannot be issued as the member is not enrolled in this course."
+msgstr ""
+"Le certificat ne peut pas être délivré : le membre n'est pas inscrit à ce "
+"cours."
 
 #: lms/lms/doctype/lms_certificate/lms_certificate.py:214
 msgid "Certification is not enabled for this course."
@@ -1431,7 +1505,9 @@ msgstr "Choisissez une réponse"
 
 #: frontend/src/components/Settings/EmailAccount/EmailAdd.vue:5
 msgid "Choose the email service provider you want to configure."
-msgstr "Choisissez le fournisseur de service de messagerie que vous souhaitez configurer."
+msgstr ""
+"Choisissez le fournisseur de service de messagerie que vous souhaitez "
+"configurer."
 
 #. Label of the city (Data) field in DocType 'User'
 #. Label of the location (Data) field in DocType 'Job Opportunity'
@@ -1587,7 +1663,8 @@ msgstr "Société"
 msgid "Company Details"
 msgstr "Détail de la société"
 
-#. Label of the company_email_address (Data) field in DocType 'Job Opportunity'
+#. Label of the company_email_address (Data) field in DocType 'Job
+#. Opportunity'
 #: frontend/src/pages/JobForm.vue:102
 #: lms/job/doctype/job_opportunity/job_opportunity.json
 msgid "Company Email Address"
@@ -1651,8 +1728,12 @@ msgid "Complete Your Enrollment - Don't miss out!"
 msgstr "Terminez votre inscription — ne passez pas à côté !"
 
 #: frontend/src/components/VideoBlock.vue:148
-msgid "Complete the upcoming quiz to continue watching the video. The quiz will open in {0} {1}."
-msgstr "Terminez le quiz à venir pour continuer la vidéo. Le quiz s'ouvrira dans {0} {1}."
+msgid ""
+"Complete the upcoming quiz to continue watching the video. The quiz will "
+"open in {0} {1}."
+msgstr ""
+"Terminez le quiz à venir pour continuer la vidéo. Le quiz s'ouvrira dans {0}"
+" {1}."
 
 #: frontend/src/components/Sidebar/AppSidebar.vue:106
 #: frontend/src/components/Sidebar/AppSidebar.vue:132
@@ -1717,7 +1798,8 @@ msgstr "Configuration"
 
 #: frontend/src/components/Settings/PaymentGatewayDetails.vue:5
 msgid "Configure the credentials and options for this payment gateway."
-msgstr "Saisissez les identifiants et les options de ce prestataire de paiement."
+msgstr ""
+"Saisissez les identifiants et les options de ce prestataire de paiement."
 
 #: frontend/src/components/Settings/BrandSettings.vue:4
 msgid "Configure your Brand Name, Logo, and Favicon"
@@ -1754,7 +1836,8 @@ msgstr "Confirmez la suppression"
 msgid "Confirmation Email Sent"
 msgstr "Courriel de confirmation envoyé"
 
-#. Label of the confirmation_email_template (Link) field in DocType 'LMS Batch'
+#. Label of the confirmation_email_template (Link) field in DocType 'LMS
+#. Batch'
 #: lms/lms/doctype/lms_batch/lms_batch.json
 msgid "Confirmation Email Template"
 msgstr "Modèle d'e-mail de confirmation"
@@ -1765,7 +1848,8 @@ msgstr "Félicitations pour votre certification !"
 
 #: frontend/src/components/Settings/GoogleMeetAccountForm.vue:5
 msgid "Connect a Google Meet account to schedule and host live classes."
-msgstr "Reliez un compte Google Meet pour planifier et animer des cours en direct."
+msgstr ""
+"Reliez un compte Google Meet pour planifier et animer des cours en direct."
 
 #: frontend/src/components/Settings/ZoomAccountForm.vue:5
 msgid "Connect a Zoom account to schedule and host live classes."
@@ -1841,8 +1925,11 @@ msgid "Correct Answer"
 msgstr "Bonne réponse"
 
 #: lms/lms/course_import_export.py:196
-msgid "Could not create the course ZIP file. Please try again later. Error: {0}"
-msgstr "Impossible de créer l'archive ZIP du cours. Réessayez plus tard. Erreur : {0}"
+msgid ""
+"Could not create the course ZIP file. Please try again later. Error: {0}"
+msgstr ""
+"Impossible de créer l'archive ZIP du cours. Réessayez plus tard. Erreur : "
+"{0}"
 
 #: frontend/src/pages/QuizForm.vue:330
 msgid "Could not delete the quiz"
@@ -2177,7 +2264,8 @@ msgstr "Le cours {0} est déjà dans ce programme."
 #: frontend/src/pages/Courses/CourseCertification.vue:127
 #: frontend/src/pages/Courses/CourseDetail.vue:361
 #: frontend/src/pages/Courses/Courses.vue:359
-#: frontend/src/pages/Courses/Courses.vue:366 frontend/src/pages/Lesson.vue:616
+#: frontend/src/pages/Courses/Courses.vue:366
+#: frontend/src/pages/Lesson.vue:616
 #: frontend/src/pages/Programs/ProgramForm.vue:44
 #: frontend/src/pages/Programs/Programs.vue:66
 #: frontend/src/pages/SCORMChapter.vue:234
@@ -2205,8 +2293,12 @@ msgid "Courses in this Program"
 msgstr "Cours de ce programme"
 
 #: frontend/src/pages/Programs/ProgramDetail.vue:21
-msgid "Courses must be completed in order. You can only start the next course after completing the previous one."
-msgstr "Les cours doivent être suivis dans l'ordre : vous ne pouvez commencer le suivant qu'après avoir terminé le précédent."
+msgid ""
+"Courses must be completed in order. You can only start the next course after"
+" completing the previous one."
+msgstr ""
+"Les cours doivent être suivis dans l'ordre : vous ne pouvez commencer le "
+"suivant qu'après avoir terminé le précédent."
 
 #. Label of the cover_image (Attach Image) field in DocType 'User'
 #: lms/fixtures/custom_field.json
@@ -2285,7 +2377,8 @@ msgstr "Créer un devoir"
 
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplateList.vue:5
 msgid "Create and manage reusable email templates for your notifications."
-msgstr "Créez et gérez des modèles de courriel réutilisables pour vos notifications."
+msgstr ""
+"Créez et gérez des modèles de courriel réutilisables pour vos notifications."
 
 #: frontend/src/components/CourseOutline.vue:34
 msgid "Create chapter"
@@ -2430,8 +2523,12 @@ msgstr "Cher/Chère "
 #: frontend/src/components/Modals/EmailTemplateModal.vue:64
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplateAdd.vue:109
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplateEdit.vue:108
-msgid "Dear {{ member_name }},\\n\\nYou have been enrolled in our upcoming batch {{ batch_name }}.\\n\\nThanks,\\nFrappe Learning"
-msgstr "Bonjour {{ member_name }},\\n\\nVous avez été inscrit à notre prochaine session {{ batch_name }}.\\n\\nMerci,\\nNeoffice"
+msgid ""
+"Dear {{ member_name }},\\n\\nYou have been enrolled in our upcoming batch {{"
+" batch_name }}.\\n\\nThanks,\\nFrappe Learning"
+msgstr ""
+"Bonjour {{ member_name }},\\n\\nVous avez été inscrit à notre prochaine "
+"session {{ batch_name }}.\\n\\nMerci,\\nNeoffice"
 
 #: frontend/src/pages/QuizForm.vue:234
 msgid "Deduct marks for incorrect answers."
@@ -2456,7 +2553,8 @@ msgstr "Envoi et boîte de réception par défaut"
 
 #: frontend/src/components/Settings/Badges/BadgeForm.vue:5
 msgid "Define a badge and the criteria for awarding it to learners."
-msgstr "Définissez un badge et les conditions pour l'attribuer aux apprenants."
+msgstr ""
+"Définissez un badge et les conditions pour l'attribuer aux apprenants."
 
 #. Label of the degree_type (Data) field in DocType 'Education Detail'
 #: lms/lms/doctype/education_detail/education_detail.json
@@ -2528,28 +2626,57 @@ msgid "Delete {0}?"
 msgstr "Supprimer {0}?"
 
 #: frontend/src/pages/Courses/CourseForm.vue:262
-msgid "Deleting the course will also delete all its chapters and lessons. Are you sure you want to delete this course?"
-msgstr "Supprimer le cours supprimera aussi tous ses chapitres et toutes ses leçons. Voulez-vous vraiment le supprimer ?"
+msgid ""
+"Deleting the course will also delete all its chapters and lessons. Are you "
+"sure you want to delete this course?"
+msgstr ""
+"Supprimer le cours supprimera aussi tous ses chapitres et toutes ses leçons."
+" Voulez-vous vraiment le supprimer ?"
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue:257
-msgid "Deleting these exercises will permanently remove them from the system, along with all associated submissions. This action is irreversible. Are you sure you want to proceed?"
-msgstr "Supprimer ces exercices les retirera définitivement, ainsi que tous les rendus associés. Cette action est irréversible. Voulez-vous continuer ?"
+msgid ""
+"Deleting these exercises will permanently remove them from the system, along"
+" with all associated submissions. This action is irreversible. Are you sure "
+"you want to proceed?"
+msgstr ""
+"Supprimer ces exercices les retirera définitivement, ainsi que tous les "
+"rendus associés. Cette action est irréversible. Voulez-vous continuer ?"
 
 #: frontend/src/pages/Batches/BatchForm.vue:558
-msgid "Deleting this batch will also delete all its data including enrolled students, linked courses, assessments, feedback and discussions. Are you sure you want to continue?"
-msgstr "Supprimer cette session supprimera aussi toutes ses données : participants inscrits, cours liés, évaluations, avis et discussions. Voulez-vous continuer ?"
+msgid ""
+"Deleting this batch will also delete all its data including enrolled "
+"students, linked courses, assessments, feedback and discussions. Are you "
+"sure you want to continue?"
+msgstr ""
+"Supprimer cette session supprimera aussi toutes ses données : participants "
+"inscrits, cours liés, évaluations, avis et discussions. Voulez-vous "
+"continuer ?"
 
 #: frontend/src/components/CourseOutline.vue:372
-msgid "Deleting this chapter will also delete all its lessons and permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?"
-msgstr "Supprimer ce chapitre supprimera aussi toutes ses leçons et le retirera définitivement du cours. Cette action est irréversible. Voulez-vous continuer ?"
+msgid ""
+"Deleting this chapter will also delete all its lessons and permanently "
+"remove it from the course. This action cannot be undone. Are you sure you "
+"want to continue?"
+msgstr ""
+"Supprimer ce chapitre supprimera aussi toutes ses leçons et le retirera "
+"définitivement du cours. Cette action est irréversible. Voulez-vous "
+"continuer ?"
 
 #: frontend/src/components/CourseOutline.vue:346
-msgid "Deleting this lesson will permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?"
-msgstr "Supprimer cette leçon la retirera définitivement du cours. Cette action est irréversible. Voulez-vous continuer ?"
+msgid ""
+"Deleting this lesson will permanently remove it from the course. This action"
+" cannot be undone. Are you sure you want to continue?"
+msgstr ""
+"Supprimer cette leçon la retirera définitivement du cours. Cette action est "
+"irréversible. Voulez-vous continuer ?"
 
 #: frontend/src/pages/QuizForm.vue:314
-msgid "Deleting this quiz permanently removes it and its submissions. This action cannot be undone. Are you sure you want to continue?"
-msgstr "Supprimer ce quiz le retire définitivement, avec tous ses rendus. Cette action est irréversible. Voulez-vous continuer ?"
+msgid ""
+"Deleting this quiz permanently removes it and its submissions. This action "
+"cannot be undone. Are you sure you want to continue?"
+msgstr ""
+"Supprimer ce quiz le retire définitivement, avec tous ses rendus. Cette "
+"action est irréversible. Voulez-vous continuer ?"
 
 #: lms/lms/api.py:887
 msgid "Deletion not allowed for {0}"
@@ -2666,8 +2793,12 @@ msgid "Display correct answers after each question is attempted."
 msgstr "Afficher la bonne réponse après chaque question traitée."
 
 #: frontend/src/components/Quiz.vue:25
-msgid "Do not refresh the page or close this window. If you do, the quiz will be submitted automatically."
-msgstr "N'actualisez pas la page et ne fermez pas cette fenêtre : le quiz serait rendu automatiquement."
+msgid ""
+"Do not refresh the page or close this window. If you do, the quiz will be "
+"submitted automatically."
+msgstr ""
+"N'actualisez pas la page et ne fermez pas cette fenêtre : le quiz serait "
+"rendu automatiquement."
 
 #. Option for the 'File Type' (Select) field in DocType 'Course Lesson'
 #. Option for the 'Type' (Select) field in DocType 'LMS Assignment'
@@ -2687,8 +2818,12 @@ msgid "Document Type"
 msgstr "Type de document"
 
 #: lms/templates/emails/payment_reminder.html:11
-msgid "Don’t miss this opportunity to enhance your skills. Click below to complete your enrollment"
-msgstr "Ne passez pas à côté de cette occasion de progresser. Cliquez ci-dessous pour terminer votre inscription"
+msgid ""
+"Don’t miss this opportunity to enhance your skills. Click below to complete "
+"your enrollment"
+msgstr ""
+"Ne passez pas à côté de cette occasion de progresser. Cliquez ci-dessous "
+"pour terminer votre inscription"
 
 #: frontend/src/pages/Courses/CourseImportModal.vue:23
 msgid "Drag and drop a ZIP file, or upload from your"
@@ -2878,7 +3013,8 @@ msgstr "Le modèle de courriel a bien été supprimé"
 msgid "Email Template updated successfully"
 msgstr "Le modèle de courriel a bien été mis à jour"
 
-#. Label of the email_templates_tab (Tab Break) field in DocType 'LMS Settings'
+#. Label of the email_templates_tab (Tab Break) field in DocType 'LMS
+#. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
 msgid "Email Templates"
 msgstr "Modèles d’Email"
@@ -2920,8 +3056,12 @@ msgid "Enable"
 msgstr "Activer"
 
 #: lms/lms/doctype/lms_settings/lms_settings.py:27
-msgid "Enable Google API in Google Settings to send calendar invites for evaluations."
-msgstr "Activez l'API Google dans les paramètres Google pour envoyer les invitations d'agenda des évaluations."
+msgid ""
+"Enable Google API in Google Settings to send calendar invites for "
+"evaluations."
+msgstr ""
+"Activez l'API Google dans les paramètres Google pour envoyer les invitations"
+" d'agenda des évaluations."
 
 #. Label of the enable_negative_marking (Check) field in DocType 'LMS Quiz'
 #: frontend/src/pages/QuizForm.vue:233 lms/lms/doctype/lms_quiz/lms_quiz.json
@@ -2934,7 +3074,8 @@ msgstr "Activer les évaluations pour les participants de la session."
 
 #: frontend/src/components/Modals/ChapterModal.vue:27
 msgid "Enable this only if you want to upload a SCORM package as a chapter."
-msgstr "N'activez ceci que pour téléverser un paquet SCORM en tant que chapitre."
+msgstr ""
+"N'activez ceci que pour téléverser un paquet SCORM en tant que chapitre."
 
 #. Label of the enabled (Check) field in DocType 'LMS Badge'
 #. Label of the enabled (Check) field in DocType 'LMS Coupon'
@@ -2958,8 +3099,11 @@ msgid "Enabled"
 msgstr "Activé"
 
 #: frontend/src/pages/Batches/components/BulkCertificates.vue:51
-msgid "Enabling this will publish the certificate on the certified participants page."
-msgstr "Activer ceci publiera le certificat sur la page des participants certifiés."
+msgid ""
+"Enabling this will publish the certificate on the certified participants "
+"page."
+msgstr ""
+"Activer ceci publiera le certificat sur la page des participants certifiés."
 
 #. Label of the end_date (Date) field in DocType 'LMS Batch'
 #: frontend/src/pages/Batches/components/NewBatchModal.vue:22
@@ -3007,7 +3151,8 @@ msgstr "Exiger que le devoir soit rendu"
 msgid "Enforce Course Order"
 msgstr "Imposer l'ordre des cours"
 
-#. Label of the enforce_quiz_completion (Check) field in DocType 'LMS Settings'
+#. Label of the enforce_quiz_completion (Check) field in DocType 'LMS
+#. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
 msgid "Enforce Quiz Completion"
 msgstr "Exiger que le quiz soit terminé"
@@ -3092,8 +3237,10 @@ msgid "Enrollment from Batch"
 msgstr "Inscription depuis la session"
 
 #: lms/lms/doctype/lms_batch_enrollment/lms_batch_enrollment.py:57
-msgid "Enrollment in this batch is restricted. Please contact the Administrator."
-msgstr "L'inscription à cette session est restreinte. Contactez l'administrateur."
+msgid ""
+"Enrollment in this batch is restricted. Please contact the Administrator."
+msgstr ""
+"L'inscription à cette session est restreinte. Contactez l'administrateur."
 
 #. Label of the enrollments (Int) field in DocType 'LMS Course'
 #. Label of a chart in the Learning Workspace
@@ -3101,7 +3248,8 @@ msgstr "L'inscription à cette session est restreinte. Contactez l'administrateu
 #. Label of a Workspace Sidebar Item
 #: frontend/src/pages/Programs/ProgramProgressSummary.vue:13
 #: lms/lms/doctype/lms_course/lms_course.json
-#: lms/lms/workspace/learning/learning.json lms/workspace_sidebar/learning.json
+#: lms/lms/workspace/learning/learning.json
+#: lms/workspace_sidebar/learning.json
 msgid "Enrollments"
 msgstr "Inscriptions"
 
@@ -3110,8 +3258,12 @@ msgid "Enter Brand Name"
 msgstr "Saisir le nom de la marque"
 
 #: lms/lms/doctype/lms_settings/lms_settings.py:32
-msgid "Enter Client Id and Client Secret in Google Settings to send calendar invites for evaluations."
-msgstr "Saisissez l'identifiant et le secret client dans les paramètres Google pour envoyer les invitations d'agenda des évaluations."
+msgid ""
+"Enter Client Id and Client Secret in Google Settings to send calendar "
+"invites for evaluations."
+msgstr ""
+"Saisissez l'identifiant et le secret client dans les paramètres Google pour "
+"envoyer les invitations d'agenda des évaluations."
 
 #: frontend/src/pages/Billing.vue:64
 msgid "Enter a Coupon Code"
@@ -3248,7 +3400,9 @@ msgstr "L'évaluation a bien été annulée"
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:92
 msgid "Evaluation end date cannot be less than the batch end date."
-msgstr "La date de fin des évaluations ne peut pas précéder la date de fin de la session."
+msgstr ""
+"La date de fin des évaluations ne peut pas précéder la date de fin de la "
+"session."
 
 #: frontend/src/components/Modals/Event.vue:279
 msgid "Evaluation saved successfully"
@@ -3404,7 +3558,8 @@ msgstr "Échoué"
 
 #. Option for the 'Status' (Select) field in DocType 'LMS Programming Exercise
 #. Submission'
-#. Option for the 'Status' (Select) field in DocType 'LMS Test Case Submission'
+#. Option for the 'Status' (Select) field in DocType 'LMS Test Case
+#. Submission'
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue:39
 #: lms/lms/doctype/lms_programming_exercise_submission/lms_programming_exercise_submission.json
 #: lms/lms/doctype/lms_test_case_submission/lms_test_case_submission.json
@@ -3429,7 +3584,8 @@ msgstr "Échec de l'inscription au programme : {0}"
 
 #: lms/lms/doctype/lms_live_class/lms_live_class.py:223
 msgid "Failed to fetch attendance data from Zoom for class {0}: {1}"
-msgstr "Impossible de récupérer les présences depuis Zoom pour le cours {0} : {1}"
+msgstr ""
+"Impossible de récupérer les présences depuis Zoom pour le cours {0} : {1}"
 
 #: frontend/src/pages/Profile.vue:284
 msgid "Failed to refresh session"
@@ -3689,11 +3845,15 @@ msgstr "Installer l'application Paiements"
 
 #: frontend/src/components/InstallPrompt.vue:9
 msgid "Get the app on your device for easy access & a better experience!"
-msgstr "Obtenez l'application sur votre appareil pour un accès facile et une meilleure expérience !"
+msgstr ""
+"Obtenez l'application sur votre appareil pour un accès facile et une "
+"meilleure expérience !"
 
 #: frontend/src/components/InstallPrompt.vue:45
 msgid "Get the app on your iPhone for easy access & a better experience"
-msgstr "Obtenez l'application sur votre iPhone pour un accès facile et une meilleure expérience"
+msgstr ""
+"Obtenez l'application sur votre iPhone pour un accès facile et une meilleure"
+" expérience"
 
 #: frontend/src/components/Modals/EditProfile.vue:48
 msgid "GitHub ID"
@@ -3729,7 +3889,8 @@ msgstr "Google Classroom"
 msgid "Google Drive"
 msgstr "Google Drive"
 
-#. Option for the 'Conferencing Provider' (Select) field in DocType 'LMS Batch'
+#. Option for the 'Conferencing Provider' (Select) field in DocType 'LMS
+#. Batch'
 #. Option for the 'Conferencing Provider' (Select) field in DocType 'LMS Live
 #. Class'
 #: frontend/src/pages/Batches/BatchForm.vue:598
@@ -3923,8 +4084,12 @@ msgid "I am currently working here"
 msgstr "J'y travaille actuellement"
 
 #: lms/templates/emails/certification.html:6
-msgid "I am delighted to inform you that you have successfully earned your certification for the {0} course. Congratulations!"
-msgstr "J'ai le plaisir de vous annoncer que vous avez obtenu votre certification pour le cours {0}. Félicitations !"
+msgid ""
+"I am delighted to inform you that you have successfully earned your "
+"certification for the {0} course. Congratulations!"
+msgstr ""
+"J'ai le plaisir de vous annoncer que vous avez obtenu votre certification "
+"pour le cours {0}. Félicitations !"
 
 #: frontend/src/pages/ProfileAbout.vue:166
 msgid "I am happy to announce that I earned the {0} badge on {1} at {2}"
@@ -3936,7 +4101,9 @@ msgstr "Je ne suis pas disponible"
 
 #: frontend/src/pages/Billing.vue:185
 msgid "I consent to my personal information being stored for invoicing"
-msgstr "J'accepte que mes informations personnelles soient conservées pour la facturation"
+msgstr ""
+"J'accepte que mes informations personnelles soient conservées pour la "
+"facturation"
 
 #: frontend/src/pages/QuizForm.vue:436
 msgid "ID"
@@ -3954,38 +4121,57 @@ msgid "Identify User Category"
 msgstr "Identifier la catégorie d'utilisateur"
 
 #: frontend/src/components/Quiz.vue:67
-msgid "If you answer incorrectly, {0} {1} will be deducted from your score for each incorrect answer."
-msgstr "En cas de mauvaise réponse, {0} {1} sera retiré de votre score pour chaque erreur."
+msgid ""
+"If you answer incorrectly, {0} {1} will be deducted from your score for each"
+" incorrect answer."
+msgstr ""
+"En cas de mauvaise réponse, {0} {1} sera retiré de votre score pour chaque "
+"erreur."
 
 #: lms/templates/emails/mentor_request_creation_email.html:5
 msgid "If you are not any more interested to mentor the course"
 msgstr "Si vous ne souhaitez plus encadrer ce cours"
 
 #: frontend/src/components/Quiz.vue:44
-msgid "If you fail to do so, the quiz will be automatically submitted when the timer ends."
+msgid ""
+"If you fail to do so, the quiz will be automatically submitted when the "
+"timer ends."
 msgstr "À défaut, le quiz sera rendu automatiquement à la fin du chronomètre."
 
 #: lms/templates/emails/payment_reminder.html:19
-msgid "If you have any questions or need assistance, feel free to reach out to our support team."
-msgstr "Pour toute question ou besoin d'aide, n'hésitez pas à contacter notre assistance."
+msgid ""
+"If you have any questions or need assistance, feel free to reach out to our "
+"support team."
+msgstr ""
+"Pour toute question ou besoin d'aide, n'hésitez pas à contacter notre "
+"assistance."
 
 #: lms/templates/emails/batch_confirmation.html:29
 #: lms/templates/emails/batch_start_reminder.html:27
 #: lms/templates/emails/batch_start_reminder_recorded.html:30
 #: lms/templates/emails/live_class_reminder.html:24
-msgid "If you have any questions or require assistance, feel free to contact us."
+msgid ""
+"If you have any questions or require assistance, feel free to contact us."
 msgstr "Pour toute question ou besoin d'aide, n'hésitez pas à nous contacter."
 
 #. Description of the 'Amount (USD)' (Currency) field in DocType 'LMS Batch'
 #. Description of the 'Amount (USD)' (Currency) field in DocType 'LMS Course'
 #: lms/lms/doctype/lms_batch/lms_batch.json
 #: lms/lms/doctype/lms_course/lms_course.json
-msgid "If you set an amount here, then the USD equivalent setting will not get applied."
-msgstr "Si vous saisissez un montant ici, le réglage d'équivalent en USD ne s'appliquera pas."
+msgid ""
+"If you set an amount here, then the USD equivalent setting will not get "
+"applied."
+msgstr ""
+"Si vous saisissez un montant ici, le réglage d'équivalent en USD ne "
+"s'appliquera pas."
 
 #: lms/lms/doctype/lms_quiz/lms_quiz.py:80
-msgid "If you want open ended questions then make sure each question in the quiz is of open ended type."
-msgstr "Pour des questions ouvertes, assurez-vous que chaque question du quiz est de type ouvert."
+msgid ""
+"If you want open ended questions then make sure each question in the quiz is"
+" of open ended type."
+msgstr ""
+"Pour des questions ouvertes, assurez-vous que chaque question du quiz est de"
+" type ouvert."
 
 #. Option for the 'File Type' (Select) field in DocType 'Course Lesson'
 #. Option for the 'Type' (Select) field in DocType 'LMS Assignment'
@@ -4213,7 +4399,8 @@ msgstr "Invitez votre équipe et vos participants"
 msgid "Is Correct"
 msgstr "Est correct"
 
-#. Label of the is_scorm_chapter (Check) field in DocType 'LMS Course Progress'
+#. Label of the is_scorm_chapter (Check) field in DocType 'LMS Course
+#. Progress'
 #: lms/lms/doctype/lms_course_progress/lms_course_progress.json
 msgid "Is SCORM Chapter"
 msgstr "Chapitre SCORM"
@@ -4308,9 +4495,9 @@ msgstr "Titre du poste"
 
 #. Label of the jobs (Check) field in DocType 'LMS Settings'
 #. Label of the jobs_tab (Tab Break) field in DocType 'LMS Settings'
-#: frontend/src/pages/JobApplications.vue:8 frontend/src/pages/JobDetail.vue:10
-#: frontend/src/pages/JobForm.vue:309 frontend/src/pages/Jobs.vue:6
-#: frontend/src/pages/Jobs.vue:348
+#: frontend/src/pages/JobApplications.vue:8
+#: frontend/src/pages/JobDetail.vue:10 frontend/src/pages/JobForm.vue:309
+#: frontend/src/pages/Jobs.vue:6 frontend/src/pages/Jobs.vue:348
 #: lms/lms/doctype/lms_settings/lms_settings.json
 msgid "Jobs"
 msgstr "Emplois"
@@ -4669,7 +4856,8 @@ msgstr "Lancer un cours payant"
 #. Name of a Workspace
 #. Title of a Workspace Sidebar
 #: frontend/src/pages/PersonaForm.vue:13
-#: lms/lms/workspace/learning/learning.json lms/workspace_sidebar/learning.json
+#: lms/lms/workspace/learning/learning.json
+#: lms/workspace_sidebar/learning.json
 msgid "Learning"
 msgstr "Formation"
 
@@ -4788,8 +4976,12 @@ msgid "Let users enroll themselves."
 msgstr "Laisser les utilisateurs s'inscrire eux-mêmes."
 
 #: lms/templates/onboarding_header.html:11
-msgid "Lets start setting up your content on the LMS so that you can reclaim time and focus on growth."
-msgstr "Commençons à préparer vos contenus de formation, pour que vous puissiez récupérer du temps et vous concentrer sur l'essentiel."
+msgid ""
+"Lets start setting up your content on the LMS so that you can reclaim time "
+"and focus on growth."
+msgstr ""
+"Commençons à préparer vos contenus de formation, pour que vous puissiez "
+"récupérer du temps et vous concentrer sur l'essentiel."
 
 #. Option for the 'Grade Type' (Select) field in DocType 'Education Detail'
 #: lms/lms/doctype/education_detail/education_detail.json
@@ -4802,8 +4994,12 @@ msgid "Limit Questions To"
 msgstr "Limiter le nombre de questions à"
 
 #: lms/lms/doctype/lms_quiz/lms_quiz.py:53
-msgid "Limit cannot be greater than or equal to the number of questions in the quiz."
-msgstr "La limite ne peut pas être supérieure ou égale au nombre de questions du quiz."
+msgid ""
+"Limit cannot be greater than or equal to the number of questions in the "
+"quiz."
+msgstr ""
+"La limite ne peut pas être supérieure ou égale au nombre de questions du "
+"quiz."
 
 #: frontend/src/pages/ProfileAbout.vue:96
 msgid "LinkedIn"
@@ -4815,7 +5011,8 @@ msgstr "LinkedIn"
 msgid "LinkedIn ID"
 msgstr "Identifiant LinkedIn"
 
-#. Label of the live_class (Link) field in DocType 'LMS Live Class Participant'
+#. Label of the live_class (Link) field in DocType 'LMS Live Class
+#. Participant'
 #. Label of the show_live_class (Check) field in DocType 'LMS Settings'
 #: frontend/src/pages/Batches/components/LiveClass.vue:19
 #: lms/lms/doctype/lms_live_class_participant/lms_live_class_participant.json
@@ -4923,7 +5120,8 @@ msgid "Manage your courses and batches at a glance"
 msgstr "Gérez vos cours et vos sessions d'un coup d'œil"
 
 #: frontend/src/components/Settings/EmailAccount/EmailAccountList.vue:5
-msgid "Manage your email accounts and configure incoming and outgoing settings."
+msgid ""
+"Manage your email accounts and configure incoming and outgoing settings."
 msgstr "Gérez vos comptes de messagerie et réglez la réception et l'envoi."
 
 #. Option for the 'User Category' (Select) field in DocType 'User'
@@ -4974,8 +5172,12 @@ msgid "Marks To Cut"
 msgstr "Points à retirer"
 
 #: lms/lms/doctype/lms_quiz_submission/lms_quiz_submission.py:41
-msgid "Marks for question number {0} cannot be greater than the marks allotted for that question."
-msgstr "Les points de la question {0} ne peuvent pas dépasser les points prévus pour cette question."
+msgid ""
+"Marks for question number {0} cannot be greater than the marks allotted for "
+"that question."
+msgstr ""
+"Les points de la question {0} ne peuvent pas dépasser les points prévus pour"
+" cette question."
 
 #. Label of the marks_out_of (Int) field in DocType 'LMS Quiz Result'
 #: frontend/src/pages/QuizSubmission.vue:70
@@ -5116,7 +5318,8 @@ msgstr "Nombre de membres"
 msgid "Member Image"
 msgstr "Photo du membre"
 
-#. Label of the member_name (Data) field in DocType 'LMS Assignment Submission'
+#. Label of the member_name (Data) field in DocType 'LMS Assignment
+#. Submission'
 #. Label of the member_name (Data) field in DocType 'LMS Badge Assignment'
 #. Label of the member_name (Data) field in DocType 'LMS Batch Enrollment'
 #. Label of the member_name (Data) field in DocType 'LMS Batch Feedback'
@@ -5212,7 +5415,8 @@ msgstr "Membres"
 msgid "Mentor"
 msgstr "Encadrant"
 
-#. Label of the mentor_name (Data) field in DocType 'LMS Course Mentor Mapping'
+#. Label of the mentor_name (Data) field in DocType 'LMS Course Mentor
+#. Mapping'
 #: lms/lms/doctype/lms_course_mentor_mapping/lms_course_mentor_mapping.json
 msgid "Mentor Name"
 msgstr "Nom de l'encadrant"
@@ -5542,8 +5746,12 @@ msgid "No assessments added to this batch"
 msgstr "Aucune évaluation ajoutée à cette session"
 
 #: lms/lms/doctype/lms_live_class/lms_live_class.py:77
-msgid "No calendar is configured for the conferencing provider. Please set up a calendar to create events."
-msgstr "Aucun agenda n'est configuré pour le prestataire de visioconférence. Configurez un agenda pour créer des rendez-vous."
+msgid ""
+"No calendar is configured for the conferencing provider. Please set up a "
+"calendar to create events."
+msgstr ""
+"Aucun agenda n'est configuré pour le prestataire de visioconférence. "
+"Configurez un agenda pour créer des rendez-vous."
 
 #: lms/templates/certificates_section.html:23
 msgid "No certificates"
@@ -5803,8 +6011,10 @@ msgid "Once again, congratulations on this significant accomplishment."
 msgstr "Encore une fois, félicitations pour cette belle réussite."
 
 #: frontend/src/components/Assignment.vue:66
-msgid "Once the moderator grades your submission, you'll find the details here."
-msgstr "Dès que le correcteur aura noté votre rendu, le détail apparaîtra ici."
+msgid ""
+"Once the moderator grades your submission, you'll find the details here."
+msgstr ""
+"Dès que le correcteur aura noté votre rendu, le détail apparaîtra ici."
 
 #. Option for the 'Medium' (Select) field in DocType 'LMS Batch'
 #: frontend/src/pages/Batches/BatchForm.vue:617
@@ -5859,7 +6069,7 @@ msgstr "Un seul fichier {0} est accepté."
 #: lms/job/doctype/job_opportunity/job_opportunity.json
 #: lms/job/web_form/job_opportunity/job_opportunity.json
 msgid "Open"
-msgstr "Ouvrir"
+msgstr "Ouverte"
 
 #: lms/templates/emails/assignment_submission.html:8
 msgid "Open Assignment"
@@ -6083,7 +6293,8 @@ msgstr "Réussi"
 
 #. Option for the 'Status' (Select) field in DocType 'LMS Programming Exercise
 #. Submission'
-#. Option for the 'Status' (Select) field in DocType 'LMS Test Case Submission'
+#. Option for the 'Status' (Select) field in DocType 'LMS Test Case
+#. Submission'
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue:38
 #: lms/lms/doctype/lms_programming_exercise_submission/lms_programming_exercise_submission.json
 #: lms/lms/doctype/lms_test_case_submission/lms_test_case_submission.json
@@ -6091,7 +6302,8 @@ msgid "Passed"
 msgstr "Passé"
 
 #. Label of the passing_percentage (Int) field in DocType 'LMS Quiz'
-#. Label of the passing_percentage (Int) field in DocType 'LMS Quiz Submission'
+#. Label of the passing_percentage (Int) field in DocType 'LMS Quiz
+#. Submission'
 #: frontend/src/pages/QuizForm.vue:195 frontend/src/pages/Quizzes.vue:275
 #: lms/lms/doctype/lms_quiz/lms_quiz.json
 #: lms/lms/doctype/lms_quiz_submission/lms_quiz_submission.json
@@ -6108,8 +6320,12 @@ msgid "Paste a YouTube link"
 msgstr "Collez un lien YouTube"
 
 #: frontend/src/components/Controls/VideoPreviewField.vue:107
-msgid "Paste a YouTube link, or upload a video file (MP4, WebM, or OGG) to show a preview on the course page."
-msgstr "Collez un lien YouTube, ou téléversez une vidéo (MP4, WebM ou OGG) pour afficher un aperçu sur la page du cours."
+msgid ""
+"Paste a YouTube link, or upload a video file (MP4, WebM, or OGG) to show a "
+"preview on the course page."
+msgstr ""
+"Collez un lien YouTube, ou téléversez une vidéo (MP4, WebM ou OGG) pour "
+"afficher un aperçu sur la page du cours."
 
 #. Label of the payment (Link) field in DocType 'LMS Batch Enrollment'
 #. Label of the payment (Link) field in DocType 'LMS Enrollment'
@@ -6268,12 +6484,17 @@ msgid "Pink"
 msgstr "Rose"
 
 #: lms/lms/doctype/lms_settings/lms_settings.py:40
-msgid "Please add <a href='{0}'>{1}</a> for <a href='{2}'>{3}</a> to send calendar invites for evaluations."
-msgstr "Ajoutez <a href='{0}'>{1}</a> pour <a href='{2}'>{3}</a> afin d'envoyer les invitations d'agenda des évaluations."
+msgid ""
+"Please add <a href='{0}'>{1}</a> for <a href='{2}'>{3}</a> to send calendar "
+"invites for evaluations."
+msgstr ""
+"Ajoutez <a href='{0}'>{1}</a> pour <a href='{2}'>{3}</a> afin d'envoyer les "
+"invitations d'agenda des évaluations."
 
 #: lms/lms/user.py:77
 msgid "Please ask your administrator to verify your sign-up"
-msgstr "Veuillez demander à votre administrateur de vérifier votre inscription"
+msgstr ""
+"Veuillez demander à votre administrateur de vérifier votre inscription"
 
 #: lms/lms/api.py:1129
 msgid "Please attach a SCORM package before saving this chapter."
@@ -6285,7 +6506,9 @@ msgstr "Veuillez vérifier votre email pour validation"
 
 #: lms/templates/emails/community_course_membership.html:7
 msgid "Please click on the following button to set your new password"
-msgstr "Veuillez cliquer sur le bouton suivant pour définir votre nouveau mot de passe"
+msgstr ""
+"Veuillez cliquer sur le bouton suivant pour définir votre nouveau mot de "
+"passe"
 
 #: frontend/src/pages/Programs/ProgramDetail.vue:54
 msgid "Please complete the previous course to unlock this one."
@@ -6304,7 +6527,9 @@ msgid "Please enroll for this course to view this lesson"
 msgstr "Inscrivez-vous à ce cours pour voir cette leçon"
 
 #: frontend/src/pages/Billing.vue:99
-msgid "Please ensure that the billing name you enter is correct, as it will be used on your invoice."
+msgid ""
+"Please ensure that the billing name you enter is correct, as it will be used"
+" on your invoice."
 msgstr "Vérifiez le nom de facturation saisi : il figurera sur votre facture."
 
 #: frontend/src/components/Quiz.vue:37
@@ -6344,12 +6569,20 @@ msgid "Please fill the mandatory fields: {0}"
 msgstr "Remplissez les champs obligatoires : {0}"
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:72
-msgid "Please install the Payments App to create a paid batch. Refer to the documentation for more details. {0}"
-msgstr "Installez l'application Paiements pour créer une session payante. Voyez la documentation pour le détail. {0}"
+msgid ""
+"Please install the Payments App to create a paid batch. Refer to the "
+"documentation for more details. {0}"
+msgstr ""
+"Installez l'application Paiements pour créer une session payante. Voyez la "
+"documentation pour le détail. {0}"
 
 #: lms/lms/doctype/lms_course/lms_course.py:71
-msgid "Please install the Payments App to create a paid course. Refer to the documentation for more details. {0}"
-msgstr "Installez l'application Paiements pour créer un cours payant. Voyez la documentation pour le détail. {0}"
+msgid ""
+"Please install the Payments App to create a paid course. Refer to the "
+"documentation for more details. {0}"
+msgstr ""
+"Installez l'application Paiements pour créer un cours payant. Voyez la "
+"documentation pour le détail. {0}"
 
 #: frontend/src/pages/Billing.vue:350
 msgid "Please let us know where you heard about us from."
@@ -6393,8 +6626,10 @@ msgid "Please provide your consent to proceed with the payment."
 msgstr "Donnez votre accord pour poursuivre le paiement."
 
 #: frontend/src/components/Quiz.vue:14
-msgid "Please read the following instructions carefully before starting the quiz"
-msgstr "Lisez attentivement les consignes ci-dessous avant de commencer le quiz"
+msgid ""
+"Please read the following instructions carefully before starting the quiz"
+msgstr ""
+"Lisez attentivement les consignes ci-dessous avant de commencer le quiz"
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:142
 msgid "Please run the code to execute the test cases."
@@ -6409,8 +6644,12 @@ msgid "Please select a Zoom account for this batch."
 msgstr "Choisissez un compte Zoom pour cette session."
 
 #: frontend/src/pages/Batches/components/LiveClass.vue:10
-msgid "Please select a conferencing provider and add an account to the batch to create live classes."
-msgstr "Choisissez un prestataire de visioconférence et ajoutez un compte à la session pour créer des cours en direct."
+msgid ""
+"Please select a conferencing provider and add an account to the batch to "
+"create live classes."
+msgstr ""
+"Choisissez un prestataire de visioconférence et ajoutez un compte à la "
+"session pour créer des cours en direct."
 
 #: frontend/src/pages/Programs/ProgramForm.vue:422
 msgid "Please select a course"
@@ -6473,8 +6712,12 @@ msgid "Please upload a SCORM package"
 msgstr "Téléversez un paquet SCORM"
 
 #: frontend/src/components/Controls/VideoPreviewField.vue:156
-msgid "Please upload an MP4, WebM, or OGG video — formats like .MOV can't be played in the browser."
-msgstr "Téléversez une vidéo MP4, WebM ou OGG — les formats comme .MOV ne se lisent pas dans le navigateur."
+msgid ""
+"Please upload an MP4, WebM, or OGG video — formats like .MOV can't be played"
+" in the browser."
+msgstr ""
+"Téléversez une vidéo MP4, WebM ou OGG — les formats comme .MOV ne se lisent "
+"pas dans le navigateur."
 
 #. Option for the 'Grade Type' (Select) field in DocType 'Education Detail'
 #: lms/lms/doctype/education_detail/education_detail.json
@@ -6557,7 +6800,8 @@ msgstr "Propulsé par Neoffice"
 msgid "Preferred Function"
 msgstr "Fonction souhaitée"
 
-#. Label of the preferred_functions (Table MultiSelect) field in DocType 'User'
+#. Label of the preferred_functions (Table MultiSelect) field in DocType
+#. 'User'
 #: lms/fixtures/custom_field.json
 msgid "Preferred Functions"
 msgstr "Fonctions souhaitées"
@@ -6578,7 +6822,8 @@ msgstr "Secteur souhaité"
 msgid "Preferred Location"
 msgstr "Lieu souhaité"
 
-#. Label of the prevent_skipping_videos (Check) field in DocType 'LMS Settings'
+#. Label of the prevent_skipping_videos (Check) field in DocType 'LMS
+#. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
 msgid "Prevent Skipping Videos"
 msgstr "Empêcher d'avancer dans les vidéos"
@@ -6625,8 +6870,11 @@ msgstr "Pays principaux"
 #. Description of the 'Hide my Private Information from others' (Check) field
 #. in DocType 'User'
 #: lms/fixtures/custom_field.json
-msgid "Private Information includes your Grade and Work Environment Preferences"
-msgstr "Les informations personnelles comprennent votre note et vos préférences d'environnement de travail"
+msgid ""
+"Private Information includes your Grade and Work Environment Preferences"
+msgstr ""
+"Les informations personnelles comprennent votre note et vos préférences "
+"d'environnement de travail"
 
 #. Label of the problem_statement (Text Editor) field in DocType 'LMS
 #. Programming Exercise'
@@ -6798,7 +7046,8 @@ msgstr "Cours publiés"
 msgid "Published On"
 msgstr "Publié le"
 
-#. Label of the purchased_certificate (Check) field in DocType 'LMS Enrollment'
+#. Label of the purchased_certificate (Check) field in DocType 'LMS
+#. Enrollment'
 #: frontend/src/pages/Courses/CourseEnrollmentModal.vue:7
 #: lms/lms/doctype/lms_enrollment/lms_enrollment.json
 msgid "Purchased Certificate"
@@ -6826,7 +7075,8 @@ msgstr "Python"
 #. Label of the question (Text) field in DocType 'LMS Quiz Result'
 #: frontend/src/components/Modals/AssignmentForm.vue:33
 #: frontend/src/components/Modals/Question.vue:19
-#: frontend/src/pages/QuizForm.vue:441 frontend/src/pages/QuizSubmission.vue:58
+#: frontend/src/pages/QuizForm.vue:441
+#: frontend/src/pages/QuizSubmission.vue:58
 #: lms/lms/doctype/course_lesson/course_lesson.json
 #: lms/lms/doctype/lms_assignment/lms_assignment.json
 #: lms/lms/doctype/lms_assignment_submission/lms_assignment_submission.json
@@ -6927,7 +7177,8 @@ msgstr "Le quiz a bien été supprimé"
 
 #: lms/plugins.py:97
 msgid "Quiz is not available to Guest users. Please login to continue."
-msgstr "Le quiz n'est pas accessible aux visiteurs. Connectez-vous pour continuer."
+msgstr ""
+"Le quiz n'est pas accessible aux visiteurs. Connectez-vous pour continuer."
 
 #: frontend/src/components/CourseCardOverlay.vue:129
 msgid "Quiz topic"
@@ -7004,7 +7255,8 @@ msgstr "Nombre d'utilisations"
 msgid "Reference DocName"
 msgstr "DocName de référence"
 
-#. Label of the reference_doctype (Link) field in DocType 'LMS Batch Timetable'
+#. Label of the reference_doctype (Link) field in DocType 'LMS Batch
+#. Timetable'
 #. Label of the reference_doctype (Select) field in DocType 'LMS Coupon Item'
 #. Label of the reference_doctype (Link) field in DocType 'LMS Timetable
 #. Legend'
@@ -7166,7 +7418,9 @@ msgstr "Ligne {0} : l'heure de fin doit rester dans la durée de la session."
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:109
 msgid "Row #{0} Start time cannot be greater than or equal to end time."
-msgstr "Ligne {0} : l'heure de début ne peut pas être postérieure ou égale à l'heure de fin."
+msgstr ""
+"Ligne {0} : l'heure de début ne peut pas être postérieure ou égale à l'heure"
+" de fin."
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:118
 msgid "Row #{0} Start time cannot be outside the batch duration."
@@ -7190,7 +7444,8 @@ msgstr "En cours d'exécution"
 msgid "Rust"
 msgstr "Rust"
 
-#. Label of the scorm_section (Section Break) field in DocType 'Course Chapter'
+#. Label of the scorm_section (Section Break) field in DocType 'Course
+#. Chapter'
 #: lms/lms/doctype/course_chapter/course_chapter.json
 msgid "SCORM"
 msgstr "SCORM"
@@ -7441,11 +7696,16 @@ msgstr "Inscription libre"
 
 #: frontend/src/pages/Courses/CoursePublishSettings.vue:86
 msgid "Sell an evaluator-graded certificate alongside this free course."
-msgstr "Vendre un certificat noté par un évaluateur à côté de ce cours gratuit."
+msgstr ""
+"Vendre un certificat noté par un évaluateur à côté de ce cours gratuit."
 
 #: frontend/src/pages/Courses/CoursePublishSettings.vue:180
-msgid "Selling a paid course or certificate needs the Payments app. Install it from the Frappe Marketplace, then turn on pricing here."
-msgstr "Vendre un cours ou un certificat payant demande l'application Paiements. Installez-la, puis activez la tarification ici."
+msgid ""
+"Selling a paid course or certificate needs the Payments app. Install it from"
+" the Frappe Marketplace, then turn on pricing here."
+msgstr ""
+"Vendre un cours ou un certificat payant demande l'application Paiements. "
+"Installez-la, puis activez la tarification ici."
 
 #: frontend/src/components/ContactUsEmail.vue:27
 #: frontend/src/pages/JobApplications.vue:126
@@ -7482,7 +7742,8 @@ msgstr "Notifier la publication d'un cours"
 msgid "Send Payment Reminders for Batch"
 msgstr "Envoyer des rappels de paiement pour la session"
 
-#. Label of the send_payment_reminders_for_course (Check) field in DocType 'LMS
+#. Label of the send_payment_reminders_for_course (Check) field in DocType
+#. 'LMS
 #. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
 msgid "Send Payment Reminders for Course"
@@ -7511,12 +7772,16 @@ msgid "Set Color"
 msgstr "Choisir une couleur"
 
 #: frontend/src/components/Settings/Coupons/CouponDetails.vue:5
-msgid "Set the discount, validity, and the courses or batches this coupon applies to."
-msgstr "Réglez la remise, la validité et les cours ou sessions concernés par ce bon."
+msgid ""
+"Set the discount, validity, and the courses or batches this coupon applies "
+"to."
+msgstr ""
+"Réglez la remise, la validité et les cours ou sessions concernés par ce bon."
 
 #: frontend/src/components/Settings/BrandSettings.vue:25
 msgid "Set the name of your brand. Appears in the left sidebar."
-msgstr "Définir le nom de votre marque. Apparaît dans la barre latérale gauche."
+msgstr ""
+"Définir le nom de votre marque. Apparaît dans la barre latérale gauche."
 
 #: lms/templates/emails/community_course_membership.html:1
 msgid "Set your Password"
@@ -7627,7 +7892,8 @@ msgstr "L'inscription est désactivée"
 msgid "Sign up"
 msgstr "S'inscrire"
 
-#. Label of the signup_settings_tab (Tab Break) field in DocType 'LMS Settings'
+#. Label of the signup_settings_tab (Tab Break) field in DocType 'LMS
+#. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
 msgid "Signup Settings"
 msgstr "Paramètres d'inscription"
@@ -7663,7 +7929,8 @@ msgid "Skip"
 msgstr "Sauter"
 
 #: frontend/src/components/Questionnaire.vue:147
-#: frontend/src/pages/PersonaForm.vue:39 frontend/src/pages/PersonaForm.vue:102
+#: frontend/src/pages/PersonaForm.vue:39
+#: frontend/src/pages/PersonaForm.vue:102
 msgid "Skip for now"
 msgstr "Passer pour l'instant"
 
@@ -7740,7 +8007,8 @@ msgstr "Commencer"
 #. Label of the start_time (Time) field in DocType 'Evaluator Schedule'
 #. Label of the start_time (Time) field in DocType 'LMS Batch'
 #. Label of the start_time (Time) field in DocType 'LMS Batch Timetable'
-#. Label of the start_time (Time) field in DocType 'LMS Certificate Evaluation'
+#. Label of the start_time (Time) field in DocType 'LMS Certificate
+#. Evaluation'
 #. Label of the start_time (Time) field in DocType 'LMS Certificate Request'
 #. Label of the start_time (Time) field in DocType 'Scheduled Flow'
 #: frontend/src/pages/Batches/components/NewBatchModal.vue:31
@@ -7860,8 +8128,11 @@ msgstr "Étudiants"
 
 #. Description of the 'Paid Batch' (Check) field in DocType 'LMS Batch'
 #: lms/lms/doctype/lms_batch/lms_batch.json
-msgid "Students will be enrolled in a paid batch once they complete the payment"
-msgstr "Les participants seront inscrits à une session payante une fois le paiement effectué"
+msgid ""
+"Students will be enrolled in a paid batch once they complete the payment"
+msgstr ""
+"Les participants seront inscrits à une session payante une fois le paiement "
+"effectué"
 
 #: frontend/src/components/ContactUsEmail.vue:7
 #: frontend/src/components/Modals/EmailTemplateModal.vue:28
@@ -7919,8 +8190,12 @@ msgid "Submit Feedback"
 msgstr "Soumettre un commentaire"
 
 #: frontend/src/components/Modals/JobApplicationModal.vue:21
-msgid "Submit your resume to proceed with your application for this position. Upon submission, it will be shared with the job poster."
-msgstr "Envoyez votre CV pour poursuivre votre candidature. Il sera transmis à l'auteur de l'offre."
+msgid ""
+"Submit your resume to proceed with your application for this position. Upon "
+"submission, it will be shared with the job poster."
+msgstr ""
+"Envoyez votre CV pour poursuivre votre candidature. Il sera transmis à "
+"l'auteur de l'offre."
 
 #: frontend/src/pages/Programs/ProgramEnrollment.vue:140
 msgid "Successfully enrolled in program"
@@ -8089,16 +8364,24 @@ msgid "Thanks and Regards"
 msgstr "Avec nos salutations"
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:313
-msgid "The Google Meet account does not have a Google Calendar configured. Please set up a Google Calendar first."
-msgstr "Ce compte Google Meet n'a pas d'agenda Google configuré. Configurez d'abord un agenda Google."
+msgid ""
+"The Google Meet account does not have a Google Calendar configured. Please "
+"set up a Google Calendar first."
+msgstr ""
+"Ce compte Google Meet n'a pas d'agenda Google configuré. Configurez d'abord "
+"un agenda Google."
 
 #: lms/lms/utils.py:2548
 msgid "The batch does not exist."
 msgstr "Cette session n'existe pas."
 
 #: lms/templates/emails/batch_start_reminder.html:6
-msgid "The batch you have enrolled for is starting tomorrow. Please be prepared and be on time for the session."
-msgstr "La session à laquelle vous êtes inscrit commence demain. Préparez-vous et soyez à l'heure."
+msgid ""
+"The batch you have enrolled for is starting tomorrow. Please be prepared and"
+" be on time for the session."
+msgstr ""
+"La session à laquelle vous êtes inscrit commence demain. Préparez-vous et "
+"soyez à l'heure."
 
 #: lms/lms/utils.py:2022
 msgid "The coupon code '{0}' is invalid."
@@ -8109,12 +8392,18 @@ msgid "The course {0} is now available on {1}."
 msgstr "Le cours {0} est maintenant disponible sur {1}."
 
 #: frontend/src/components/UpcomingEvaluations.vue:26
-msgid "The deadline to schedule evaluations has passed. Please contact the Instructor for assistance."
+msgid ""
+"The deadline to schedule evaluations has passed. Please contact the "
+"Instructor for assistance."
 msgstr "Le délai pour fixer une évaluation est passé. Contactez le formateur."
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:70
-msgid "The evaluator of this course is unavailable from {0} to {1}. Please select a date after {1}"
-msgstr "L'évaluateur de ce cours n'est pas disponible du {0} au {1}. Choisissez une date après le {1}"
+msgid ""
+"The evaluator of this course is unavailable from {0} to {1}. Please select a"
+" date after {1}"
+msgstr ""
+"L'évaluateur de ce cours n'est pas disponible du {0} au {1}. Choisissez une "
+"date après le {1}"
 
 #: lms/lms/doctype/lms_assignment_submission/lms_assignment_submission.py:82
 msgid "The instructor has left a comment on your assignment {0}"
@@ -8133,12 +8422,17 @@ msgid "The lesson does not exist."
 msgstr "Cette leçon n'existe pas."
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:149
-msgid "The selected Google Meet account does not have a Google Calendar configured."
+msgid ""
+"The selected Google Meet account does not have a Google Calendar configured."
 msgstr "Le compte Google Meet choisi n'a pas d'agenda Google configuré."
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:142
-msgid "The selected Google Meet account is disabled. Please enable it or select another account."
-msgstr "Le compte Google Meet choisi est désactivé. Activez-le ou choisissez-en un autre."
+msgid ""
+"The selected Google Meet account is disabled. Please enable it or select "
+"another account."
+msgstr ""
+"Le compte Google Meet choisi est désactivé. Activez-le ou choisissez-en un "
+"autre."
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:89
 msgid "The slot is already booked by another participant."
@@ -8153,12 +8447,16 @@ msgid "The status of your application has changed."
 msgstr "L'état de votre candidature a changé."
 
 #: frontend/src/components/CreateOutline.vue:12
-msgid "There are no chapters in this course. Create and manage chapters from here."
+msgid ""
+"There are no chapters in this course. Create and manage chapters from here."
 msgstr "Ce cours n'a aucun chapitre. Créez et gérez les chapitres ici."
 
 #: frontend/src/pages/Home/AdminHome.vue:178
-msgid "There are no courses currently. Create your first course to get started!"
-msgstr "Il n'y a aucun cours pour l'instant. Créez votre premier cours pour commencer !"
+msgid ""
+"There are no courses currently. Create your first course to get started!"
+msgstr ""
+"Il n'y a aucun cours pour l'instant. Créez votre premier cours pour "
+"commencer !"
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:100
 #: lms/lms/doctype/lms_batch_enrollment/lms_batch_enrollment.py:74
@@ -8170,26 +8468,36 @@ msgid "There are no submissions for this assignment."
 msgstr "Aucun rendu pour ce devoir."
 
 #: frontend/src/components/Layouts/EmptyStateLayout.vue:43
-msgid "There are no {0} currently. Keep an eye out, fresh learning experiences are on the way!"
-msgstr "Il n'y a aucun {0} pour l'instant. Restez à l'affût, de nouvelles formations arrivent !"
+msgid ""
+"There are no {0} currently. Keep an eye out, fresh learning experiences are "
+"on the way!"
+msgstr ""
+"Il n'y a aucun {0} pour l'instant. Restez à l'affût, de nouvelles formations"
+" arrivent !"
 
 #: lms/templates/course_list.html:14
 msgid "There are no {0} on this site."
 msgstr "Il n'y a aucun {0} sur ce site."
 
 #: lms/lms/doctype/lms_quiz_submission/lms_quiz_submission.py:59
-msgid "There has been an update on your submission. You have got a score of {0} for the quiz {1}"
+msgid ""
+"There has been an update on your submission. You have got a score of {0} for"
+" the quiz {1}"
 msgstr "Votre rendu a été mis à jour. Vous avez obtenu {0} au quiz {1}"
 
 #. Description of the 'section_break_ubxi' (Section Break) field in DocType
 #. 'LMS Batch'
 #: lms/lms/doctype/lms_batch/lms_batch.json
 msgid "These customisations will work on the main batch page."
-msgstr "Ces personnalisations s'appliquent à la page principale de la session."
+msgstr ""
+"Ces personnalisations s'appliquent à la page principale de la session."
 
 #: frontend/src/pages/Courses/CourseOverviewSection.vue:51
-msgid "These tags help search engines describe and rank your course in results."
-msgstr "Ces balises aident les moteurs de recherche à décrire et à classer votre cours."
+msgid ""
+"These tags help search engines describe and rank your course in results."
+msgstr ""
+"Ces balises aident les moteurs de recherche à décrire et à classer votre "
+"cours."
 
 #: frontend/src/pages/PersonaForm.vue:159
 msgid "Thinkific"
@@ -8237,13 +8545,18 @@ msgstr "Ce cours est gratuit."
 #. Description of the 'Meta Description' (Small Text) field in DocType 'LMS
 #. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
-msgid "This description will be shown on lists and pages without meta description"
-msgstr "Cette description apparaîtra sur les listes et les pages sans description de référencement"
+msgid ""
+"This description will be shown on lists and pages without meta description"
+msgstr ""
+"Cette description apparaîtra sur les listes et les pages sans description de"
+" référencement"
 
 #. Description of the 'Meta Image' (Attach Image) field in DocType 'LMS
 #. Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
-msgid "This image will be shown on lists and pages that don't have an image by default"
+msgid ""
+"This image will be shown on lists and pages that don't have an image by "
+"default"
 msgstr "Cette image apparaîtra sur les listes et les pages qui n'en ont pas"
 
 #: frontend/src/pages/Lesson.vue:31
@@ -8251,24 +8564,38 @@ msgid "This lesson is locked"
 msgstr "Cette leçon est verrouillée"
 
 #: frontend/src/pages/Lesson.vue:36
-msgid "This lesson is not available for preview. Please enroll in the course to access it."
-msgstr "Cette leçon n'est pas disponible en prévisualisation. Veuillez vous inscrire au cours pour y accéder."
+msgid ""
+"This lesson is not available for preview. Please enroll in the course to "
+"access it."
+msgstr ""
+"Cette leçon n'est pas disponible en prévisualisation. Veuillez vous inscrire"
+" au cours pour y accéder."
 
 #: lms/lms/widgets/NoPreviewModal.html:16
-msgid "This lesson is not available for preview. Please join the course to access it."
-msgstr "Cette leçon n'est pas disponible en prévisualisation. Veuillez vous inscrire au cours pour y accéder."
+msgid ""
+"This lesson is not available for preview. Please join the course to access "
+"it."
+msgstr ""
+"Cette leçon n'est pas disponible en prévisualisation. Veuillez vous inscrire"
+" au cours pour y accéder."
 
 #: frontend/src/components/Settings/EmailAccount/EmailAccountList.vue:103
 msgid "This permanently deletes the email account and cannot be undone."
-msgstr "Ceci supprime définitivement le compte de messagerie. L'action est irréversible."
+msgstr ""
+"Ceci supprime définitivement le compte de messagerie. L'action est "
+"irréversible."
 
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplateList.vue:85
 msgid "This permanently deletes the email template and cannot be undone."
-msgstr "Ceci supprime définitivement le modèle de courriel. L'action est irréversible."
+msgstr ""
+"Ceci supprime définitivement le modèle de courriel. L'action est "
+"irréversible."
 
 #: frontend/src/components/Settings/Members.vue:117
 msgid "This permanently deletes the user account and cannot be undone."
-msgstr "Ceci supprime définitivement le compte utilisateur. L'action est irréversible."
+msgstr ""
+"Ceci supprime définitivement le compte utilisateur. L'action est "
+"irréversible."
 
 #: frontend/src/pages/Programs/ProgramEnrollment.vue:13
 msgid "This program consists of {0} courses"
@@ -8284,8 +8611,12 @@ msgstr "Ce quiz n'a encore aucune question."
 
 #: frontend/src/components/Sidebar/AppSidebar.vue:91
 #: frontend/src/components/Sidebar/AppSidebar.vue:177
-msgid "This site is being updated. You will not be able to make any changes. Full access will be restored shortly."
-msgstr "Ce site est en cours de mise à jour. Vous ne pouvez rien modifier pour le moment. L'accès complet reviendra sous peu."
+msgid ""
+"This site is being updated. You will not be able to make any changes. Full "
+"access will be restored shortly."
+msgstr ""
+"Ce site est en cours de mise à jour. Vous ne pouvez rien modifier pour le "
+"moment. L'accès complet reviendra sous peu."
 
 #: lms/lms/api.py:1652
 msgid "This user cannot be deleted."
@@ -8296,12 +8627,19 @@ msgid "This video contains {0} {1}:"
 msgstr "Cette vidéo contient {0} {1} :"
 
 #: frontend/src/components/Controls/VideoPreviewField.vue:161
-msgid "This video's codec can't be played in browsers (e.g. HEVC/H.265). Please upload an H.264 MP4 or a WebM."
-msgstr "Le codec de cette vidéo ne se lit pas dans les navigateurs (p. ex. HEVC/H.265). Téléversez un MP4 H.264 ou un WebM."
+msgid ""
+"This video's codec can't be played in browsers (e.g. HEVC/H.265). Please "
+"upload an H.264 MP4 or a WebM."
+msgstr ""
+"Le codec de cette vidéo ne se lit pas dans les navigateurs (p. ex. "
+"HEVC/H.265). Téléversez un MP4 H.264 ou un WebM."
 
 #: frontend/src/components/Settings/Coupons/CouponList.vue:122
-msgid "This will permanently delete the coupon and the code will no longer be valid."
-msgstr "Ceci supprimera définitivement le bon et son code ne sera plus valable."
+msgid ""
+"This will permanently delete the coupon and the code will no longer be "
+"valid."
+msgstr ""
+"Ceci supprimera définitivement le bon et son code ne sera plus valable."
 
 #. Option for the 'Day' (Select) field in DocType 'Evaluator Schedule'
 #. Option for the 'Day' (Select) field in DocType 'LMS Certificate Request'
@@ -8466,8 +8804,12 @@ msgid "Today"
 msgstr "Aujourd'hui"
 
 #: lms/lms/user.py:43
-msgid "Too many users signed up recently, so the registration is disabled. Please try back in an hour"
-msgstr "Trop d'utilisateurs se sont inscrits récemment, du coup l’inscription est désactivée. Veuillez essayer à nouveau dans une heure"
+msgid ""
+"Too many users signed up recently, so the registration is disabled. Please "
+"try back in an hour"
+msgstr ""
+"Trop d'utilisateurs se sont inscrits récemment, du coup l’inscription est "
+"désactivée. Veuillez essayer à nouveau dans une heure"
 
 #: frontend/src/pages/Billing.vue:54
 msgid "Total"
@@ -8543,7 +8885,8 @@ msgstr "Identifiant Twitter"
 #. Label of the type (Select) field in DocType 'LMS Quiz Question'
 #: frontend/src/components/Modals/AssessmentModal.vue:20
 #: frontend/src/components/Modals/Question.vue:36
-#: frontend/src/pages/Assignments.vue:45 frontend/src/pages/Assignments.vue:279
+#: frontend/src/pages/Assignments.vue:45
+#: frontend/src/pages/Assignments.vue:279
 #: frontend/src/pages/Batches/components/Assessments.vue:212
 #: frontend/src/pages/JobForm.vue:32 frontend/src/pages/Jobs.vue:82
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue:58
@@ -8559,7 +8902,9 @@ msgstr "Type"
 
 #: frontend/src/utils/markdownParser.js:45
 msgid "Type '/' for commands or select text to format"
-msgstr "Tapez « / » pour les commandes, ou sélectionnez du texte pour le mettre en forme"
+msgstr ""
+"Tapez « / » pour les commandes, ou sélectionnez du texte pour le mettre en "
+"forme"
 
 #: frontend/src/pages/Courses/CourseDetailsSection.vue:70
 msgid "Type something"
@@ -8602,7 +8947,8 @@ msgstr "Impossible de mettre à jour le membre"
 msgid "Unattempted Questions"
 msgstr "Questions non traitées"
 
-#. Label of the unavailability_section (Section Break) field in DocType 'Course
+#. Label of the unavailability_section (Section Break) field in DocType
+#. 'Course
 #. Evaluator'
 #: lms/lms/doctype/course_evaluator/course_evaluator.json
 msgid "Unavailability"
@@ -8614,7 +8960,9 @@ msgstr "L'indisponibilité a bien été mise à jour"
 
 #: lms/lms/doctype/course_evaluator/course_evaluator.py:36
 msgid "Unavailable From Date cannot be greater than Unavailable To Date"
-msgstr "La date de début d'indisponibilité ne peut pas être postérieure à la date de fin"
+msgstr ""
+"La date de début d'indisponibilité ne peut pas être postérieure à la date de"
+" fin"
 
 #. Option for the 'Status' (Select) field in DocType 'LMS Course'
 #: lms/lms/doctype/lms_course/lms_course.json
@@ -8720,8 +9068,12 @@ msgid "Upload File"
 msgstr "Téléverser un fichier"
 
 #: frontend/src/pages/Courses/NewCourseModal.vue:189
-msgid "Upload a 750×422 image (.jpg, .jpeg, .gif, or .png) — shown on the catalog card and lesson hero."
-msgstr "Téléversez une image 750×422 (.jpg, .jpeg, .gif ou .png) — affichée sur la vignette du catalogue et en tête de leçon."
+msgid ""
+"Upload a 750×422 image (.jpg, .jpeg, .gif, or .png) — shown on the catalog "
+"card and lesson hero."
+msgstr ""
+"Téléversez une image 750×422 (.jpg, .jpeg, .gif ou .png) — affichée sur la "
+"vignette du catalogue et en tête de leçon."
 
 #: frontend/src/pages/Courses/CourseThumbnailField.vue:115
 msgid "Upload an image to replace the color."
@@ -8740,8 +9092,12 @@ msgid "Upload video"
 msgstr "Téléverser une vidéo"
 
 #: frontend/src/components/Controls/VideoPreviewField.vue:73
-msgid "Uploaded video — students see it on the course page. Remove it to use a YouTube link instead."
-msgstr "Vidéo téléversée — les participants la voient sur la page du cours. Retirez-la pour utiliser un lien YouTube à la place."
+msgid ""
+"Uploaded video — students see it on the course page. Remove it to use a "
+"YouTube link instead."
+msgstr ""
+"Vidéo téléversée — les participants la voient sur la page du cours. Retirez-"
+"la pour utiliser un lien YouTube à la place."
 
 #: frontend/src/components/Controls/Uploader.vue:39
 #: frontend/src/pages/Courses/CourseThumbnailField.vue:60
@@ -8868,8 +9224,12 @@ msgid "Video Statistics"
 msgstr "Statistiques de la vidéo"
 
 #: frontend/src/pages/Lesson.vue:902
-msgid "Video failed to load — this lesson will still be marked complete after you spend some time on it."
-msgstr "La vidéo n'a pas pu être chargée — la leçon sera tout de même marquée terminée après un certain temps passé dessus."
+msgid ""
+"Video failed to load — this lesson will still be marked complete after you "
+"spend some time on it."
+msgstr ""
+"La vidéo n'a pas pu être chargée — la leçon sera tout de même marquée "
+"terminée après un certain temps passé dessus."
 
 #: frontend/src/pages/JobDetail.vue:31
 msgid "View Applications"
@@ -8930,11 +9290,16 @@ msgid "Watch Time (mins)"
 msgstr "Temps de visionnage (min)"
 
 #: lms/templates/emails/batch_confirmation.html:6
-msgid "We are pleased to inform you that you have been enrolled in our upcoming batch. Congratulations!"
-msgstr "Nous avons le plaisir de vous annoncer votre inscription à notre prochaine session. Félicitations !"
+msgid ""
+"We are pleased to inform you that you have been enrolled in our upcoming "
+"batch. Congratulations!"
+msgstr ""
+"Nous avons le plaisir de vous annoncer votre inscription à notre prochaine "
+"session. Félicitations !"
 
 #: lms/templates/emails/payment_reminder.html:7
-msgid "We have a limited number of seats, and they won't be available for long!"
+msgid ""
+"We have a limited number of seats, and they won't be available for long!"
 msgstr "Les places sont limitées et partent vite !"
 
 #: lms/templates/emails/payment_reminder.html:4
@@ -8979,12 +9344,18 @@ msgid "When a course gets submitted for review, it will be listed here."
 msgstr "Les cours soumis à relecture apparaîtront ici."
 
 #: frontend/src/pages/LessonForm.vue:13
-msgid "When on, anyone can preview this lesson without enrolling. Otherwise it is visible only to enrolled students."
-msgstr "Activé, tout le monde peut consulter cette leçon sans s'inscrire. Sinon elle n'est visible que des participants inscrits."
+msgid ""
+"When on, anyone can preview this lesson without enrolling. Otherwise it is "
+"visible only to enrolled students."
+msgstr ""
+"Activé, tout le monde peut consulter cette leçon sans s'inscrire. Sinon elle"
+" n'est visible que des participants inscrits."
 
 #: lms/templates/emails/batch_start_reminder_recorded.html:11
 msgid "When you feel ready, you can schedule an evaluation to get certified."
-msgstr "Quand vous vous sentez prêt, fixez une évaluation pour obtenir la certification."
+msgstr ""
+"Quand vous vous sentez prêt, fixez une évaluation pour obtenir la "
+"certification."
 
 #: frontend/src/pages/Billing.vue:162
 msgid "Where did you hear about us?"
@@ -8995,8 +9366,16 @@ msgid "Where will you be using Frappe Learning?"
 msgstr "Où utiliserez-vous Neoffice ?"
 
 #: lms/templates/emails/certification.html:10
-msgid "With this certification, you can now showcase your updated skills and share your achievement with your colleagues and on LinkedIn. To access your certificate, please click on the link provided below. Make sure you are logged in to the portal."
-msgstr "Grâce à cette certification, vous pouvez désormais mettre en avant vos compétences et partager votre réussite avec vos collègues et sur LinkedIn. Pour accéder à votre certificat, cliquez sur le lien ci-dessous. Vérifiez que vous êtes bien connecté au portail."
+msgid ""
+"With this certification, you can now showcase your updated skills and share "
+"your achievement with your colleagues and on LinkedIn. To access your "
+"certificate, please click on the link provided below. Make sure you are "
+"logged in to the portal."
+msgstr ""
+"Grâce à cette certification, vous pouvez désormais mettre en avant vos "
+"compétences et partager votre réussite avec vos collègues et sur LinkedIn. "
+"Pour accéder à votre certificat, cliquez sur le lien ci-dessous. Vérifiez "
+"que vous êtes bien connecté au portail."
 
 #. Option for the 'Open to' (Select) field in DocType 'User'
 #: lms/fixtures/custom_field.json
@@ -9015,7 +9394,8 @@ msgstr "Environnement de travail"
 msgid "Work Experience"
 msgstr "Expérience professionnelle"
 
-#. Label of the work_experience_details (Section Break) field in DocType 'User'
+#. Label of the work_experience_details (Section Break) field in DocType
+#. 'User'
 #: lms/fixtures/custom_field.json
 msgid "Work Experience Details"
 msgstr "Détail de l'expérience professionnelle"
@@ -9047,8 +9427,12 @@ msgid "You already have an evaluation on {0} at {1} for the course {2}."
 msgstr "Vous avez déjà une évaluation le {0} à {1} pour le cours {2}."
 
 #: frontend/src/pages/Courses/CourseCertification.vue:14
-msgid "You are already certified for this course. Click on the card below to open your certificate."
-msgstr "Vous êtes déjà certifié pour ce cours. Cliquez sur la carte ci-dessous pour ouvrir votre certificat."
+msgid ""
+"You are already certified for this course. Click on the card below to open "
+"your certificate."
+msgstr ""
+"Vous êtes déjà certifié pour ce cours. Cliquez sur la carte ci-dessous pour "
+"ouvrir votre certificat."
 
 #: lms/lms/api.py:187
 msgid "You are already enrolled for this batch."
@@ -9060,11 +9444,13 @@ msgstr "Vous êtes déjà inscrit à ce cours."
 
 #: lms/lms/utils.py:1503
 msgid "You are not authorized to view the assessments of this batch."
-msgstr "Vous n'avez pas le droit de consulter les évaluations de cette session."
+msgstr ""
+"Vous n'avez pas le droit de consulter les évaluations de cette session."
 
 #: lms/lms/utils.py:1705
 msgid "You are not authorized to view the chart data of this batch."
-msgstr "Vous n'avez pas le droit de consulter les graphiques de cette session."
+msgstr ""
+"Vous n'avez pas le droit de consulter les graphiques de cette session."
 
 #: lms/lms/utils.py:2314
 msgid "You are not authorized to view the details of this program."
@@ -9076,11 +9462,14 @@ msgstr "Vous n'avez pas le droit de consulter les réponses de ce sujet."
 
 #: lms/lms/utils.py:1868
 msgid "You are not authorized to view the discussion topics for this item."
-msgstr "Vous n'avez pas le droit de consulter les sujets de discussion de cet élément."
+msgstr ""
+"Vous n'avez pas le droit de consulter les sujets de discussion de cet "
+"élément."
 
 #: lms/lms/utils.py:1614
 msgid "You are not authorized to view the students of this batch."
-msgstr "Vous n'avez pas le droit de consulter les participants de cette session."
+msgstr ""
+"Vous n'avez pas le droit de consulter les participants de cette session."
 
 #: lms/lms/utils.py:1454
 msgid "You are not authorized to view this quiz."
@@ -9091,8 +9480,11 @@ msgid "You are not enrolled in this course."
 msgstr "Vous n'êtes pas inscrit à ce cours."
 
 #: frontend/src/pages/SCORMChapter.vue:25
-msgid "You are not enrolled in this course. Please enroll to access this lesson."
-msgstr "Vous n'êtes pas inscrit à ce cours. Inscrivez-vous pour accéder à cette leçon."
+msgid ""
+"You are not enrolled in this course. Please enroll to access this lesson."
+msgstr ""
+"Vous n'êtes pas inscrit à ce cours. Inscrivez-vous pour accéder à cette "
+"leçon."
 
 #: frontend/src/components/NoPermission.vue:23
 msgid "You are not permitted to access this page."
@@ -9105,7 +9497,8 @@ msgstr "Vous n'êtes pas l'évaluateur désigné pour ce cours et cette session.
 #: lms/templates/emails/lms_course_interest.html:13
 #: lms/templates/emails/lms_invite_request_approved.html:11
 msgid "You can also copy-paste following link in your browser"
-msgstr "Vous pouvez également copier-coller le lien suivant dans votre navigateur"
+msgstr ""
+"Vous pouvez également copier-coller le lien suivant dans votre navigateur"
 
 #: frontend/src/components/Quiz.vue:58
 msgid "You can attempt this quiz {0}."
@@ -9133,7 +9526,9 @@ msgstr "Vous ne pouvez pas fixer une évaluation pour quelqu'un d'autre."
 
 #: frontend/src/pages/ProfileEvaluator.vue:14
 msgid "You cannot change the availability when the site is being updated."
-msgstr "Vous ne pouvez pas modifier les disponibilités pendant la mise à jour du site."
+msgstr ""
+"Vous ne pouvez pas modifier les disponibilités pendant la mise à jour du "
+"site."
 
 #: frontend/src/pages/ProfileRoles.vue:12
 msgid "You cannot change the roles in read-only mode."
@@ -9148,8 +9543,12 @@ msgid "You cannot enroll in an unpublished program."
 msgstr "Vous ne pouvez pas vous inscrire à un programme non publié."
 
 #: lms/lms/doctype/lms_enrollment/lms_enrollment.py:47
-msgid "You cannot enroll in this course as self-learning is disabled. Please contact the Administrator."
-msgstr "Vous ne pouvez pas vous inscrire à ce cours : l'inscription libre est désactivée. Contactez l'administrateur."
+msgid ""
+"You cannot enroll in this course as self-learning is disabled. Please "
+"contact the Administrator."
+msgstr ""
+"Vous ne pouvez pas vous inscrire à ce cours : l'inscription libre est "
+"désactivée. Contactez l'administrateur."
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:127
 msgid "You cannot schedule evaluations after {0}."
@@ -9177,11 +9576,13 @@ msgstr "Vous n'avez pas le droit d'accéder aux badges."
 
 #: lms/lms/api.py:1357
 msgid "You do not have permission to access heatmap data."
-msgstr "Vous n'avez pas le droit d'accéder aux données du calendrier d'activité."
+msgstr ""
+"Vous n'avez pas le droit d'accéder aux données du calendrier d'activité."
 
 #: lms/lms/api.py:2312
 msgid "You do not have permission to access lesson completion stats."
-msgstr "Vous n'avez pas le droit d'accéder aux statistiques d'achèvement des leçons."
+msgstr ""
+"Vous n'avez pas le droit d'accéder aux statistiques d'achèvement des leçons."
 
 #: lms/lms/api.py:2352
 msgid "You do not have permission to access this course's assessment data."
@@ -9240,12 +9641,18 @@ msgid "You do not have permission to modify this role."
 msgstr "Vous n'avez pas le droit de modifier ce rôle."
 
 #: lms/lms/doctype/lms_batch_enrollment/lms_batch_enrollment.py:119
-msgid "You do not have permission to send confirmation emails for this enrollment."
-msgstr "Vous n'avez pas le droit d'envoyer les courriels de confirmation de cette inscription."
+msgid ""
+"You do not have permission to send confirmation emails for this enrollment."
+msgstr ""
+"Vous n'avez pas le droit d'envoyer les courriels de confirmation de cette "
+"inscription."
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:196
-msgid "You do not have permission to set up calendar events for this evaluation."
-msgstr "Vous n'avez pas le droit de créer les rendez-vous d'agenda de cette évaluation."
+msgid ""
+"You do not have permission to set up calendar events for this evaluation."
+msgstr ""
+"Vous n'avez pas le droit de créer les rendez-vous d'agenda de cette "
+"évaluation."
 
 #: lms/lms/api.py:1758 lms/lms/api.py:1762
 msgid "You do not have permission to update meta tags."
@@ -9265,15 +9672,20 @@ msgid "You got {0}% correct answers with a score of {1} out of {2}"
 msgstr "Vous avez {0} % de bonnes réponses, avec un score de {1} sur {2}"
 
 #: lms/templates/emails/live_class_reminder.html:6
-msgid "You have a live class scheduled tomorrow. Please be prepared and be on time for the session."
-msgstr "Vous avez un cours en direct demain. Préparez-vous et soyez à l'heure."
+msgid ""
+"You have a live class scheduled tomorrow. Please be prepared and be on time "
+"for the session."
+msgstr ""
+"Vous avez un cours en direct demain. Préparez-vous et soyez à l'heure."
 
 #: lms/job/doctype/lms_job_application/lms_job_application.py:26
 msgid "You have already applied for this job."
 msgstr "Vous avez déjà postulé à cette offre."
 
 #: frontend/src/components/Quiz.vue:119
-msgid "You have already exceeded the maximum number of attempts allowed for this quiz."
+msgid ""
+"You have already exceeded the maximum number of attempts allowed for this "
+"quiz."
 msgstr "Vous avez déjà dépassé le nombre maximum de tentatives pour ce quiz."
 
 #: lms/lms/api.py:211
@@ -9313,8 +9725,12 @@ msgid "You have not received any certificates yet."
 msgstr "Vous n'avez encore reçu aucun certificat."
 
 #: lms/lms/widgets/NoPreviewModal.html:12
-msgid "You have opted to be notified for this course. You will receive an email when the course becomes available."
-msgstr "Vous avez choisi d'être notifié pour ce cours. Vous recevrez un courriel lorsque le cours sera disponible."
+msgid ""
+"You have opted to be notified for this course. You will receive an email "
+"when the course becomes available."
+msgstr ""
+"Vous avez choisi d'être notifié pour ce cours. Vous recevrez un courriel "
+"lorsque le cours sera disponible."
 
 #: frontend/src/pages/Home/Home.vue:126 frontend/src/pages/Home/Home.vue:149
 msgid "You have {0} upcoming {1} and {2} {3} scheduled."
@@ -9330,7 +9746,9 @@ msgstr "Vous avez {0} {1} programmés."
 
 #: lms/lms/doctype/lms_batch_enrollment/lms_batch_enrollment.py:31
 msgid "You must be a Moderator or Batch Evaluator to enroll users in a batch."
-msgstr "Vous devez être modérateur ou évaluateur de session pour inscrire des utilisateurs."
+msgstr ""
+"Vous devez être modérateur ou évaluateur de session pour inscrire des "
+"utilisateurs."
 
 #: lms/lms/doctype/lms_badge_assignment/lms_badge_assignment.py:23
 msgid "You must be an Admin to assign badges to users."
@@ -9366,16 +9784,23 @@ msgid "You're all caught up! Check back later for updates."
 msgstr "Vous êtes à jour ! Revenez plus tard pour du nouveau."
 
 #: lms/templates/emails/batch_start_reminder_recorded.html:6
-msgid "You're enrolled and all set! The course content is ready, so you can start learning right away and go at your own pace."
-msgstr "Vous êtes inscrit, tout est prêt ! Le contenu du cours est disponible : commencez quand vous voulez, à votre rythme."
+msgid ""
+"You're enrolled and all set! The course content is ready, so you can start "
+"learning right away and go at your own pace."
+msgstr ""
+"Vous êtes inscrit, tout est prêt ! Le contenu du cours est disponible : "
+"commencez quand vous voulez, à votre rythme."
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:475
 msgid "You're enrolled in {0} – start whenever you're ready"
 msgstr "Vous êtes inscrit à {0} — commencez quand vous voulez"
 
 #: lms/templates/emails/mentor_request_creation_email.html:4
-msgid "You've applied to become a mentor for this course. Your request is currently under review."
-msgstr "Vous avez demandé à encadrer ce cours. Votre demande est en cours d'examen."
+msgid ""
+"You've applied to become a mentor for this course. Your request is currently"
+" under review."
+msgstr ""
+"Vous avez demandé à encadrer ce cours. Votre demande est en cours d'examen."
 
 #: frontend/src/components/Assignment.vue:64
 msgid "You've successfully submitted the assignment."
@@ -9393,8 +9818,12 @@ msgid "YouTube Video will appear at the top of the lesson."
 msgstr "La vidéo YouTube apparaîtra en haut de la leçon."
 
 #: frontend/src/components/Controls/VideoPreviewField.vue:104
-msgid "YouTube link added — students see it embedded on the course page. Clear the field to upload a file instead."
-msgstr "Lien YouTube ajouté — les participants le voient intégré sur la page du cours. Videz le champ pour téléverser un fichier à la place."
+msgid ""
+"YouTube link added — students see it embedded on the course page. Clear the "
+"field to upload a file instead."
+msgstr ""
+"Lien YouTube ajouté — les participants le voient intégré sur la page du "
+"cours. Videz le champ pour téléverser un fichier à la place."
 
 #: lms/www/new-sign-up.html:56
 msgid "Your Account has been successfully created!"
@@ -9427,11 +9856,15 @@ msgid "Your enrollment in {{ batch_name }} is confirmed"
 msgstr "Votre inscription à {{ batch_name }} est confirmée"
 
 #: lms/templates/emails/certificate_request_notification.html:3
-msgid "Your evaluation for the course {0} has been scheduled on {1} at {2} ({3} time)."
-msgstr "Votre évaluation pour le cours {0} est fixée au {1} à {2} (heure de {3})."
+msgid ""
+"Your evaluation for the course {0} has been scheduled on {1} at {2} ({3} "
+"time)."
+msgstr ""
+"Votre évaluation pour le cours {0} est fixée au {1} à {2} (heure de {3})."
 
 #: lms/lms/notification/certificate_request_reminder/certificate_request_reminder.html:3
-msgid "Your evaluation for the course {0} has been scheduled on {1} at {2} {3}."
+msgid ""
+"Your evaluation for the course {0} has been scheduled on {1} at {2} {3}."
 msgstr "Votre évaluation pour le cours {0} a été programmée le {1} à {2} {3}."
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:142
@@ -9443,22 +9876,33 @@ msgid "Your evaluator is {0}"
 msgstr "Votre évaluateur est {0}"
 
 #: frontend/src/pages/Home/Streak.vue:49
-msgid "Your learning streak counts the number of days in a row you’ve kept up your learning, whether it’s a lesson, quiz, or assignment. Don’t worry, weekends don’t break your streak."
-msgstr "Votre série compte les jours d'affilée où vous avez appris quelque chose — une leçon, un quiz ou un devoir. Rassurez-vous : les week-ends ne cassent pas la série."
+msgid ""
+"Your learning streak counts the number of days in a row you’ve kept up your "
+"learning, whether it’s a lesson, quiz, or assignment. Don’t worry, weekends "
+"don’t break your streak."
+msgstr ""
+"Votre série compte les jours d'affilée où vous avez appris quelque chose — "
+"une leçon, un quiz ou un devoir. Rassurez-vous : les week-ends ne cassent "
+"pas la série."
 
 #: lms/templates/emails/mentor_request_status_update_email.html:4
 msgid "Your request to join us as a mentor for the course"
 msgstr "Votre demande pour encadrer le cours"
 
 #: frontend/src/components/Quiz.vue:360
-msgid "Your submission has been successfully saved. The instructor will review and grade it shortly, and you'll be notified of your final result."
-msgstr "Votre rendu a bien été enregistré. Le formateur le relira et le notera sous peu, et vous serez averti du résultat."
+msgid ""
+"Your submission has been successfully saved. The instructor will review and "
+"grade it shortly, and you'll be notified of your final result."
+msgstr ""
+"Votre rendu a bien été enregistré. Le formateur le relira et le notera sous "
+"peu, et vous serez averti du résultat."
 
 #: frontend/src/pages/Lesson.vue:9 frontend/src/pages/Lesson.vue:128
 msgid "Zen Mode"
 msgstr "Mode concentration"
 
-#. Option for the 'Conferencing Provider' (Select) field in DocType 'LMS Batch'
+#. Option for the 'Conferencing Provider' (Select) field in DocType 'LMS
+#. Batch'
 #. Option for the 'Conferencing Provider' (Select) field in DocType 'LMS Live
 #. Class'
 #: frontend/src/pages/Batches/BatchForm.vue:594
@@ -9942,20 +10386,34 @@ msgid "Yoga"
 msgstr "Yoga"
 
 #: lms/www/nos-formations.html
-msgid "Illustrated guides, filmed sessions and progressive programmes. Start with the free courses — no account needed to read them — and go further when you feel like it."
-msgstr "Des guides illustrés, des séances filmées et des programmes progressifs. Commencez par les cours gratuits — aucun compte n'est demandé pour les lire — et allez plus loin quand vous en avez envie."
+msgid ""
+"Illustrated guides, filmed sessions and progressive programmes. Start with "
+"the free courses — no account needed to read them — and go further when you "
+"feel like it."
+msgstr ""
+"Des guides illustrés, des séances filmées et des programmes progressifs. "
+"Commencez par les cours gratuits — aucun compte n'est demandé pour les lire "
+"— et allez plus loin quand vous en avez envie."
 
 #: lms/www/nos-formations.html
-msgid "Readable straight away, with nothing to pay and nothing to sign up for."
+msgid ""
+"Readable straight away, with nothing to pay and nothing to sign up for."
 msgstr "Lisibles tout de suite, sans rien payer et sans s'inscrire."
 
 #: lms/www/nos-formations.html
-msgid "Filmed sessions, reserved for members. Buy once, access for the stated period."
-msgstr "Des séances filmées, réservées aux inscrits. Un achat, un accès pour la durée indiquée."
+msgid ""
+"Filmed sessions, reserved for members. Buy once, access for the stated "
+"period."
+msgstr ""
+"Des séances filmées, réservées aux inscrits. Un achat, un accès pour la "
+"durée indiquée."
 
 #: lms/www/nos-formations.html
-msgid "Every programme opens with a free lesson, so you can try before you buy."
-msgstr "Chaque programme s'ouvre sur une leçon offerte, pour essayer avant d'acheter."
+msgid ""
+"Every programme opens with a free lesson, so you can try before you buy."
+msgstr ""
+"Chaque programme s'ouvre sur une leçon offerte, pour essayer avant "
+"d'acheter."
 
 #: lms/www/nos-formations.html
 msgid "Browse the whole catalogue"
@@ -9982,8 +10440,14 @@ msgid "One item, one offer"
 msgstr "Un article, une offre"
 
 #: lms/lms/neoffice_commerce.py
-msgid "{0} is already bookable ({1}), so it cannot also sell a course: an item carries one price, and a class and a filmed programme are rarely worth the same. Create a second item for the course."
-msgstr "{0} est déjà réservable ({1}) : il ne peut donc pas vendre un cours en plus. Un article porte un seul prix, et une séance et un programme filmé ne valent presque jamais la même chose. Créez un second article pour le cours."
+msgid ""
+"{0} is already bookable ({1}), so it cannot also sell a course: an item "
+"carries one price, and a class and a filmed programme are rarely worth the "
+"same. Create a second item for the course."
+msgstr ""
+"{0} est déjà réservable ({1}) : il ne peut donc pas vendre un cours en plus."
+" Un article porte un seul prix, et une séance et un programme filmé ne "
+"valent presque jamais la même chose. Créez un second article pour le cours."
 
 #: lms/www/nos_formations.py
 msgid "from {0}"
@@ -9994,20 +10458,30 @@ msgid "Paid, and unbuyable"
 msgstr "Payant, et inachetable"
 
 #: lms/lms/neoffice_commerce.py
-msgid "This course is marked as paid but no article sells it: nobody can buy it. Set the article and its offers in the « Selling » section, or uncheck « Paid course » to open it."
-msgstr "Ce cours est marqué payant, mais aucun article ne le vend : personne ne peut l'acheter. Renseignez l'article et ses offres dans la section « Vente », ou décochez « Cours payant » pour l'ouvrir."
+msgid ""
+"This course is marked as paid but no article sells it: nobody can buy it. "
+"Set the article and its offers in the « Selling » section, or uncheck « Paid"
+" course » to open it."
+msgstr ""
+"Ce cours est marqué payant, mais aucun article ne le vend : personne ne peut"
+" l'acheter. Renseignez l'article et ses offres dans la section « Vente », ou"
+" décochez « Cours payant » pour l'ouvrir."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Selling"
 msgstr "Vente"
 
 #: lms/lms/neoffice_commerce.py
-msgid "The article that sells this course. Its shop page is where it is bought."
-msgstr "L'article qui vend ce cours. C'est sa fiche boutique qui sert à l'acheter."
+msgid ""
+"The article that sells this course. Its shop page is where it is bought."
+msgstr ""
+"L'article qui vend ce cours. C'est sa fiche boutique qui sert à l'acheter."
 
 #: lms/lms/neoffice_commerce.py
-msgid "One line per access duration. Left empty, the article's own price applies."
-msgstr "Une ligne par durée d'accès. Laissée vide, le prix de l'article s'applique."
+msgid ""
+"One line per access duration. Left empty, the article's own price applies."
+msgstr ""
+"Une ligne par durée d'accès. Laissée vide, le prix de l'article s'applique."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Offers"
@@ -10038,8 +10512,12 @@ msgid "Show the courses on the website"
 msgstr "Montrer les formations sur le site"
 
 #: lms/www/nos-formations.html
-msgid "Adds « Our courses » to the site menu and opens /nos-formations. Off, the page and the menu entry disappear."
-msgstr "Ajoute « Nos formations » au menu du site et ouvre /nos-formations. Décochée, la page et l'entrée de menu disparaissent."
+msgid ""
+"Adds « Our courses » to the site menu and opens /nos-formations. Off, the "
+"page and the menu entry disappear."
+msgstr ""
+"Ajoute « Nos formations » au menu du site et ouvre /nos-formations. "
+"Décochée, la page et l'entrée de menu disparaissent."
 
 #: lms/www/nos-formations.html
 msgid "No course in this category yet."
@@ -10054,16 +10532,33 @@ msgid "Two checkouts for the same course"
 msgstr "Deux façons de payer le même cours"
 
 #: lms/lms/neoffice_commerce.py
-msgid "A payment gateway here opens the course module's OWN checkout, which knows nothing about the cart, TWINT, the card terminal or invoicing. In Neoffice a course is sold as an article — see the « Selling » section of the course. Leave this empty unless you really want two ways to buy the same course."
-msgstr "Une passerelle ici ouvre l'encaissement propre au module de formation, qui ignore le panier, TWINT, le terminal de carte et la facturation. Dans Neoffice, un cours se vend en article — voir la section « Vente » du cours. Laissez ce champ vide, sauf à vouloir vraiment deux façons d'acheter le même cours."
+msgid ""
+"A payment gateway here opens the course module's OWN checkout, which knows "
+"nothing about the cart, TWINT, the card terminal or invoicing. In Neoffice a"
+" course is sold as an article — see the « Selling » section of the course. "
+"Leave this empty unless you really want two ways to buy the same course."
+msgstr ""
+"Une passerelle ici ouvre l'encaissement propre au module de formation, qui "
+"ignore le panier, TWINT, le terminal de carte et la facturation. Dans "
+"Neoffice, un cours se vend en article — voir la section « Vente » du cours. "
+"Laissez ce champ vide, sauf à vouloir vraiment deux façons d'acheter le même"
+" cours."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Videos (Infomaniak VOD)"
 msgstr "Vidéos (Infomaniak VOD)"
 
 #: lms/lms/neoffice_commerce.py
-msgid "Where the lesson videos are hosted. Leave empty to keep whatever is in the site configuration — filling these takes over. The three values come from the Infomaniak manager: Streaming / VOD gives the channel and the account, and the API tokens of your profile give the key."
-msgstr "Où sont hébergées les vidéos des leçons. Laissez vide pour garder ce que contient la configuration du site — remplir ici prend le dessus. Les trois valeurs viennent du manager Infomaniak : Streaming / VOD donne le canal et le compte, les jetons d'API de votre profil donnent la clé."
+msgid ""
+"Where the lesson videos are hosted. Leave empty to keep whatever is in the "
+"site configuration — filling these takes over. The three values come from "
+"the Infomaniak manager: Streaming / VOD gives the channel and the account, "
+"and the API tokens of your profile give the key."
+msgstr ""
+"Où sont hébergées les vidéos des leçons. Laissez vide pour garder ce que "
+"contient la configuration du site — remplir ici prend le dessus. Les trois "
+"valeurs viennent du manager Infomaniak : Streaming / VOD donne le canal et "
+"le compte, les jetons d'API de votre profil donnent la clé."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Infomaniak video channel"
@@ -10071,39 +10566,68 @@ msgstr "Canal vidéo Infomaniak"
 
 #: lms/lms/neoffice_commerce.py
 msgid "The channel number of the VOD space, from the Infomaniak manager."
-msgstr "Le numéro du canal de l'espace VOD, tel qu'il apparaît dans le manager Infomaniak."
+msgstr ""
+"Le numéro du canal de l'espace VOD, tel qu'il apparaît dans le manager "
+"Infomaniak."
 
 #: lms/lms/neoffice_commerce.py
-msgid "Every call carries it; without it the API answers a bare « access denied »."
-msgstr "Chaque appel le porte ; sans lui, l'API répond « accès refusé » sans autre explication."
+msgid ""
+"Every call carries it; without it the API answers a bare « access denied »."
+msgstr ""
+"Chaque appel le porte ; sans lui, l'API répond « accès refusé » sans autre "
+"explication."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Infomaniak API key"
 msgstr "Clé d'API Infomaniak"
 
 #: lms/lms/neoffice_commerce.py
-msgid "An Infomaniak token carrying the VOD scope. It never leaves the server — the player receives a link signed for five minutes, never the key."
-msgstr "Un jeton Infomaniak portant la portée VOD. Il ne quitte jamais le serveur — le lecteur reçoit un lien signé pour cinq minutes, jamais la clé."
+msgid ""
+"An Infomaniak token carrying the VOD scope. It never leaves the server — the"
+" player receives a link signed for five minutes, never the key."
+msgstr ""
+"Un jeton Infomaniak portant la portée VOD. Il ne quitte jamais le serveur — "
+"le lecteur reçoit un lien signé pour cinq minutes, jamais la clé."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Sell the courses through the shop"
 msgstr "Vendre les formations par la boutique"
 
 #: lms/lms/neoffice_commerce.py
-msgid "On, a course is bought like any other article — cart, VAT, TWINT, card terminal, invoice — and everything below is left aside. Off, the course module takes the money itself through its own gateway, and none of that applies."
-msgstr "Coché, une formation s'achète comme n'importe quel article — panier, TVA, TWINT, terminal de paiement, facture — et tout ce qui suit reste de côté. Décoché, le module de formation encaisse lui-même par sa propre passerelle, et rien de tout cela ne s'applique."
+msgid ""
+"On, a course is bought like any other article — cart, VAT, TWINT, card "
+"terminal, invoice — and everything below is left aside. Off, the course "
+"module takes the money itself through its own gateway, and none of that "
+"applies."
+msgstr ""
+"Coché, une formation s'achète comme n'importe quel article — panier, TVA, "
+"TWINT, terminal de paiement, facture — et tout ce qui suit reste de côté. "
+"Décoché, le module de formation encaisse lui-même par sa propre passerelle, "
+"et rien de tout cela ne s'applique."
 
 #: lms/lms/neoffice_commerce.py
-msgid "Labels the prices shown in the course catalogue. The actual billing currency is the company's, decided by the shop."
-msgstr "Libelle les prix affichés dans le catalogue des formations. La devise réellement facturée est celle de la société, décidée par la boutique."
+msgid ""
+"Labels the prices shown in the course catalogue. The actual billing currency"
+" is the company's, decided by the shop."
+msgstr ""
+"Libelle les prix affichés dans le catalogue des formations. La devise "
+"réellement facturée est celle de la société, décidée par la boutique."
 
 #: lms/lms/neoffice_video.py
-msgid "Video hosting is not configured. Fill Channel, Account and Access token under Learning › Settings › Videos."
-msgstr "L'hébergement des vidéos n'est pas configuré. Renseignez le canal, le compte et le jeton d'accès sous Formations › Paramètres › Vidéos."
+msgid ""
+"Video hosting is not configured. Fill Channel, Account and Access token "
+"under Learning › Settings › Videos."
+msgstr ""
+"L'hébergement des vidéos n'est pas configuré. Renseignez le canal, le compte"
+" et le jeton d'accès sous Formations › Paramètres › Vidéos."
 
 #: lms/lms/neoffice_video.py
-msgid "Infomaniak refused the call — the channel, the account or the token is wrong. Their exact answer is in the Error Log."
-msgstr "Infomaniak a refusé l'appel — le canal, le compte ou le jeton est faux. Leur réponse exacte est dans le journal des erreurs."
+msgid ""
+"Infomaniak refused the call — the channel, the account or the token is "
+"wrong. Their exact answer is in the Error Log."
+msgstr ""
+"Infomaniak a refusé l'appel — le canal, le compte ou le jeton est faux. Leur"
+" réponse exacte est dans le journal des erreurs."
 
 #: lms/public/js/neoffice_lms_settings.js
 msgid "Test the video connection"
@@ -10126,8 +10650,10 @@ msgid "No answer"
 msgstr "Pas de réponse"
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "Connected to « {0} » — channel {1}, account {2}, {3} media in the space."
-msgstr "Connecté à « {0} » — canal {1}, compte {2}, {3} média(s) dans l'espace."
+msgid ""
+"Connected to « {0} » — channel {1}, account {2}, {3} media in the space."
+msgstr ""
+"Connecté à « {0} » — canal {1}, compte {2}, {3} média(s) dans l'espace."
 
 #: lms/lms/neoffice_commerce.py
 msgid "Infomaniak account number"
@@ -10138,16 +10664,37 @@ msgid "Open the Infomaniak manager"
 msgstr "Ouvrir le manager Infomaniak"
 
 #: lms/lms/neoffice_commerce.py
-msgid "Closes account creation for the WHOLE website — saving copies this switch into Website Settings, so the shop and the customer portal stop accepting new accounts too, not only the courses."
-msgstr "Ferme la création de compte pour TOUT le site — l'enregistrement recopie cet interrupteur dans les paramètres du site web, donc la boutique et le portail client cessent eux aussi d'accepter de nouveaux comptes, pas seulement les formations."
+msgid ""
+"Closes account creation for the WHOLE website — saving copies this switch "
+"into Website Settings, so the shop and the customer portal stop accepting "
+"new accounts too, not only the courses."
+msgstr ""
+"Ferme la création de compte pour TOUT le site — l'enregistrement recopie cet"
+" interrupteur dans les paramètres du site web, donc la boutique et le "
+"portail client cessent eux aussi d'accepter de nouveaux comptes, pas "
+"seulement les formations."
 
 #: lms/lms/neoffice_commerce.py
-msgid "Adds a category question to the sign-up form. Careful: filling this — or the content beside it — makes the course module's form REPLACE the site's standard sign-up form, for every visitor."
-msgstr "Ajoute une question de catégorie au formulaire d'inscription. Attention : la cocher — ou remplir le contenu à côté — fait REMPLACER le formulaire d'inscription du site par celui du module de formation, pour tous les visiteurs."
+msgid ""
+"Adds a category question to the sign-up form. Careful: filling this — or the"
+" content beside it — makes the course module's form REPLACE the site's "
+"standard sign-up form, for every visitor."
+msgstr ""
+"Ajoute une question de catégorie au formulaire d'inscription. Attention : la"
+" cocher — ou remplir le contenu à côté — fait REMPLACER le formulaire "
+"d'inscription du site par celui du module de formation, pour tous les "
+"visiteurs."
 
 #: lms/lms/neoffice_commerce.py
-msgid "Shown on the sign-up form. As soon as it holds anything, the course module's form replaces the site's standard one, for every visitor. Leave it empty when accounts are created by the shop or by the ERP."
-msgstr "Affiché sur le formulaire d'inscription. Dès qu'il contient quelque chose, le formulaire du module de formation remplace celui du site, pour tous les visiteurs. Laissez-le vide quand les comptes sont créés par la boutique ou par l'ERP."
+msgid ""
+"Shown on the sign-up form. As soon as it holds anything, the course module's"
+" form replaces the site's standard one, for every visitor. Leave it empty "
+"when accounts are created by the shop or by the ERP."
+msgstr ""
+"Affiché sur le formulaire d'inscription. Dès qu'il contient quelque chose, "
+"le formulaire du module de formation remplace celui du site, pour tous les "
+"visiteurs. Laissez-le vide quand les comptes sont créés par la boutique ou "
+"par l'ERP."
 
 #: lms/lms/workspace/training
 msgid "Enrollment"
@@ -10171,7 +10718,9 @@ msgstr "Aucune vidéo"
 
 #: lms/public/js/neoffice_lms_settings.js
 msgid "The space holds no video yet. Upload them in the Infomaniak manager."
-msgstr "L'espace ne contient encore aucune vidéo. Déposez-les dans le manager Infomaniak."
+msgstr ""
+"L'espace ne contient encore aucune vidéo. Déposez-les dans le manager "
+"Infomaniak."
 
 #: lms/public/js/neoffice_lms_settings.js
 msgid "still encoding"
@@ -10195,11 +10744,14 @@ msgstr "Chargement des vidéos…"
 
 #: frontend/src/utils/secureVideoBlock.js
 msgid "No video in the space yet. Upload them in the Infomaniak manager."
-msgstr "Aucune vidéo dans l'espace pour l'instant. Déposez-les dans le manager Infomaniak."
+msgstr ""
+"Aucune vidéo dans l'espace pour l'instant. Déposez-les dans le manager "
+"Infomaniak."
 
 #: frontend/src/utils/secureVideoBlock.js
 msgid "The video space did not answer. Check Learning › Settings › Videos."
-msgstr "L'espace vidéo n'a pas répondu. Vérifiez Formations › Paramètres › Vidéos."
+msgstr ""
+"L'espace vidéo n'a pas répondu. Vérifiez Formations › Paramètres › Vidéos."
 
 #: lms/public/js/neoffice_lms_settings.js
 msgid "Upload a video"
@@ -10210,8 +10762,12 @@ msgid "Video file"
 msgstr "Fichier vidéo"
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "The file goes to your Infomaniak space, and is removed from this server afterwards."
-msgstr "Le fichier part vers votre espace Infomaniak, puis il est retiré de ce serveur."
+msgid ""
+"The file goes to your Infomaniak space, and is removed from this server "
+"afterwards."
+msgstr ""
+"Le fichier part vers votre espace Infomaniak, puis il est retiré de ce "
+"serveur."
 
 #: lms/public/js/neoffice_lms_settings.js
 msgid "Folder"
@@ -10226,8 +10782,12 @@ msgid "public"
 msgstr "public"
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "A protected folder makes the video unplayable without a signed link — that is where course videos belong. A public folder is for free teasers."
-msgstr "Un dossier protégé rend la vidéo injouable sans lien signé — c'est là que vont les vidéos de cours. Un dossier public sert aux extraits gratuits."
+msgid ""
+"A protected folder makes the video unplayable without a signed link — that "
+"is where course videos belong. A public folder is for free teasers."
+msgstr ""
+"Un dossier protégé rend la vidéo injouable sans lien signé — c'est là que "
+"vont les vidéos de cours. Un dossier public sert aux extraits gratuits."
 
 #: lms/public/js/neoffice_lms_settings.js
 msgid "Send to Infomaniak"
@@ -10250,16 +10810,29 @@ msgid "The upload failed."
 msgstr "Le téléversement a échoué."
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "This file is {0}. The server refuses uploads over {1} — ask your administrator to raise the limit, or upload it in the Infomaniak manager."
-msgstr "Ce fichier pèse {0}. Le serveur refuse les dépôts au-delà de {1} — demandez à votre administrateur de relever la limite, ou déposez-le dans le manager Infomaniak."
+msgid ""
+"This file is {0}. The server refuses uploads over {1} — ask your "
+"administrator to raise the limit, or upload it in the Infomaniak manager."
+msgstr ""
+"Ce fichier pèse {0}. Le serveur refuse les dépôts au-delà de {1} — demandez "
+"à votre administrateur de relever la limite, ou déposez-le dans le manager "
+"Infomaniak."
 
 #: lms/public/js/neoffice_lms_settings.js
-msgid "{0} of {1} uploads used on the « {2} » plan ({3} videos in the space). A deleted video does not give its slot back."
-msgstr "{0} dépôts sur {1} utilisés avec le forfait « {2} » ({3} vidéos dans l'espace). Supprimer une vidéo ne rend pas sa place."
+msgid ""
+"{0} of {1} uploads used on the « {2} » plan ({3} videos in the space). A "
+"deleted video does not give its slot back."
+msgstr ""
+"{0} dépôts sur {1} utilisés avec le forfait « {2} » ({3} vidéos dans "
+"l'espace). Supprimer une vidéo ne rend pas sa place."
 
 #: lms/lms/neoffice_video.py
-msgid "This plan allows {0} uploads in all, and {1} have been used. Deleting a video does not give its slot back — the plan has to be raised."
-msgstr "Ce forfait autorise {0} dépôts en tout, et {1} ont été utilisés. Supprimer une vidéo ne rend pas sa place — il faut relever le forfait."
+msgid ""
+"This plan allows {0} uploads in all, and {1} have been used. Deleting a "
+"video does not give its slot back — the plan has to be raised."
+msgstr ""
+"Ce forfait autorise {0} dépôts en tout, et {1} ont été utilisés. Supprimer "
+"une vidéo ne rend pas sa place — il faut relever le forfait."
 
 #: lms/lms/neoffice_video.py
 msgid "File not found."
