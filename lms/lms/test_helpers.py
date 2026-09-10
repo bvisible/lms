@@ -1,4 +1,5 @@
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe.tests import UnitTestCase
@@ -6,6 +7,39 @@ from frappe.utils import add_days, nowdate
 
 from lms.lms.doctype.lms_certificate.lms_certificate import get_default_certificate_template
 from lms.lms.doctype.lms_quiz.lms_quiz import submit_quiz
+
+
+@contextmanager
+def guards_enforced():
+	"""Make `frappe.only_for` refuse inside this block, on any frappe.
+
+	Upstream v15 short-circuits the guard in test mode:
+
+	    def only_for(roles, message=False):
+	        if local.flags.in_test or local.session.user == "Administrator":
+	            return
+
+	so `assertRaises(PermissionError)` around an `only_for`-protected call proves
+	nothing there -- it passes because the guard never ran. Upstream `develop`
+	dropped that short-circuit and our fork follows it, which is why these tests
+	are meaningful on our bench and vacuous on upstream's
+	(neoffice-maintenance#260).
+
+	A test that means to prove a refusal should not depend on which fork is
+	underneath. Clearing the flag for the call restores the real code path on
+	both: on our fork it changes nothing (the flag is not read), on upstream it
+	stops the bypass. The refusal itself is upstream's own -- only the test-mode
+	exemption differs, so nothing is being faked here.
+
+	Kept narrow on purpose: `in_test` also guards side effects elsewhere (mail,
+	the broken-account disabler), so it is restored immediately.
+	"""
+	was = frappe.local.flags.in_test
+	frappe.local.flags.in_test = False
+	try:
+		yield
+	finally:
+		frappe.local.flags.in_test = was
 
 
 class BaseTestUtils(UnitTestCase):

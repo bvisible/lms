@@ -8,7 +8,7 @@ from lms.lms.api import (
 	set_evaluator_unavailability,
 	update_evaluator_slot,
 )
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, guards_enforced
 
 
 class TestEvaluatorAvailability(BaseTestUtils):
@@ -338,7 +338,10 @@ class TestEvaluatorAvailability(BaseTestUtils):
 	def test_a_course_creator_cannot_make_themselves_an_evaluator(self):
 		frappe.session.user = self.course_creator.email
 
-		with self.assertRaises(frappe.PermissionError):
+		# guards_enforced: this path refuses through `frappe.only_for`, which
+		# upstream v15 skips in test mode -- the assertion would pass there for the
+		# wrong reason, or not at all (#260).
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.course_creator.email, "Monday", "09:00:00", "10:00:00")
 
 	def test_a_student_cannot_read_their_own_availability_either(self):
@@ -430,7 +433,11 @@ class TestEvaluatorAvailability(BaseTestUtils):
 	def test_a_student_cannot_provision_a_calendar(self):
 		frappe.session.user = self.student.email
 
-		with self.assertRaises(frappe.PermissionError):
+		# guards_enforced: `ensure_evaluator_calendar` opens with `frappe.only_for`,
+		# which upstream v15 skips in test mode -- the call would then run on and
+		# die further down on "Enable Google API in Google Settings", an lms
+		# validation, hiding the refusal this test is about (#260).
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			ensure_evaluator_calendar()
 
 	def test_a_write_for_an_unknown_user_is_still_refused(self):
