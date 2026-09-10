@@ -1,4 +1,5 @@
 import json
+# //// Neoffice — contextmanager import added (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours"): needed by guards_enforced() below
 from contextlib import contextmanager
 
 import frappe
@@ -9,6 +10,7 @@ from lms.lms.doctype.lms_certificate.lms_certificate import get_default_certific
 from lms.lms.doctype.lms_quiz.lms_quiz import submit_quiz
 
 
+# //// Neoffice — guards_enforced() added (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours"): upstream v15's only_for() no-ops under local.flags.in_test, so PermissionError assertions around only_for-protected calls proved nothing there; clearing the flag for the call makes the assertion meaningful on any frappe fork (see docstring below for detail)
 @contextmanager
 def guards_enforced():
 	"""Make `frappe.only_for` refuse inside this block, on any frappe.

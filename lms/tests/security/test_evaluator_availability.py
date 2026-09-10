@@ -8,6 +8,7 @@ from lms.lms.api import (
 	set_evaluator_unavailability,
 	update_evaluator_slot,
 )
+# //// Neoffice — guards_enforced() added (4e99efac "test(security): every refusal in this file, not only the three that showed"): all eleven only_for refusals in this file now assert through it, not just the three the upstream preview originally flagged
 from lms.lms.test_helpers import BaseTestUtils, guards_enforced
 
 
@@ -148,21 +149,25 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		"""The probe that found this: a Course Creator, who cannot even open the
 		Slots tab, could write to any evaluator's calendar."""
 		frappe.session.user = self.course_creator.email
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.evaluator.email, "Wednesday", "09:00:00", "10:00:00")
 
 	def test_course_creator_cannot_set_someone_elses_unavailability(self):
 		frappe.session.user = self.course_creator.email
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			set_evaluator_unavailability(self.evaluator.email, "unavailable_to", "2026-09-01")
 
 	def test_evaluator_cannot_write_a_peers_availability(self):
 		frappe.session.user = self.other_evaluator.email
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.evaluator.email, "Thursday", "09:00:00", "10:00:00")
 
 	def test_student_cannot_write_availability(self):
 		frappe.session.user = self.student.email
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.evaluator.email, "Friday", "09:00:00", "10:00:00")
 
@@ -181,6 +186,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		frappe.session.user = self.evaluator.email
 		foreign_slot = self._slot_of(self.other_schedule)
 
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			update_evaluator_slot(self.evaluator.email, foreign_slot, "day", "Sunday")
 
@@ -188,6 +194,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		frappe.session.user = self.evaluator.email
 		foreign_slot = self._slot_of(self.other_schedule)
 
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			delete_evaluator_slot(self.evaluator.email, foreign_slot)
 
@@ -327,6 +334,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		self._reset_target(self.student.email)
 		frappe.session.user = self.student.email
 
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.student.email, "Monday", "09:00:00", "10:00:00")
 
@@ -338,6 +346,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 	def test_a_course_creator_cannot_make_themselves_an_evaluator(self):
 		frappe.session.user = self.course_creator.email
 
+		# //// Neoffice — wrapped in guards_enforced() (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours"): one of the three PermissionError assertions the upstream-preview CI reported as "not raised" when run against upstream's frappe, which still short-circuits only_for() in test mode (#260, #138)
 		# guards_enforced: this path refuses through `frappe.only_for`, which
 		# upstream v15 skips in test mode -- the assertion would pass there for the
 		# wrong reason, or not at all (#260).
@@ -347,6 +356,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 	def test_a_student_cannot_read_their_own_availability_either(self):
 		frappe.session.user = self.student.email
 
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			get_evaluator_details(self.student.email)
 
@@ -357,6 +367,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		could read every other one's schedule, unavailability and calendar."""
 		frappe.session.user = self.evaluator.email
 
+		# //// Neoffice — wrapped in guards_enforced() (4e99efac "test(security): every refusal in this file, not only the three that showed"): upstream v15's only_for() no-ops in test mode, so this PermissionError assertion passed for the wrong reason there
 		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			get_evaluator_details(self.other_evaluator.email)
 
@@ -433,6 +444,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 	def test_a_student_cannot_provision_a_calendar(self):
 		frappe.session.user = self.student.email
 
+		# //// Neoffice — wrapped in guards_enforced() (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours"): one of the three PermissionError assertions the upstream-preview CI reported as "not raised" when run against upstream's frappe, which still short-circuits only_for() in test mode (#260, #138)
 		# guards_enforced: `ensure_evaluator_calendar` opens with `frappe.only_for`,
 		# which upstream v15 skips in test mode -- the call would then run on and
 		# die further down on "Enable Google API in Google Settings", an lms

@@ -6,6 +6,7 @@ from frappe.utils import add_days, format_time, getdate
 
 from lms.lms.api import save_role
 from lms.lms.doctype.course_evaluator.course_evaluator import get_schedule, get_schedule_range_end_date
+# //// Neoffice — guards_enforced() added (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours"): needed to make PermissionError assertions meaningful on any frappe fork, not just ours
 from lms.lms.test_helpers import BaseTestUtils, guards_enforced
 
 
@@ -119,6 +120,7 @@ class TestEvaluatorRoleCRUD(BaseTestUtils):
 	def test_non_moderator_cannot_save_role(self):
 		"""[A non-moderator user should not be able to assign roles.]"""
 		frappe.set_user(self.test_user.email)
+		# //// Neoffice — wrapped in guards_enforced() (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours"): upstream v15's only_for() short-circuits when local.flags.in_test, so this assertRaises(PermissionError) passed for the wrong reason before
 		# guards_enforced: `save_role` is protected by `frappe.only_for`, which
 		# upstream v15 skips in test mode -- without this the assertion passes for
 		# the wrong reason there, and proves nothing (#260).
