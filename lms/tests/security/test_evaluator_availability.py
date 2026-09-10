@@ -148,22 +148,22 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		"""The probe that found this: a Course Creator, who cannot even open the
 		Slots tab, could write to any evaluator's calendar."""
 		frappe.session.user = self.course_creator.email
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.evaluator.email, "Wednesday", "09:00:00", "10:00:00")
 
 	def test_course_creator_cannot_set_someone_elses_unavailability(self):
 		frappe.session.user = self.course_creator.email
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			set_evaluator_unavailability(self.evaluator.email, "unavailable_to", "2026-09-01")
 
 	def test_evaluator_cannot_write_a_peers_availability(self):
 		frappe.session.user = self.other_evaluator.email
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.evaluator.email, "Thursday", "09:00:00", "10:00:00")
 
 	def test_student_cannot_write_availability(self):
 		frappe.session.user = self.student.email
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.evaluator.email, "Friday", "09:00:00", "10:00:00")
 
 	def test_moderator_may_edit_anyones_availability(self):
@@ -181,14 +181,14 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		frappe.session.user = self.evaluator.email
 		foreign_slot = self._slot_of(self.other_schedule)
 
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			update_evaluator_slot(self.evaluator.email, foreign_slot, "day", "Sunday")
 
 	def test_slot_delete_cannot_be_redirected_at_another_evaluators_row(self):
 		frappe.session.user = self.evaluator.email
 		foreign_slot = self._slot_of(self.other_schedule)
 
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			delete_evaluator_slot(self.evaluator.email, foreign_slot)
 
 	# --- input validation --------------------------------------------------
@@ -327,7 +327,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		self._reset_target(self.student.email)
 		frappe.session.user = self.student.email
 
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			add_evaluator_slot(self.student.email, "Monday", "09:00:00", "10:00:00")
 
 		self.assertFalse(frappe.db.exists("Course Evaluator", self.student.email))
@@ -347,7 +347,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 	def test_a_student_cannot_read_their_own_availability_either(self):
 		frappe.session.user = self.student.email
 
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			get_evaluator_details(self.student.email)
 
 	# --- reads are owner-gated too ----------------------------------------
@@ -357,7 +357,7 @@ class TestEvaluatorAvailability(BaseTestUtils):
 		could read every other one's schedule, unavailability and calendar."""
 		frappe.session.user = self.evaluator.email
 
-		with self.assertRaises(frappe.PermissionError):
+		with guards_enforced(), self.assertRaises(frappe.PermissionError):
 			get_evaluator_details(self.other_evaluator.email)
 
 	def test_a_moderator_can_still_read_anyones_schedule(self):
