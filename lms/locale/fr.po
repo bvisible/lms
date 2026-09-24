@@ -9149,7 +9149,7 @@ msgstr "Catégorie d'utilisateur"
 #. Label of the user_field (Select) field in DocType 'LMS Badge'
 #: lms/lms/doctype/lms_badge/lms_badge.json
 msgid "User Field"
-msgstr "Champ de l&#39;utilisateur"
+msgstr "Champ de l'utilisateur"
 
 #. Label of the user_image (Attach Image) field in DocType 'Course Evaluator'
 #: lms/lms/doctype/course_evaluator/course_evaluator.json
