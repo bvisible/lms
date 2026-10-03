@@ -811,6 +811,8 @@ def get_courses(filters: dict = None, start: int = 0) -> list:
 	if show_featured and start == 0:
 		courses = get_featured_courses(filters, or_filters, fields) + courses
 
+	# //// Neoffice — a draft course is not listed to who may not see it (see `course_is_visible`).
+	courses = [c for c in courses if c.get("published") or course_is_visible(c.name)]
 	courses = get_enrollment_details(courses)
 	courses = get_course_card_details(courses)
 	return courses
@@ -1073,6 +1075,10 @@ def get_course_outline(course: str = None, progress: bool = False) -> list:
 	if not guest_access_allowed():
 		return []
 
+	# //// Neoffice — the plan of a draft course is not given to who may not see the course (see `course_is_visible`).
+	if not course_is_visible(course):
+		return []
+
 	chapters = get_outline_chapter(course)
 	if not chapters:
 		return []
@@ -1204,6 +1210,9 @@ def build_outline(
 @rate_limit(limit=500, seconds=60 * 60)
 def get_lesson(course: str, chapter: int, lesson: int) -> dict:
 	if not guest_access_allowed():
+		return {}
+	# //// Neoffice — nothing of a draft course's lessons, titles included, for who may not see the course (see `course_is_visible`).
+	if not course_is_visible(course):
 		return {}
 
 	ChapterReference = frappe.qb.DocType("Chapter Reference")
@@ -2746,6 +2755,17 @@ def validate_batch_access(batch: str):
 	)
 	if not enrollment_exists:
 		frappe.throw(_("You do not have access to this batch."))
+
+
+def course_is_visible(course: str) -> bool:
+	"""A published course is visible to everyone; an unpublished one only to who may modify it or is enrolled."""
+	# //// Neoffice — added. `get_course_details` already hid a draft course from a guest, but `get_courses`
+	# //// (the catalogue), `get_course_outline` (the plan) and `get_lesson` (the lesson titles) did not: an
+	# //// anonymous visitor could read the title, the description and the whole plan of a course before it was
+	# //// published (issue maintenance#1082). Same rule as `get_course_details`, written once.
+	if frappe.db.get_value("LMS Course", course, "published"):
+		return True
+	return bool(can_modify_course(course) or get_membership(course))
 
 
 def can_modify_course(course: str) -> bool:
