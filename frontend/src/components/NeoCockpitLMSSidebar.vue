@@ -1,7 +1,7 @@
 <!-- //// Neoffice — added file (no upstream equivalent), 2c0b294c, then 39bc2311
 //// (menu declared explicitly, like Drive), c5cdc270 (no desk icons for a learner),
-//// c1d10eb2 (menu in English on an anonymous visitor's first visit) and b0bf03f1
-//// (course categories in the sidebar).
+//// c1d10eb2 (menu in English on an anonymous visitor's first visit), b0bf03f1
+//// (course categories in the sidebar) and the full row for a desk user (remote assistance).
 //// The LMS-side adapter of the cockpit: it builds the nav from the LMS routes and hands
 //// it to NeoCockpitBridge, and renders upstream's <AppSidebar> when the bundle fails,
 //// so a cockpit outage degrades to the upstream sidebar instead of an empty page.
@@ -18,10 +18,7 @@
 		search-kbd="⌘K"
 		@failed="failed = true"
 	/>
-	<CommandPalette
-		v-if="!failed"
-		v-model="settingsStore.isCommandPaletteOpen"
-	/>
+	<CommandPalette v-if="!failed" v-model="settingsStore.isCommandPaletteOpen" />
 </template>
 
 <script setup>
@@ -87,10 +84,13 @@ const isStaff = computed(() => {
 	return Boolean(u?.is_moderator || u?.is_instructor || u?.is_evaluator)
 })
 
-// A learner has no webmail, no NORA and no desk — and the Notes icon navigates
-// to /app/notes, which only answers with a permission error. Staff running the
-// platform keep the full row.
-const utilities = computed(() => (isStaff.value ? null : []))
+// A portal learner has no webmail, no NORA and no desk — and the Notes icon
+// navigates to /app/notes, which only answers with a permission error. Staff
+// running the platform keep the full row, and so does a desk user taking a
+// course: webmail, NORA and the help lifebuoy, whose « Demander de l'aide » is
+// how they reach the support team from here (remote assistance, 03.10).
+const deskUser = computed(() => userResource?.data?.user_type === 'System User')
+const utilities = computed(() => (isStaff.value || deskUser.value ? null : []))
 
 const item = (label, icon, routeName, activeFor = []) => ({
 	label,
