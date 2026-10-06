@@ -68,21 +68,17 @@
 							</template>
 						</Button>
 					</Tooltip>
-					<Button
-						variant="outline"
-						@click="editorMode = editorMode === 'preview' ? 'edit' : 'preview'"
-					>
-						<template #prefix>
-							<span v-if="editorMode === 'preview'" class="lucide-x size-4" />
-							<span v-else class="lucide-eye size-4" />
-						</template>
-						{{
-							editorMode === 'preview'
-								? __('Close student view')
-								: __('Student View')
-						}}
-					</Button>
 				</template>
+				<!-- //// Neoffice — the learner view button was inside the block above, so it only existed on the editor tab and only once a
+				     lesson was selected, while Overview, Dashboard, Editor and Settings are all the same course. It is now on every tab; from another
+				     tab it opens the editor in learner view (the editor picks the first lesson). -->
+				<Button v-if="isAdmin && course.data" variant="outline" @click="toggleStudentView">
+					<template #prefix>
+						<span v-if="inStudentView" class="lucide-x size-4" />
+						<span v-else class="lucide-eye size-4" />
+					</template>
+					{{ inStudentView ? __('Close student view') : __('View as a learner') }}
+				</Button>
 				<Button
 					v-if="tabIndex === 1 && course.data"
 					variant="outline"
@@ -212,6 +208,19 @@ interface EditorSelection {
 const editorSelected = ref<EditorSelection | null>(null)
 const editorMode = ref<'edit' | 'preview'>('edit')
 const showLessonHelp = ref(false)
+//// Neoffice — see the learner view button in the template.
+const EDITOR_TAB_INDEX = 2
+const inStudentView = computed(
+	() => tabIndex.value === EDITOR_TAB_INDEX && editorMode.value === 'preview'
+)
+const toggleStudentView = () => {
+	if (inStudentView.value) {
+		editorMode.value = 'edit'
+		return
+	}
+	editorMode.value = 'preview'
+	tabIndex.value = EDITOR_TAB_INDEX
+}
 
 // Settings tab (CourseForm) exposes the API the LayoutHeader actions need.
 type CourseMenuItem = {

@@ -9911,3 +9911,13 @@ msgstr "Quiz schließen"
 #: frontend/src/components/Quiz.vue
 msgid "Do not refresh or leave the page once you have answered a question: the quiz would be submitted automatically. Closing this window does not submit it."
 msgstr "Aktualisieren Sie die Seite nicht und verlassen Sie sie nicht, sobald Sie eine Frage beantwortet haben: Das Quiz würde automatisch eingereicht. Das Schließen dieses Fensters reicht es nicht ein."
+
+# //// Neoffice — added entry: the "unpublished" tab of the course, program and batch lists (the wiki app's « Dépublié » won the shared word).
+#: frontend/src/pages/Courses/Courses.vue
+msgid "Not yet published"
+msgstr "Noch nicht veröffentlicht"
+
+# //// Neoffice — added entry: the learner view button of the course page (was "Student View", shown on the editor tab only).
+#: frontend/src/pages/Courses/CourseDetail.vue
+msgid "View as a learner"
+msgstr "Als Lernender ansehen"

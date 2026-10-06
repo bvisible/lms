@@ -318,7 +318,9 @@ const courseTabs = computed(() => {
 		user.data?.is_evaluator
 	) {
 		tabs.push({ label: __('Created'), value: 'created' })
-		tabs.push({ label: __('Unpublished'), value: 'unpublished' })
+		//// Neoffice — `Unpublished` is one string shared by every app of the dictionary: the wiki app translates it « Dépublié » and wins
+		//// over the lms entry « Non publié ». A source string of its own gives the tab its own French (same in Programs and Batches).
+		tabs.push({ label: __('Not yet published'), value: 'unpublished' })
 	} else if (user.data) {
 		tabs.push({ label: __('Enrolled'), value: 'enrolled' })
 	}

@@ -237,7 +237,9 @@ const programTabs = computed(() => [
 		value: 'published',
 	},
 	{
-		label: __('Unpublished'),
+		//// Neoffice — `Unpublished` is one string shared by every app of the dictionary: the wiki app translates it « Dépublié » and wins
+		//// over the lms entry « Non publié ». A source string of its own gives the tab its own French (same in Programs and Batches).
+		label: __('Not yet published'),
 		value: 'unpublished',
 	},
 ])
