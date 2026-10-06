@@ -9879,3 +9879,35 @@ msgstr "{} Bestanden"
 msgid "{} Published"
 msgstr ""
 
+# //// Neoffice — added entries: the quiz window (QuizBlock.vue) and the bar at the top of a lesson (LessonQuizBar.vue).
+#: frontend/src/components/QuizBlock.vue
+msgid "Take the quiz"
+msgstr "Quiz starten"
+
+#: frontend/src/components/LessonQuizBar.vue
+msgid "This lesson ends with a quiz."
+msgstr "Diese Lektion endet mit einem Quiz."
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Leave the quiz?"
+msgstr "Quiz verlassen?"
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Your answers will not be saved. You can start the quiz again later."
+msgstr "Ihre Antworten werden nicht gespeichert. Sie können das Quiz später erneut starten."
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Continue the quiz"
+msgstr "Quiz fortsetzen"
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Leave quiz"
+msgstr "Quiz verlassen"
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Close quiz"
+msgstr "Quiz schließen"
+
+#: frontend/src/components/Quiz.vue
+msgid "Do not refresh or leave the page once you have answered a question: the quiz would be submitted automatically. Closing this window does not submit it."
+msgstr "Aktualisieren Sie die Seite nicht und verlassen Sie sie nicht, sobald Sie eine Frage beantwortet haben: Das Quiz würde automatisch eingereicht. Das Schließen dieses Fensters reicht es nicht ein."

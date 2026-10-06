@@ -218,6 +218,8 @@
 							/>
 						</div>
 
+						<!-- //// Neoffice — the quiz of the lesson, one click from the top (see LessonQuizBar.vue). -->
+						<LessonQuizBar />
 						<div
 							v-if="
 								lesson.data.instructor_content &&
@@ -369,6 +371,8 @@ import {
 } from '@/utils/secureVideo'
 import EditorJS from '@editorjs/editorjs'
 import LessonContent from '@/components/LessonContent.vue'
+//// Neoffice — added: the bar that opens the quiz window from the top of the lesson.
+import LessonQuizBar from '@/components/LessonQuizBar.vue'
 import CourseInstructors from '@/components/CourseInstructors.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import Discussions from '@/components/Discussions.vue'

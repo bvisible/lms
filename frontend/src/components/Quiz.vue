@@ -20,11 +20,16 @@
 				<li v-if="inVideo">
 					{{ __('You will have to complete the quiz to continue the video') }}
 				</li>
+				<!-- //// Neoffice — in the quiz window, closing the window does not hand the quiz in; leaving the page does. -->
 				<li>
 					{{
-						__(
-							'Do not refresh the page or close this window. If you do, the quiz will be submitted automatically.'
-						)
+						inWindow
+							? __(
+									'Do not refresh or leave the page once you have answered a question: the quiz would be submitted automatically. Closing this window does not submit it.'
+								)
+							: __(
+									'Do not refresh the page or close this window. If you do, the quiz will be submitted automatically.'
+								)
 					}}
 				</li>
 				<li>
@@ -519,6 +524,11 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	//// Neoffice — set by QuizBlock.vue when the quiz runs in its window.
+	inWindow: {
+		type: Boolean,
+		default: false,
+	},
 	backToVideo: {
 		type: Function,
 		default: () => {},
@@ -528,6 +538,10 @@ const props = defineProps({
 onMounted(() => {
 	window.addEventListener('pagehide', handlePageHide)
 	window.addEventListener('beforeunload', handleBeforeUnload)
+	//// Neoffice — two mounts of the same quiz share one resource (same cache key), and the second one finds `quiz.data`
+	//// already filled but its own `questions` and `questionsByName` empty: the quiz read "0 questions" the second time it
+	//// was opened (a lesson visited twice, or the quiz window opened twice). Fetch again, so the transform and onSuccess run.
+	if (quiz.data) quiz.reload()
 })
 
 onUnmounted(() => {
@@ -537,9 +551,13 @@ onUnmounted(() => {
 
 const handlePageHide = () => {
 	if (activeQuestion.value > 0 && !quizSubmission.data) {
+		const results = localStorage.getItem(quiz.data.title) || '[]'
+		//// Neoffice — upstream hands the quiz in, with a score of 0, as soon as the page is left after "Début", even
+		//// when no question was answered: opening a quiz and leaving wrote a failed attempt. Nothing answered, nothing sent.
+		if (results === '[]') return
 		const params = new URLSearchParams({
 			quiz: quiz.data.name,
-			results: localStorage.getItem(quiz.data.title) || '[]',
+			results,
 		})
 
 		navigator.sendBeacon(
@@ -1031,4 +1049,12 @@ const getSubmissionColumns = () => {
 		},
 	]
 }
+
+//// Neoffice — read by QuizBlock.vue to decide whether closing the quiz window needs a confirmation.
+defineExpose({
+	inProgress: computed(() => activeQuestion.value > 0 && !quizSubmission.data),
+	hasAnswers: computed(
+		() => attemptedQuestions.value.length > 0 || getAnswers().length > 0
+	),
+})
 </script>

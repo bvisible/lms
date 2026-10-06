@@ -10851,3 +10851,36 @@ msgstr "Infomaniak a refusé le fichier. Voir le journal des erreurs."
 #: lms/lms/neoffice_video.py
 msgid "The upload failed. See the Error Log."
 msgstr "Le téléversement a échoué. Voir le journal des erreurs."
+
+# //// Neoffice — added entries: the quiz window (QuizBlock.vue) and the bar at the top of a lesson (LessonQuizBar.vue).
+#: frontend/src/components/QuizBlock.vue
+msgid "Take the quiz"
+msgstr "Passer le quiz"
+
+#: frontend/src/components/LessonQuizBar.vue
+msgid "This lesson ends with a quiz."
+msgstr "Cette leçon se termine par un quiz."
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Leave the quiz?"
+msgstr "Quitter le quiz ?"
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Your answers will not be saved. You can start the quiz again later."
+msgstr "Vos réponses ne seront pas enregistrées. Vous pourrez recommencer le quiz plus tard."
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Continue the quiz"
+msgstr "Continuer le quiz"
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Leave quiz"
+msgstr "Quitter le quiz"
+
+#: frontend/src/components/QuizBlock.vue
+msgid "Close quiz"
+msgstr "Fermer le quiz"
+
+#: frontend/src/components/Quiz.vue
+msgid "Do not refresh or leave the page once you have answered a question: the quiz would be submitted automatically. Closing this window does not submit it."
+msgstr "N'actualisez pas la page et ne la quittez pas une fois une question répondue : le quiz serait rendu automatiquement. Fermer cette fenêtre ne le rend pas."

@@ -92,6 +92,7 @@ declare module 'vue' {
     LessonContent: typeof import('./src/components/LessonContent.vue')['default']
     LessonHelp: typeof import('./src/components/LessonHelp.vue')['default']
     LessonModal: typeof import('./src/components/Modals/LessonModal.vue')['default']
+    LessonQuizBar: typeof import('./src/components/LessonQuizBar.vue')['default']
     Link: typeof import('./src/components/Controls/Link.vue')['default']
     ListPage: typeof import('./src/components/Layouts/ListPage.vue')['default']
     ListPageBody: typeof import('./src/components/Layouts/ListPageBody.vue')['default']
