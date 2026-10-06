@@ -311,8 +311,11 @@
 							class="ms-auto"
 							@click="checkAnswer()"
 						>
+							<!-- //// Neoffice — `Check` alone is ambiguous: every installed app shares one dictionary, where it means a form
+							     checkbox (frappe, lms) or a bank cheque (mint), so the quiz button read "Case à cocher" or "Chèque".
+							     A source string of its own gives this button one meaning; the lms `__()` has no translation context. -->
 							<span>
-								{{ __('Check') }}
+								{{ __('Check Answer') }}
 							</span>
 						</Button>
 						<Button

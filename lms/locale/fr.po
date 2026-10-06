@@ -1443,6 +1443,12 @@ msgstr "Faire payer l'inscription à ce cours."
 msgid "Check"
 msgstr "Case à cocher"
 
+# //// Neoffice — added entry: the quiz button used `Check`, which the shared dictionary translates as a form checkbox
+# //// (or a bank cheque with the mint app). Its own source string, see Quiz.vue, gives it one meaning.
+#: frontend/src/components/Quiz.vue:315
+msgid "Check Answer"
+msgstr "Vérifier la réponse"
+
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue:18
 msgid "Check All Submissions"
 msgstr "Voir tous les rendus"
