@@ -68,7 +68,9 @@
 			>
 			</iframe>
 		</div>
-		<div v-else v-html="renderSafe(block)"></div>
+		<!-- //// Neoffice — the rendered Markdown gets `neo-lesson-md`: upstream's `.lesson-content` rules are applied nowhere, so a
+		     capture showed at its natural width, up to the whole column, however small the part of the screen it shows. -->
+		<div v-else class="neo-lesson-md" v-html="renderSafe(block)"></div>
 	</div>
 	<div v-if="quizId">
 		<Quiz :quiz="quizId" />

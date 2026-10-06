@@ -1184,6 +1184,38 @@ usePageMeta(() => {
 	border: 1px solid theme('colors.gray.200');
 	border-radius: 0.5rem;
 }
+/* //// Neoffice — captures in a lesson follow the manual (wiki `neoffice-wiki.css`, section 3): never wider than the text, then a size
+ * class set on the <img> by the author — `img-xs` 240px, `img-sm` 400px, `img-md` 640px, `img-lg` 900px, `img-full` the whole column —
+ * so a capture of a small dialog is not shown as large as a full screen. The default is 720px, narrower than the manual's text width
+ * because a lesson sits next to numbered steps. `img-center` centres. A class survives the sanitizer; Markdown `![]()` cannot carry one,
+ * so a sized capture is written `<img class="img-md" src="…" alt="…">`. */
+.neo-lesson-md img {
+	max-width: min(100%, 720px);
+	height: auto;
+	border-radius: 8px;
+	margin: 1.5rem auto 1.5rem 0;
+	display: block;
+}
+.neo-lesson-md img.img-xs {
+	max-width: 240px;
+}
+.neo-lesson-md img.img-sm {
+	max-width: 400px;
+}
+.neo-lesson-md img.img-md {
+	max-width: 640px;
+}
+.neo-lesson-md img.img-lg {
+	max-width: 900px;
+}
+.neo-lesson-md img.img-full {
+	width: 100%;
+	max-width: 100%;
+}
+.neo-lesson-md img.img-center {
+	margin-left: auto;
+	margin-right: auto;
+}
 
 .lesson-content code {
 	display: block;
