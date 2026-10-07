@@ -1193,7 +1193,7 @@ usePageMeta(() => {
  * so a capture of a small dialog is not shown as large as a full screen. The default is 720px, narrower than the manual's text width
  * because a lesson sits next to numbered steps. `img-center` centres. A class survives the sanitizer; Markdown `![]()` cannot carry one,
  * so a sized capture is written `<img class="img-md" src="…" alt="…">`. A size is a ceiling, never wider than the column: 900px in a
- * 770px column ran under the side panel. */
+ * 770px column ran under the side panel. A whole-screen capture (1440px wide) is `img-full`, a piece of the menu `img-sm`. */
 .neo-lesson-md img {
 	max-width: min(100%, 720px);
 	height: auto;
