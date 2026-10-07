@@ -1192,7 +1192,8 @@ usePageMeta(() => {
  * class set on the <img> by the author — `img-xs` 240px, `img-sm` 400px, `img-md` 640px, `img-lg` 900px, `img-full` the whole column —
  * so a capture of a small dialog is not shown as large as a full screen. The default is 720px, narrower than the manual's text width
  * because a lesson sits next to numbered steps. `img-center` centres. A class survives the sanitizer; Markdown `![]()` cannot carry one,
- * so a sized capture is written `<img class="img-md" src="…" alt="…">`. */
+ * so a sized capture is written `<img class="img-md" src="…" alt="…">`. A size is a ceiling, never wider than the column: 900px in a
+ * 770px column ran under the side panel. */
 .neo-lesson-md img {
 	max-width: min(100%, 720px);
 	height: auto;
@@ -1201,16 +1202,16 @@ usePageMeta(() => {
 	display: block;
 }
 .neo-lesson-md img.img-xs {
-	max-width: 240px;
+	max-width: min(100%, 240px);
 }
 .neo-lesson-md img.img-sm {
-	max-width: 400px;
+	max-width: min(100%, 400px);
 }
 .neo-lesson-md img.img-md {
-	max-width: 640px;
+	max-width: min(100%, 640px);
 }
 .neo-lesson-md img.img-lg {
-	max-width: 900px;
+	max-width: min(100%, 900px);
 }
 .neo-lesson-md img.img-full {
 	width: 100%;
