@@ -96,6 +96,7 @@
 	</div>
 </template>
 <script setup>
+//// Neoffice — added imports for the quiz window (nextTick, onBeforeUnmount, onMounted) and its confirm-leave check (71dc7a163).
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Button, createResource } from 'frappe-ui'
 import Quiz from '@/components/Quiz.vue'
@@ -113,6 +114,10 @@ const props = defineProps({
 	},
 })
 
+//// Neoffice ▼▼▼ — the quiz runs in a window instead of inline in the lesson (71dc7a163): isOpen/confirmLeave/overlay/quizRef
+//// hold the window and its close-confirmation state, openQuiz/closeQuiz/requestClose drive it (closing never submits, only
+//// leaving the page does — see Quiz.vue), and registerLessonQuiz lets LessonQuizBar open this same quiz from the bar at
+//// the top of the lesson.
 const isOpen = ref(false)
 const confirmLeave = ref(false)
 const overlay = ref(null)
@@ -168,6 +173,7 @@ onBeforeUnmount(() => {
 	unregister()
 	if (isOpen.value) lockPageScroll(false)
 })
+//// Neoffice ▲▲▲
 
 const redirectToLogin = () => {
 	window.location.href = `/login`

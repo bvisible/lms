@@ -320,6 +320,7 @@
 							     checkbox (frappe, lms) or a bank cheque (mint), so the quiz button read "Case à cocher" or "Chèque".
 							     A source string of its own gives this button one meaning; the lms `__()` has no translation context. -->
 							<span>
+								<!-- //// Neoffice — see the block marker above: dedicated "Check Answer" string (855068353) -->
 								{{ __('Check Answer') }}
 							</span>
 						</Button>
@@ -555,6 +556,7 @@ const handlePageHide = () => {
 		//// Neoffice — upstream hands the quiz in, with a score of 0, as soon as the page is left after "Début", even
 		//// when no question was answered: opening a quiz and leaving wrote a failed attempt. Nothing answered, nothing sent.
 		if (results === '[]') return
+		//// Neoffice — see the block marker above: only submit when answered
 		const params = new URLSearchParams({
 			quiz: quiz.data.name,
 			results,
