@@ -1202,15 +1202,19 @@ usePageMeta(() => {
 	display: block;
 }
 .neo-lesson-md img.img-xs {
+	/* //// Neoffice — see the block marker above: size is a ceiling (638252096) */
 	max-width: min(100%, 240px);
 }
 .neo-lesson-md img.img-sm {
+	/* //// Neoffice — see the block marker above: size is a ceiling (638252096) */
 	max-width: min(100%, 400px);
 }
 .neo-lesson-md img.img-md {
+	/* //// Neoffice — see the block marker above: size is a ceiling (638252096) */
 	max-width: min(100%, 640px);
 }
 .neo-lesson-md img.img-lg {
+	/* //// Neoffice — see the block marker above: size is a ceiling (638252096) */
 	max-width: min(100%, 900px);
 }
 .neo-lesson-md img.img-full {
