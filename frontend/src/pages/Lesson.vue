@@ -1229,6 +1229,27 @@ usePageMeta(() => {
 	width: 100%;
 	max-width: min(100%, 960px);
 }
+.neo-lesson-md .neo-side {
+	/* //// Neoffice — a capture of a panel (a piece of the menu, a dialog) with the numbered list that explains it: the capture on the left, the numbers
+	 * and their texts on the right, so that the list is read next to what it describes instead of under a picture with a blank half (Daniel, 10 October
+	 * 2026: « afficher les numéros à côté de la vue »). In a lesson: <div class="neo-side"> + a blank line + the <img> + a blank line + the list + a blank
+	 * line + </div>. The blank lines let the Markdown inside the div be parsed. Under 640px the two stack. */
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 1rem 2rem;
+	margin: 1.5rem 0;
+}
+.neo-lesson-md .neo-side > img {
+	flex: 0 1 auto;
+	margin: 0;
+}
+.neo-lesson-md .neo-side > ol,
+.neo-lesson-md .neo-side > ul {
+	flex: 1 1 300px;
+	min-width: 0;
+	margin: 0;
+}
 .neo-lesson-md img:not(.img-full) {
 	/* //// Neoffice — a tall capture (a piece of the menu, a dialog) is capped in height as well as in width: 400px wide and 750px tall filled a screen
 	 * of its own. Width and height stay `auto`, so the ratio is kept and the capture just gets narrower. */
