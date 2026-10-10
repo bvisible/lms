@@ -203,7 +203,7 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	overlay.setAttribute('role', 'dialog')
 	overlay.setAttribute('aria-modal', 'true')
 	overlay.setAttribute('aria-label', translate('Enlarge the video'))
-	// the dimmed page around the pop-up; a click on it closes the pop-up
+	// the dimmed page around the pop-up; a click on it closes the pop-up (the film of the page keeps its place: nothing of the page moves)
 	overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:rgba(20,20,20,.62);'
 	const opener = document.activeElement as HTMLElement | null
 
