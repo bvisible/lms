@@ -1,6 +1,6 @@
 //// Neoffice — added file (no upstream equivalent)
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { enhanceVideos, openViewer, VIEWER_ATTRIBUTE } from '@/utils/lessonVideoViewer'
+import { enhanceVideos, installLessonVideoViewer, openViewer, VIEWER_ATTRIBUTE } from '@/utils/lessonVideoViewer'
 
 const filmWithControls = () => {
 	const video = document.createElement('video')
@@ -61,6 +61,22 @@ describe('lessonVideoViewer', () => {
 		const film = overlay.querySelector('video') as HTMLVideoElement
 		film.dispatchEvent(new Event('ended'))
 		expect(onEnded).toHaveBeenCalledTimes(1)
+	})
+
+	it('opens the enlarged view when the picture is clicked, and leaves the control bar to the browser', () => {
+		installLessonVideoViewer()
+		const source = filmWithControls()
+		source.getBoundingClientRect = () => ({ top: 0, bottom: 400, left: 0, right: 600, width: 600, height: 400, x: 0, y: 0, toJSON() {} }) as DOMRect
+		enhanceVideos(document)
+		// the bottom 56 px are the control bar: no dialog, the click goes on to the browser
+		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 380 }))
+		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+		// the picture: the dialog opens, and the click does not reach the film (no play / pause)
+		const reachedFilm = vi.fn()
+		source.addEventListener('click', reachedFilm)
+		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 100 }))
+		expect(document.querySelector('.neo-video-viewer')).not.toBeNull()
+		expect(reachedFilm).not.toHaveBeenCalled()
 	})
 
 	it('closes with its button and with a click on the black around the film', () => {

@@ -19,6 +19,9 @@ const translate = (message: string): string => {
 const supportsHover = (): boolean =>
 	typeof window.matchMedia !== 'function' || window.matchMedia('(hover: hover)').matches
 
+// The bottom of a film with controls belongs to the browser's control bar (play, time, volume…): a click there keeps its own meaning.
+const CONTROL_BAR_HEIGHT = 56
+
 let zoomButton: HTMLButtonElement | null = null
 let zoomTarget: HTMLVideoElement | null = null
 
@@ -171,6 +174,24 @@ export function installLessonVideoViewer(): void {
 			else hideButton()
 		},
 		{ passive: true }
+	)
+	// A click on the picture of an enhanced film opens the enlarged view instead of playing or pausing it (Daniel, 10 October 2026): the viewer
+	// starts the film. The control bar at the bottom keeps its buttons. The listener is in the capture phase so that the browser's own
+	// click-to-play, which lives on the film, never sees the click.
+	document.addEventListener(
+		'click',
+		(event) => {
+			const target = event.target as Element | null
+			if (!target || target === zoomButton || zoomButton?.contains(target)) return
+			const video = target.closest?.(`video[${VIEWER_ATTRIBUTE}]`) as HTMLVideoElement | null
+			if (!video) return
+			const rect = video.getBoundingClientRect()
+			if (event.clientY > rect.bottom - CONTROL_BAR_HEIGHT) return
+			event.preventDefault()
+			event.stopPropagation()
+			openViewer(video)
+		},
+		true
 	)
 	window.addEventListener('scroll', hideButton, { passive: true, capture: true })
 	window.addEventListener('resize', hideButton, { passive: true })
