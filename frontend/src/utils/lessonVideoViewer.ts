@@ -124,6 +124,65 @@ function button(label: string, inner: string): HTMLButtonElement {
 	return b
 }
 
+// A slider drawn by hand (a track, a fill, a round handle): the browser's own range input is nearly invisible on a dark bar in some browsers.
+type Slider = { el: HTMLElement; set: (value: number) => void; value: () => number; onInput: (callback: (value: number) => void) => void }
+
+function slider(label: string, size: { grow?: boolean; width?: number }): Slider {
+	const root = document.createElement('div')
+	root.setAttribute('role', 'slider')
+	root.setAttribute('aria-label', label)
+	root.setAttribute('aria-valuemin', '0')
+	root.setAttribute('aria-valuemax', '100')
+	root.setAttribute('aria-valuenow', '0')
+	root.tabIndex = 0
+	root.style.cssText = `display:flex;align-items:center;height:28px;cursor:pointer;touch-action:none;` +
+		(size.grow ? 'flex:1 1 auto;min-width:80px;' : `flex:0 0 ${size.width}px;width:${size.width}px;`)
+	const track = document.createElement('div')
+	track.style.cssText = 'position:relative;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.28);'
+	const fill = document.createElement('div')
+	fill.style.cssText = 'position:absolute;top:0;bottom:0;left:0;width:0;border-radius:3px;background:#fff;'
+	const handle = document.createElement('div')
+	handle.style.cssText = 'position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;'
+	track.append(fill, handle)
+	root.appendChild(track)
+	let current = 0
+	let listener: (value: number) => void = () => {}
+	const clamp = (v: number) => Math.min(1, Math.max(0, v))
+	const set = (value: number) => {
+		current = clamp(Number.isFinite(value) ? value : 0)
+		fill.style.width = `${current * 100}%`
+		handle.style.left = `${current * 100}%`
+		root.setAttribute('aria-valuenow', String(Math.round(current * 100)))
+	}
+	const at = (event: PointerEvent) => {
+		const rect = track.getBoundingClientRect()
+		return rect.width ? clamp((event.clientX - rect.left) / rect.width) : 0
+	}
+	let dragging = false
+	root.addEventListener('pointerdown', (event) => {
+		dragging = true
+		root.setPointerCapture?.(event.pointerId)
+		set(at(event))
+		listener(current)
+	})
+	root.addEventListener('pointermove', (event) => {
+		if (!dragging) return
+		set(at(event))
+		listener(current)
+	})
+	const stop = () => (dragging = false)
+	root.addEventListener('pointerup', stop)
+	root.addEventListener('pointercancel', stop)
+	root.addEventListener('keydown', (event) => {
+		if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+		event.preventDefault()
+		event.stopPropagation()
+		set(current + (event.key === 'ArrowRight' ? 0.05 : -0.05))
+		listener(current)
+	})
+	return { el: root, set, value: () => current, onInput: (callback) => (listener = callback) }
+}
+
 export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	if (document.querySelector('.neo-video-viewer')) return null
 	const startAt = source.currentTime || 0
@@ -155,30 +214,18 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	const time = document.createElement('span')
 	time.style.cssText = 'min-width:96px;font:500 14px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;'
 	time.textContent = '0:00 / 0:00'
-	const seek = document.createElement('input')
-	seek.type = 'range'
-	seek.min = '0'
-	seek.max = '1000'
-	seek.value = '0'
-	seek.setAttribute('aria-label', translate('Seek'))
-	seek.style.cssText = 'flex:1 1 auto;min-width:80px;accent-color:#fff;cursor:pointer;'
+	const seek = slider(translate('Seek'), { grow: true })
 	const speed = button(translate('Speed'), '1x')
 	const mute = button(translate('Mute'), svg(ICON.volume))
-	const volume = document.createElement('input')
-	volume.type = 'range'
-	volume.min = '0'
-	volume.max = '1'
-	volume.step = '0.05'
-	volume.value = '1'
-	volume.setAttribute('aria-label', translate('Volume'))
-	volume.style.cssText = 'width:80px;accent-color:#fff;cursor:pointer;'
+	const volume = slider(translate('Volume'), { width: 80 })
+	volume.set(1)
 	const close = button(translate('Close the enlarged view'), '×')
 	close.style.fontSize = '26px'
-	bar.append(toggle, time, seek, speed, mute, volume, close)
+	bar.append(toggle, time, seek.el, speed, mute, volume.el, close)
 
 	const refresh = () => {
 		time.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`
-		if (Number.isFinite(video.duration) && video.duration > 0) seek.value = String(Math.round((video.currentTime / video.duration) * 1000))
+		if (Number.isFinite(video.duration) && video.duration > 0) seek.set(video.currentTime / video.duration)
 		toggle.innerHTML = svg(video.paused ? ICON.play : ICON.pause)
 		toggle.setAttribute('aria-label', translate(video.paused ? 'Play' : 'Pause'))
 		mute.innerHTML = svg(video.muted || video.volume === 0 ? ICON.muted : ICON.volume)
@@ -189,8 +236,8 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	}
 	toggle.addEventListener('click', playPause)
 	stage.addEventListener('click', playPause)
-	seek.addEventListener('input', () => {
-		if (Number.isFinite(video.duration)) video.currentTime = (Number(seek.value) / 1000) * video.duration
+	seek.onInput((value) => {
+		if (Number.isFinite(video.duration)) video.currentTime = value * video.duration
 	})
 	speed.addEventListener('click', () => {
 		const next = SPEEDS[(SPEEDS.indexOf(video.playbackRate) + 1) % SPEEDS.length]
@@ -201,9 +248,9 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 		video.muted = !video.muted
 		refresh()
 	})
-	volume.addEventListener('input', () => {
-		video.volume = Number(volume.value)
-		video.muted = video.volume === 0
+	volume.onInput((value) => {
+		video.volume = value
+		video.muted = value === 0
 		refresh()
 	})
 	;['timeupdate', 'play', 'pause', 'loadedmetadata', 'volumechange', 'durationchange'].forEach((name) => video.addEventListener(name, refresh))
@@ -240,11 +287,11 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 		} else if (event.key === ' ' && target?.tagName !== 'BUTTON') {
 			event.preventDefault()
 			playPause()
-		} else if (event.key === 'ArrowRight' && target?.tagName !== 'INPUT') {
+		} else if (event.key === 'ArrowRight' && target?.getAttribute('role') !== 'slider') {
 			video.currentTime = Math.min(video.duration || Infinity, video.currentTime + 5)
-		} else if (event.key === 'ArrowLeft' && target?.tagName !== 'INPUT') {
+		} else if (event.key === 'ArrowLeft' && target?.getAttribute('role') !== 'slider') {
 			video.currentTime = Math.max(0, video.currentTime - 5)
-		} else if ((event.key === 'm' || event.key === 'M') && target?.tagName !== 'INPUT') {
+		} else if ((event.key === 'm' || event.key === 'M') && target?.getAttribute('role') !== 'slider') {
 			video.muted = !video.muted
 			refresh()
 		}

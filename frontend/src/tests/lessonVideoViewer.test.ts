@@ -51,7 +51,7 @@ describe('lessonVideoViewer', () => {
 		expect(overlay.style.flexDirection).toBe('column')
 		expect(stage.contains(film)).toBe(true)
 		expect(bar.contains(film)).toBe(false)
-		expect(bar.querySelector('input[type=range]')).not.toBeNull() // the seek bar
+		expect(bar.querySelectorAll('[role="slider"]').length).toBe(2) // the seek bar and the volume, drawn by hand
 		expect(source.pause).toHaveBeenCalled()
 		expect(openViewer(source)).toBeNull() // one dialog at a time
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
