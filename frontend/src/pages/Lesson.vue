@@ -75,7 +75,9 @@
 						'w-full md:w-3/5 mx-auto border-none !pt-10': zenModeEnabled,
 					}"
 				>
-					<div class="px-5">
+					<!-- //// Neoffice — the lesson is read in a CENTRED column, like the manual's article (see `.neo-lesson-column` below): upstream gave it the whole width
+					     of the page with a 20px margin, so on a large screen a line of text ran 1400px wide. -->
+					<div class="neo-lesson-column">
 						<div
 							class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center justify-between"
 						>
@@ -1228,6 +1230,19 @@ usePageMeta(() => {
 	 * like the manual (wiki `neoffice-wiki.css`, `img-full`), 10 October 2026 (Daniel: « il y a des endroits où ça affiche trop grand »). */
 	width: 100%;
 	max-width: min(100%, 960px);
+}
+.neo-lesson-column {
+	/* //// Neoffice — the reading column of a lesson, as in the manual (wiki `neoffice-wiki.css`: text stops at `--neo-text-width`, captures and films never go
+	 * wider than the text above them, the article is centred). The title, the text, the films and the captures share ONE width, so they line up; the side
+	 * margin follows the size of the screen (5vw, between 20 and 72px) and the column is centred, so the free space grows with the window instead of
+	 * piling up on the right. 960px is the width of a full-width capture (`img-full`). Daniel, 10 October 2026: « aligner les deux (film et texte) avec une
+	 * marge à gauche et à droite, proportionnelle à la grandeur d'écran, comme dans le wiki ». */
+	--neo-text-width: 960px;
+	--neo-lesson-margin: clamp(20px, 5vw, 72px);
+	box-sizing: border-box;
+	max-width: calc(var(--neo-text-width) + 2 * var(--neo-lesson-margin));
+	margin-inline: auto;
+	padding-inline: var(--neo-lesson-margin);
 }
 .neo-lesson-md .neo-side {
 	/* //// Neoffice — a capture of a panel (a piece of the menu, a dialog) with the numbered list that explains it: the capture on the left, the numbers
