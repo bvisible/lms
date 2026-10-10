@@ -1,4 +1,6 @@
 <template>
+	<!-- //// Neoffice — a hosted film (a file) shows the course image as its poster until it is played: its first image is often the blank paper of
+	     the series' opening, and the card then looks empty. Upstream only uses the image when the film cannot be played. At the merge: keep ours. -->
 	<iframe
 		v-if="videoPreview.type === 'youtube'"
 		:src="videoPreview.src"
@@ -10,6 +12,7 @@
 		v-else-if="videoPreview.type === 'file' && !videoError"
 		:src="videoPreview.src"
 		controls
+		:poster="fallbackImage || undefined"
 		class="min-h-56 w-full rounded-t-md bg-black object-contain"
 		@error="videoError = true"
 	/>
