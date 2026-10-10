@@ -275,10 +275,11 @@ export function installLessonVideoViewer(): void {
 	const schedule = () => {
 		if (queued) return
 		queued = true
-		requestAnimationFrame(() => {
+		// a timer, not requestAnimationFrame: a page opened in a background tab gets no animation frame, and its films would stay as they are
+		setTimeout(() => {
 			queued = false
 			enhanceVideos(document)
-		})
+		}, 40)
 	}
 	new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true })
 	// A click on the picture of a film of the page opens the dialog, which starts the film. The listener is in the capture phase so that the
