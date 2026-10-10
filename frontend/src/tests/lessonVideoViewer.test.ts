@@ -5,7 +5,6 @@ import { enhanceVideos, installLessonVideoViewer, openViewer, VIEWER_ATTRIBUTE }
 const filmWithControls = () => {
 	const video = document.createElement('video')
 	video.setAttribute('controls', '')
-	video.setAttribute('controlslist', 'nodownload')
 	video.setAttribute('src', '/files/film.mp4')
 	document.body.appendChild(video)
 	return video
@@ -20,13 +19,15 @@ describe('lessonVideoViewer', () => {
 		document.body.innerHTML = ''
 	})
 
-	it('hides the native full screen of a film with controls, keeping the other controls list entries', () => {
+	it('takes the control bar off a film of the page, so that nothing is drawn over its picture', () => {
 		const video = filmWithControls()
 		enhanceVideos(document)
 		expect(video.getAttribute(VIEWER_ATTRIBUTE)).toBe('1')
-		expect(video.getAttribute('controlslist')).toBe('nodownload nofullscreen')
+		expect(video.hasAttribute('controls')).toBe(false)
+		expect(video.style.cursor).toBe('pointer')
+		expect(document.querySelectorAll('.neo-video-mark').length).toBe(1) // the play mark
 		enhanceVideos(document) // a second pass changes nothing
-		expect(video.getAttribute('controlslist')).toBe('nodownload nofullscreen')
+		expect(document.querySelectorAll('.neo-video-mark').length).toBe(1)
 	})
 
 	it('leaves a video without controls alone', () => {
@@ -36,7 +37,7 @@ describe('lessonVideoViewer', () => {
 		expect(video.hasAttribute(VIEWER_ATTRIBUTE)).toBe(false)
 	})
 
-	it('opens a dialog that shows the whole picture, not a cropped one, and closes on Escape', () => {
+	it('opens a dialog that shows the whole picture, with the controls below it and not over it', () => {
 		const source = filmWithControls()
 		const overlay = openViewer(source) as HTMLElement
 		expect(overlay).toBeTruthy()
@@ -44,13 +45,38 @@ describe('lessonVideoViewer', () => {
 		const film = overlay.querySelector('video') as HTMLVideoElement
 		expect(film.getAttribute('src')).toBe('/files/film.mp4')
 		expect(film.style.objectFit).toBe('contain') // never "cover": a very wide screen must not cut the top and the bottom
-		expect(film.style.width).toBe('100%')
-		expect(film.style.height).toBe('100%')
-		expect(film.getAttribute('controlslist')).toContain('nofullscreen')
+		expect(film.hasAttribute('controls')).toBe(false) // the browser's own bar would be drawn over the picture
+		// the dialog is a column: the stage (with the picture) first, then the control bar; the bar is not inside the stage
+		const [stage, bar] = Array.from(overlay.children) as HTMLElement[]
+		expect(overlay.style.flexDirection).toBe('column')
+		expect(stage.contains(film)).toBe(true)
+		expect(bar.contains(film)).toBe(false)
+		expect(bar.querySelector('input[type=range]')).not.toBeNull() // the seek bar
 		expect(source.pause).toHaveBeenCalled()
 		expect(openViewer(source)).toBeNull() // one dialog at a time
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+	})
+
+	it('plays and pauses from the control bar and from the picture of the dialog', () => {
+		const overlay = openViewer(filmWithControls()) as HTMLElement
+		const film = overlay.querySelector('video') as HTMLVideoElement
+		const [stage, bar] = Array.from(overlay.children) as HTMLElement[]
+		;(bar.querySelector('button') as HTMLButtonElement).click() // first button: play / pause
+		expect(film.play).toHaveBeenCalled()
+		stage.click()
+		expect(film.play).toHaveBeenCalledTimes(2) // the film in jsdom stays paused: a click on the picture asks to play again
+	})
+
+	it('opens the dialog when the picture of a film of the page is clicked, and the click never reaches the film', () => {
+		installLessonVideoViewer()
+		const source = filmWithControls()
+		enhanceVideos(document)
+		const reachedFilm = vi.fn()
+		source.addEventListener('click', reachedFilm)
+		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 100 }))
+		expect(document.querySelector('.neo-video-viewer')).not.toBeNull()
+		expect(reachedFilm).not.toHaveBeenCalled()
 	})
 
 	it('tells the film of the page when the enlarged film ends, so that the lesson is still validated', () => {
@@ -63,26 +89,11 @@ describe('lessonVideoViewer', () => {
 		expect(onEnded).toHaveBeenCalledTimes(1)
 	})
 
-	it('opens the enlarged view when the picture is clicked, and leaves the control bar to the browser', () => {
-		installLessonVideoViewer()
-		const source = filmWithControls()
-		source.getBoundingClientRect = () => ({ top: 0, bottom: 400, left: 0, right: 600, width: 600, height: 400, x: 0, y: 0, toJSON() {} }) as DOMRect
-		enhanceVideos(document)
-		// the bottom 56 px are the control bar: no dialog, the click goes on to the browser
-		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 380 }))
-		expect(document.querySelector('.neo-video-viewer')).toBeNull()
-		// the picture: the dialog opens, and the click does not reach the film (no play / pause)
-		const reachedFilm = vi.fn()
-		source.addEventListener('click', reachedFilm)
-		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 100 }))
-		expect(document.querySelector('.neo-video-viewer')).not.toBeNull()
-		expect(reachedFilm).not.toHaveBeenCalled()
-	})
-
-	it('closes with its button and with a click on the black around the film', () => {
+	it('closes with its button and with a click on the black around the dialog', () => {
 		const source = filmWithControls()
 		let overlay = openViewer(source) as HTMLElement
-		;(overlay.querySelector('button') as HTMLButtonElement).click()
+		const close = Array.from(overlay.querySelectorAll('button')).find((b) => b.getAttribute('aria-label') === 'Close the enlarged view') as HTMLButtonElement
+		close.click()
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
 		overlay = openViewer(source) as HTMLElement
 		overlay.click()

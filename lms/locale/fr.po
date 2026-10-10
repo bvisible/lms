@@ -10902,3 +10902,27 @@ msgstr "Agrandir la vidéo"
 #: frontend/src/utils/lessonVideoViewer.ts
 msgid "Close the enlarged view"
 msgstr "Fermer la vue agrandie"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Play"
+msgstr "Lecture"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Pause"
+msgstr "Pause"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Seek"
+msgstr "Position dans le film"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Speed"
+msgstr "Vitesse"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Mute"
+msgstr "Couper le son"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Volume"
+msgstr "Volume"
