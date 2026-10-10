@@ -10,6 +10,12 @@ const filmWithControls = () => {
 	return video
 }
 
+// jsdom has no media engine: the position of a film is a plain property here
+const withPosition = (video: HTMLVideoElement, at = 0) => {
+	Object.defineProperty(video, 'currentTime', { value: at, writable: true, configurable: true })
+	return video
+}
+
 describe('lessonVideoViewer', () => {
 	beforeEach(() => {
 		window.HTMLMediaElement.prototype.pause = vi.fn()
@@ -17,17 +23,18 @@ describe('lessonVideoViewer', () => {
 	})
 	afterEach(() => {
 		document.body.innerHTML = ''
+		document.body.style.overflow = ''
 	})
 
-	it('takes the control bar off a film of the page, so that nothing is drawn over its picture', () => {
+	it('keeps the native controls of a film of the page and takes the browser full screen off it', () => {
 		const video = filmWithControls()
 		enhanceVideos(document)
 		expect(video.getAttribute(VIEWER_ATTRIBUTE)).toBe('1')
-		expect(video.hasAttribute('controls')).toBe(false)
-		expect(video.style.cursor).toBe('pointer')
-		expect(document.querySelectorAll('.neo-video-mark').length).toBe(1) // the play mark
+		expect(video.hasAttribute('controls')).toBe(true) // Play in the strip of the player plays the film in the page
+		expect(video.getAttribute('controlsList')).toContain('nofullscreen') // the pop-up is the enlarged view, not the browser's full screen
+		expect(video.style.cursor).toBe('zoom-in')
 		enhanceVideos(document) // a second pass changes nothing
-		expect(document.querySelectorAll('.neo-video-mark').length).toBe(1)
+		expect(video.getAttribute('controlsList')).toBe('nodownload nofullscreen')
 	})
 
 	it('shows the jpg next to a film as its poster, and keeps a poster that is already there', () => {
@@ -53,60 +60,62 @@ describe('lessonVideoViewer', () => {
 		expect(video.hasAttribute(VIEWER_ATTRIBUTE)).toBe(false)
 	})
 
-	it('opens a pop-up that shows the whole picture, with the controls below it and not over it, and never asks for the browser full screen', () => {
+	it('opens a pop-up with the film alone, its native controls and a round cross, and never asks for the browser full screen', () => {
 		const requestFullscreen = vi.fn(() => Promise.resolve())
 		Element.prototype.requestFullscreen = requestFullscreen
-		const source = filmWithControls()
+		const source = withPosition(filmWithControls())
 		const overlay = openViewer(source) as HTMLElement
 		expect(overlay).toBeTruthy()
 		expect(overlay.getAttribute('role')).toBe('dialog')
-		const film = overlay.querySelector('video') as HTMLVideoElement
+		expect(overlay.style.background).toContain('0.78') // the dimmed page (78 % black, as in the manual)
+		const [film, cross] = Array.from(overlay.children) as HTMLElement[]
+		expect(film.tagName).toBe('VIDEO')
+		expect((film as HTMLVideoElement).controls).toBe(true) // the same native controls as the manual's pop-up
 		expect(film.getAttribute('src')).toBe('/files/film.mp4')
-		expect(film.style.objectFit).toBe('contain') // never "cover": a very wide screen must not cut the top and the bottom
-		expect(film.hasAttribute('controls')).toBe(false) // the browser's own bar would be drawn over the picture
-		// the dimmed page holds one centred box, a column: the head (title and cross), the stage (with the picture), then the control bar
-		expect(overlay.style.background).toContain('rgba(20, 20, 20, 0.62)')
-		expect(overlay.children.length).toBe(1)
-		const box = overlay.children[0] as HTMLElement
-		expect(box.style.flexDirection).toBe('column')
-		// the width (1000 px at most, 92 % of the window, never taller than it) is a CSS min(), which jsdom drops: measured in a real browser instead
-		const [head, stage, bar] = Array.from(box.children) as HTMLElement[]
-		expect(head.textContent).toContain('×')
-		expect(stage.style.aspectRatio).toBe('16/9')
-		expect(film.style.margin).toBe('0px') // a content stylesheet that puts a top margin on media must not push the film down
-		expect(stage.contains(film)).toBe(true)
-		expect(bar.contains(film)).toBe(false)
-		expect(requestFullscreen).not.toHaveBeenCalled() // a pop-up, not the full screen: nothing is left to cut the top and the bottom
-		expect(bar.querySelectorAll('[role="slider"]').length).toBe(2) // the seek bar and the volume, drawn by hand
+		expect((film as HTMLVideoElement).style.margin).toBe('0px') // a content stylesheet's top margin on media must not push it down
+		expect(cross.tagName).toBe('BUTTON')
+		expect(cross.style.borderRadius).toBe('999px')
 		expect(source.pause).toHaveBeenCalled()
-		expect(openViewer(source)).toBeNull() // one dialog at a time
-		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+		expect(document.body.style.overflow).toBe('hidden')
+		expect(requestFullscreen).not.toHaveBeenCalled()
+		expect(openViewer(source)).toBeNull() // one pop-up at a time
+		// the size (92vw, 88vh × the ratio of the film) is a CSS min(): jsdom drops it, so it is measured in a real browser instead
+	})
+
+	it('carries the position both ways: the film starts where the small player was, the small player resumes where the pop-up stopped', () => {
+		const source = withPosition(filmWithControls(), 12)
+		const overlay = openViewer(source) as HTMLElement
+		const film = withPosition(overlay.querySelector('video') as HTMLVideoElement, 0)
+		film.dispatchEvent(new Event('loadedmetadata'))
+		expect(film.currentTime).toBe(12)
+		expect(film.play).toHaveBeenCalled() // clicking to enlarge means wanting to watch it
+		film.currentTime = 30
+		;(overlay.querySelector('button') as HTMLButtonElement).click()
+		expect(source.currentTime).toBe(30)
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+		expect(document.body.style.overflow).toBe('')
 	})
 
-	it('plays and pauses from the control bar and from the picture of the dialog', () => {
-		const overlay = openViewer(filmWithControls()) as HTMLElement
-		const film = overlay.querySelector('video') as HTMLVideoElement
-		const [, stage, bar] = Array.from((overlay.children[0] as HTMLElement).children) as HTMLElement[]
-		;(bar.querySelector('button') as HTMLButtonElement).click() // first button: play / pause
-		expect(film.play).toHaveBeenCalled()
-		stage.click()
-		expect(film.play).toHaveBeenCalledTimes(2) // the film in jsdom stays paused: a click on the picture asks to play again
-	})
-
-	it('opens the dialog when the picture of a film of the page is clicked, and the click never reaches the film', () => {
+	it('opens the pop-up on a click in the picture, leaves a click in the strip of native controls to the player, and the first never reaches the film', () => {
 		installLessonVideoViewer()
 		const source = filmWithControls()
+		source.getBoundingClientRect = () => ({ top: 0, bottom: 400, left: 0, right: 700, width: 700, height: 400, x: 0, y: 0, toJSON: () => ({}) })
 		enhanceVideos(document)
 		const reachedFilm = vi.fn()
 		source.addEventListener('click', reachedFilm)
 		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 100 }))
 		expect(document.querySelector('.neo-video-viewer')).not.toBeNull()
 		expect(reachedFilm).not.toHaveBeenCalled()
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+		// the strip of 52 px at the bottom is the native Play / volume / seek bar
+		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 380 }))
+		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+		expect(reachedFilm).toHaveBeenCalledTimes(1)
 	})
 
-	it('tells the film of the page when the enlarged film ends, so that the lesson is still validated', () => {
-		const source = filmWithControls()
+	it('tells the film of the page when the film of the pop-up ends, so that the lesson is still validated', () => {
+		const source = withPosition(filmWithControls())
 		const onEnded = vi.fn()
 		source.addEventListener('ended', onEnded)
 		const overlay = openViewer(source) as HTMLElement
@@ -115,14 +124,18 @@ describe('lessonVideoViewer', () => {
 		expect(onEnded).toHaveBeenCalledTimes(1)
 	})
 
-	it('closes with its cross, with Escape and with a click on the dimmed page around the pop-up', () => {
-		const source = filmWithControls()
+	it('closes with its cross, with Escape and with a click on the dimmed page around the film, but not with a click on the film', () => {
+		const source = withPosition(filmWithControls())
 		let overlay = openViewer(source) as HTMLElement
-		const close = Array.from(overlay.querySelectorAll('button')).find((b) => b.getAttribute('aria-label') === 'Close the enlarged view') as HTMLButtonElement
-		close.click()
+		;(overlay.querySelector('button') as HTMLButtonElement).click()
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
 		overlay = openViewer(source) as HTMLElement
+		;(overlay.querySelector('video') as HTMLVideoElement).click()
+		expect(document.querySelector('.neo-video-viewer')).not.toBeNull() // a click on the film is the player's own business
 		overlay.click()
+		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+		openViewer(source)
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
 	})
 })

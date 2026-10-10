@@ -45,11 +45,15 @@
 			/>
 		</div>
 		<div v-else-if="block.includes('{{ Video')">
+			<!-- //// Neoffice — the film is not edge to edge: a margin all around it (20 px above and below, 16 px on the sides) and at most 920 px wide,
+			     centred, so the lesson is lighter to read (Daniel, 10 October 2026: « une petite marge tout le tour, pour ne pas que ce soit trop rempli »).
+			     Upstream draws it at the full width of the column. The pop-up (lessonVideoViewer.ts) is what enlarges it. -->
 			<video
 				controls
 				width="100%"
 				controlsList="nodownload"
 				oncontextmenu="return false;"
+				style="display: block; width: calc(100% - 32px); max-width: 920px; margin: 20px auto; border-radius: 10px"
 			>
 				<source :src="getId(block)" type="video/mp4" />
 			</video>

@@ -1224,8 +1224,15 @@ usePageMeta(() => {
 	max-width: min(100%, 900px);
 }
 .neo-lesson-md img.img-full {
+	/* //// Neoffice — `img-full` is the whole COLUMN in upstream terms, up to 1450px on a large screen: a whole-screen capture filled the page. Capped at 960px
+	 * like the manual (wiki `neoffice-wiki.css`, `img-full`), 10 October 2026 (Daniel: « il y a des endroits où ça affiche trop grand »). */
 	width: 100%;
-	max-width: 100%;
+	max-width: min(100%, 960px);
+}
+.neo-lesson-md img:not(.img-full) {
+	/* //// Neoffice — a tall capture (a piece of the menu, a dialog) is capped in height as well as in width: 400px wide and 750px tall filled a screen
+	 * of its own. Width and height stay `auto`, so the ratio is kept and the capture just gets narrower. */
+	max-height: 560px;
 }
 .neo-lesson-md img.img-center {
 	margin-left: auto;
