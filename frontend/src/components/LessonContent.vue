@@ -1,11 +1,14 @@
 <template>
+	<!-- //// Neoffice — the two YouTube iframes below keep a 16:9 shape (`aspect-ratio`, height auto). Upstream gives them a fixed height of 400
+	     (200 on a phone) at 100% width: on a wide column a 16:9 film is letterboxed with black bars on both sides. The address comes from
+	     `youtubeEmbed.ts` (no « more videos » from other channels, no automatic captions by default). At the merge: keep ours. -->
 	<div v-if="youtube">
 		<iframe
 			class="youtube-video"
 			:src="getYouTubeVideoSource(youtube.split('/').pop())"
 			:title="__('YouTube video')"
 			width="100%"
-			:height="screenSize.width < 640 ? 200 : 400"
+			style="aspect-ratio: 16 / 9; height: auto"
 			frameborder="0"
 			allowfullscreen
 		></iframe>
@@ -17,7 +20,7 @@
 				:src="getYouTubeVideoSource(block)"
 				:title="__('YouTube video')"
 				width="100%"
-				:height="screenSize.width < 640 ? 200 : 400"
+				style="aspect-ratio: 16 / 9; height: auto"
 				frameborder="0"
 				allowfullscreen
 			></iframe>
@@ -82,8 +85,9 @@ import Quiz from '@/components/QuizBlock.vue'
 import SecureVideo from '@/components/SecureVideo.vue'
 import PdfBlock from '@/components/PdfBlock.vue'
 import MarkdownIt from 'markdown-it'
-import { useScreenSize } from '@/utils/composables'
 import { getMacroArg } from '@/utils/lessonMacros'
+//// Neoffice — the address of an embedded YouTube video (see the file).
+import { youtubeEmbedUrl } from '@/utils/youtubeEmbed'
 import { sanitizeRichHTML } from '@/utils/sanitizeRichHTML'
 
 //// Neoffice — a789500f: upstream declares no emit here. The Infomaniak iframe is the
@@ -91,7 +95,6 @@ import { sanitizeRichHTML } from '@/utils/sanitizeRichHTML'
 //// be forwarded; Lesson.vue turns it into markProgress() + trackVideoWatchDuration().
 const emit = defineEmits(['video-ended'])
 
-const screenSize = useScreenSize()
 
 const markdown = new MarkdownIt({
 	html: true,
@@ -146,8 +149,8 @@ const getYouTubeVideoSource = (block) => {
 	//// Neoffice — 36c69d63: upstream embeds `youtube.com`; we embed `youtube-nocookie.com`
 	//// so no Google cookie is dropped before the visitor presses play (same change in
 	//// lms/plugins.py). At the merge: keep ours, upstream's host is the regression.
-	// nocookie: no Google cookie before the visitor presses play.
-	return `https://www.youtube-nocookie.com/embed/${block}`
+	//// Neoffice: the address is built in `youtubeEmbed.ts` (also adds `rel=0` etc., see there).
+	return youtubeEmbedUrl(block)
 }
 
 const getId = (block) => {
