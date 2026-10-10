@@ -1240,9 +1240,12 @@ usePageMeta(() => {
 	gap: 1rem 2rem;
 	margin: 1.5rem 0;
 }
-.neo-lesson-md .neo-side > img {
+.neo-lesson-md .neo-side > img:not(.img-full) {
+	/* //// Neoffice — beside its list a capture is at most 480px tall (560px when it stands alone): « un peu grand » (Daniel, 10 October 2026). The
+	 * selector is as specific as the general height cap below it, which comes later in the file, so it has to repeat `:not(.img-full)`. */
 	flex: 0 1 auto;
 	margin: 0;
+	max-height: 480px;
 }
 .neo-lesson-md .neo-side > ol,
 .neo-lesson-md .neo-side > ul {
