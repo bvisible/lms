@@ -320,6 +320,7 @@ const addInstructorNotes = (data) => {
 }
 
 onBeforeUnmount(() => {
+	//// Neoffice — see the block marker above: lessonAutosave.ts listener cleanup.
 	TOUCH_EVENTS.forEach((name) => document.removeEventListener(name, touchIfInEditor, true))
 	isUnmounting = true
 	// Flush unsaved edits before teardown; skip if deleted.
