@@ -6,9 +6,11 @@
 // bar is drawn OVER the bottom of the picture, with a dark gradient: the bottom of a screen recording is lost under it. (3) A click on the
 // picture plays or pauses it, which is of little use on a small player.
 //
-// What. A film of the page keeps no control bar: it shows its picture, a play mark and a pointer cursor, and a click on it opens a dialog that
-// covers the page. In the dialog the whole picture is shown (`object-fit: contain`, black bars on the sides if the screen is wider) and the
-// controls are in a bar BELOW the picture, never over it. The browser's full screen is asked for the dialog, never for the film.
+// What. A film of the page keeps no control bar: it shows its picture, a play mark and a pointer cursor, and a click on it opens a pop-up: a
+// centred box (16:9, 1000 px at most, 92 % of the width, never taller than the window) over a dimmed page, with a title and a cross above the
+// picture. In the box the whole picture is shown (`object-fit: contain`, black bars on the sides if the film is wider) and the controls are in
+// a bar BELOW the picture, never over it. No browser full screen at all (Daniel, 10 October 2026: « un pop-up plutôt que le plein écran »; it is
+// the shape of the pop-up of the manual's help panel, which he liked): there is no full screen left to cut the top and the bottom.
 //
 // Plain DOM on purpose: the three places that show a lesson film (the learner page, the course card and the editor preview) draw their
 // `<video>` in different ways, none of which we want to fork. Only attributes are touched on the films themselves, never their place in the DOM.
@@ -24,6 +26,7 @@ const supportsHover = (): boolean =>
 
 const SPEEDS = [1, 1.25, 1.5, 2, 0.75]
 const BAR_HEIGHT = 56
+const HEAD_HEIGHT = 40
 
 const ICON = {
 	play: '<path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/>',
@@ -200,17 +203,37 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	overlay.setAttribute('role', 'dialog')
 	overlay.setAttribute('aria-modal', 'true')
 	overlay.setAttribute('aria-label', translate('Enlarge the video'))
-	overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;background:#000;'
+	// the dimmed page around the pop-up; a click on it closes the pop-up
+	overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:rgba(20,20,20,.62);'
+	const opener = document.activeElement as HTMLElement | null
 
-	// the stage: the picture, whole, in all the room left above the control bar
+	// the pop-up: 16:9 picture, 1000 px at most, 92 % of the width, and never taller than the window (head and bar included)
+	const box = document.createElement('div')
+	box.className = 'neo-video-box'
+	box.style.cssText =
+		`display:flex;flex-direction:column;width:min(1000px,92vw,calc((92vh - ${HEAD_HEIGHT + BAR_HEIGHT}px) * 16 / 9));` +
+		'background:#141414;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);'
+
+	// the head: what is being watched, and the cross
+	const head = document.createElement('div')
+	head.style.cssText = `flex:0 0 ${HEAD_HEIGHT}px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 6px 0 16px;color:#f6f1e9;font:500 13px/1 system-ui,sans-serif;`
+	const title = document.createElement('span')
+	title.style.cssText = 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
+	title.textContent = source.getAttribute('aria-label') || source.getAttribute('title') || document.title
+	const close = button(translate('Close the enlarged view'), '×')
+	close.style.fontSize = '26px'
+	head.append(title, close)
+
+	// the stage: the picture, whole, in a 16:9 frame. The film is laid out absolutely with no margin of its own: a content stylesheet that
+	// puts a top margin on media would otherwise push it down and cut its bottom.
 	const stage = document.createElement('div')
-	stage.style.cssText = 'position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;cursor:pointer;'
+	stage.style.cssText = 'position:relative;width:100%;aspect-ratio:16/9;background:#000;cursor:pointer;'
 	const video = document.createElement('video')
 	video.src = source.currentSrc || source.getAttribute('src') || source.querySelector('source')?.getAttribute('src') || ''
 	video.playsInline = true
 	video.preload = 'auto'
-	// Never "cover": the picture is scaled to fit inside the box, whatever the shape of the screen.
-	video.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000;outline:none;'
+	// Never "cover": the picture is scaled to fit inside the frame, whatever its shape.
+	video.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;margin:0;display:block;object-fit:contain;background:#000;outline:none;'
 	stage.appendChild(video)
 
 	// the control bar: BELOW the picture, never over it
@@ -225,9 +248,7 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	const mute = button(translate('Mute'), svg(ICON.volume))
 	const volume = slider(translate('Volume'), { width: 80 })
 	volume.set(1)
-	const close = button(translate('Close the enlarged view'), '×')
-	close.style.fontSize = '26px'
-	bar.append(toggle, time, seek.el, speed, mute, volume.el, close)
+	bar.append(toggle, time, seek.el, speed, mute, volume.el)
 
 	const refresh = () => {
 		time.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`
@@ -280,9 +301,9 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 		const at = video.currentTime
 		video.pause()
 		document.removeEventListener('keydown', onKey, true)
-		if (document.fullscreenElement === overlay) void document.exitFullscreen().catch(() => {})
 		overlay.remove()
 		if (at) source.currentTime = at
+		opener?.focus?.({ preventScroll: true })
 		schedulePlacement()
 	}
 	const onKey = (event: KeyboardEvent) => {
@@ -308,10 +329,9 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	})
 	document.addEventListener('keydown', onKey, true)
 
-	overlay.append(stage, bar)
+	box.append(head, stage, bar)
+	overlay.appendChild(box)
 	document.body.appendChild(overlay)
-	// The browser's full screen is asked for the dialog, not the film: the film stays inside its box and keeps its shape.
-	if (typeof overlay.requestFullscreen === 'function') void overlay.requestFullscreen().catch(() => {})
 	close.focus({ preventScroll: true })
 	refresh()
 	return overlay
