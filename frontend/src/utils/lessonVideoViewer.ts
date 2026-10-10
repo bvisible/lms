@@ -4,7 +4,8 @@
 // The same gesture and the same pop-up as the clips of the manual (wiki app, `neoffice-video.js` and `#video-viewer` in `neoffice-wiki.css`;
 // Daniel, 10 October 2026: « ce n'est pas le même pop-up », « va regarder comme ça fait de l'autre côté »). The small player of the page stays a
 // normal player, with the native strip of controls at the bottom (a click on its Play plays the film in the page). A click on the PICTURE, outside
-// that strip, opens a pop-up over a dimmed page: the film alone, with its native controls, as wide as 92 % of the window allows without its height
+// that strip, is a two-step gesture: on a film that is not playing it starts it in the page; on a film that is playing it opens a pop-up over a
+// dimmed page: the film alone, with its native controls, as wide as 92 % of the window allows without its height
 // passing 88 % of it (so it enlarges a film on a small screen as well as on a big one), a round cross at the top right. Escape, a click outside the
 // film and the cross close it. The playing position is carried both ways: the film starts where the small player was, and the small player
 // resumes where the pop-up stopped. The browser's own full-screen button is taken off the small player (Chrome honours `controlsList`), which is
@@ -162,7 +163,10 @@ export function installLessonVideoViewer(): void {
 			event.preventDefault()
 			event.stopPropagation()
 			event.stopImmediatePropagation()
-			openViewer(video)
+			// One gesture, two steps (Daniel, 10 October 2026: « un clic dans la fenêtre que ça lise, et quand ça lit, un deuxième clic fasse un pop-up »):
+			// a film that is not playing is started in the page; a film that is playing is enlarged, from where it is.
+			if (video.paused || video.ended) void video.play().catch(() => {})
+			else openViewer(video)
 		},
 		true
 	)

@@ -96,20 +96,48 @@ describe('lessonVideoViewer', () => {
 		expect(document.body.style.overflow).toBe('')
 	})
 
-	it('opens the pop-up on a click in the picture, leaves a click in the strip of native controls to the player, and the first never reaches the film', () => {
+	// jsdom has no media engine: whether a film is playing is a plain property here
+	const setPlaying = (video: HTMLVideoElement, playing: boolean) =>
+		Object.defineProperty(video, 'paused', { value: !playing, configurable: true })
+	const clickAt = (video: HTMLVideoElement, clientY: number) =>
+		video.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY }))
+	const filmOnPage = () => {
 		installLessonVideoViewer()
 		const source = filmWithControls()
 		source.getBoundingClientRect = () => ({ top: 0, bottom: 400, left: 0, right: 700, width: 700, height: 400, x: 0, y: 0, toJSON: () => ({}) })
 		enhanceVideos(document)
+		return source
+	}
+
+	it('starts a film that is not playing in the page when its picture is clicked: the pop-up is the second click', () => {
+		const source = filmOnPage()
 		const reachedFilm = vi.fn()
 		source.addEventListener('click', reachedFilm)
-		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 100 }))
-		expect(document.querySelector('.neo-video-viewer')).not.toBeNull()
-		expect(reachedFilm).not.toHaveBeenCalled()
+		clickAt(source, 100)
+		expect(source.play).toHaveBeenCalledTimes(1) // first click: it plays in the page
+		expect(document.querySelector('.neo-video-viewer')).toBeNull()
+		expect(reachedFilm).not.toHaveBeenCalled() // the player's own click-to-play never sees it: no double toggle
+	})
+
+	it('opens the pop-up when the picture of a film that is playing is clicked, from where the film is', () => {
+		const source = filmOnPage()
+		setPlaying(source, true)
+		clickAt(source, 100)
+		expect(document.querySelector('.neo-video-viewer')).not.toBeNull() // second click: the pop-up
+		expect(source.pause).toHaveBeenCalled() // the small player stops, the pop-up carries on
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
-		// the strip of 52 px at the bottom is the native Play / volume / seek bar
-		source.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 100, clientY: 380 }))
+	})
+
+	it('starts a film that has ended again in the page, and leaves a click in the strip of native controls to the player', () => {
+		const source = filmOnPage()
+		Object.defineProperty(source, 'ended', { value: true, configurable: true })
+		clickAt(source, 100)
+		expect(source.play).toHaveBeenCalledTimes(1)
+		setPlaying(source, true)
+		const reachedFilm = vi.fn()
+		source.addEventListener('click', reachedFilm)
+		clickAt(source, 380) // the 52 px at the bottom are the native Play / volume / seek bar, whatever the film is doing
 		expect(document.querySelector('.neo-video-viewer')).toBeNull()
 		expect(reachedFilm).toHaveBeenCalledTimes(1)
 	})
