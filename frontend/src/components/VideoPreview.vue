@@ -8,6 +8,7 @@
 		class="min-h-56 w-full rounded-t-md"
 		allowfullscreen
 	/>
+	<!-- //// Neoffice — see the block marker above: course image as poster -->
 	<video
 		v-else-if="videoPreview.type === 'file' && !videoError"
 		:src="videoPreview.src"

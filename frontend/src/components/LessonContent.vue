@@ -3,6 +3,7 @@
 	     (200 on a phone) at 100% width: on a wide column a 16:9 film is letterboxed with black bars on both sides. The address comes from
 	     `youtubeEmbed.ts` (no « more videos » from other channels, no automatic captions by default). At the merge: keep ours. -->
 	<div v-if="youtube">
+		<!-- //// Neoffice — see the block marker above: 16:9 aspect-ratio fix -->
 		<iframe
 			class="youtube-video"
 			:src="getYouTubeVideoSource(youtube.split('/').pop())"
@@ -15,6 +16,7 @@
 	</div>
 	<div v-for="(block, index) in content?.split('\n\n')" :key="index">
 		<div v-if="block.includes('{{ YouTubeVideo')">
+			<!-- //// Neoffice — see the block marker above: 16:9 aspect-ratio fix -->
 			<iframe
 				class="youtube-video"
 				:src="getYouTubeVideoSource(block)"
