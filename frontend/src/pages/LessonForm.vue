@@ -100,6 +100,8 @@ import {
 } from '@/utils/lessonForm'
 import { convertBodyToBlocks as convertToJSON } from '@/utils/lessonMacros'
 import { hasVideoContent } from '@/utils/video'
+//// Neoffice — see utils/lessonAutosave.ts: opening a lesson must never save it.
+import { shouldMarkDirty } from '@/utils/lessonAutosave'
 import BlockEditor from '@/components/BlockEditor.vue'
 import { useOnboarding, useTelemetry } from 'frappe-ui/frappe'
 import {
@@ -152,6 +154,12 @@ const emit = defineEmits(['saved'])
 
 // True after initial render, so render()'s onChange doesn't autosave.
 let initialLoadComplete = false
+//// Neoffice — true after a key, a paste, a drop or a click in the editor (see lessonAutosave.ts).
+let userTouched = false
+const touchIfInEditor = (event) => {
+	if (event.target?.closest?.('.codex-editor, .ce-popover, .ce-inline-toolbar, .ce-toolbar')) userTouched = true
+}
+const TOUCH_EVENTS = ['keydown', 'paste', 'drop', 'cut', 'pointerdown']
 
 const props = defineProps({
 	courseName: {
@@ -184,7 +192,8 @@ function markDirty({ fromTitle = false } = {}) {
 	if (lessonDeleted) return
 	if (!lessonDetails.data?.lesson) return
 	// render() fires onChange; gate non-title saves until loaded.
-	if (!fromTitle && !initialLoadComplete) return
+	//// Neoffice — and, for a lesson that only has a Markdown body, until the user does something in the editor (see lessonAutosave.ts).
+	if (!shouldMarkDirty({ fromTitle, initialLoadComplete, hasSavedContent: Boolean(lessonDetails.data?.lesson?.content), userTouched })) return
 	isDirty.value = true
 	// Capture block data now so a later flush persists latest, not stale.
 	if (!fromTitle) captureEditors()
@@ -201,6 +210,8 @@ defineExpose({
 })
 
 onMounted(() => {
+	//// Neoffice — see lessonAutosave.ts.
+	TOUCH_EVENTS.forEach((name) => document.addEventListener(name, touchIfInEditor, true))
 	if (!user.data?.is_moderator && !user.data?.is_instructor) {
 		window.location.href = '/login'
 	}
@@ -309,6 +320,7 @@ const addInstructorNotes = (data) => {
 }
 
 onBeforeUnmount(() => {
+	TOUCH_EVENTS.forEach((name) => document.removeEventListener(name, touchIfInEditor, true))
 	isUnmounting = true
 	// Flush unsaved edits before teardown; skip if deleted.
 	if (lessonDeleted) return

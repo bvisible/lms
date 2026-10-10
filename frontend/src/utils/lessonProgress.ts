@@ -28,3 +28,9 @@ export function shouldAttachVideoFallback(opts: {
 }): boolean {
 	return opts.hasVideo && !!opts.enforceVideo
 }
+
+//// Neoffice — a lesson with several films (the presentation of the course, then the lesson's own film) is validated when ALL of them have been
+//// watched to the end, not when the first one ends. Upstream marks the lesson as done at the end of any film.
+export function allFilmsWatched(films: { currentTime: number; duration: number }[]): boolean {
+	return films.length > 0 && films.every((film) => isVideoComplete(film.currentTime, film.duration))
+}

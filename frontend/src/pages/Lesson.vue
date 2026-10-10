@@ -361,6 +361,8 @@ import { useSettings } from '@/stores/settings'
 import {
 	resolveDwellSeconds,
 	isVideoComplete,
+	//// Neoffice — the lesson is validated when all its films are watched (see lessonProgress.ts).
+	allFilmsWatched,
 	shouldStartDwellTimer,
 	shouldAttachVideoFallback,
 } from '@/utils/lessonProgress'
@@ -745,12 +747,15 @@ const onSecureVideoEnded = () => {
 	trackVideoWatchDuration()
 }
 
+//// Neoffice — the films of the page (not the one of the enlarged view, which reports to its own film of the page).
+const pageFilms = () => Array.from(document.querySelectorAll('video')).filter((v) => !v.closest('.neo-video-viewer'))
 const getVideoDetails = () => {
 	let details = []
 	const videos = document.querySelectorAll('video')
 	if (videos.length > 0) {
 		videos.forEach((video) => {
-			if (isVideoComplete(video.currentTime, video.duration)) markProgress()
+			//// Neoffice — only when ALL the films of the lesson are watched (upstream: this one is enough).
+			if (isVideoComplete(video.currentTime, video.duration) && allFilmsWatched(pageFilms())) markProgress()
 			details.push({
 				source: video.src,
 				watch_time: video.currentTime,
@@ -887,7 +892,8 @@ const updateVideoWatchDuration = () => {
 
 const attachVideoEndedListeners = () => {
 	const onVideoEnded = () => {
-		markProgress()
+		//// Neoffice — a lesson with several films is validated at the end of the last one, not of the first (upstream: any film).
+		if (allFilmsWatched(pageFilms())) markProgress()
 		trackVideoWatchDuration()
 	}
 
