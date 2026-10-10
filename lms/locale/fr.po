@@ -10894,3 +10894,11 @@ msgstr "Non publié"
 #: frontend/src/pages/Courses/CourseDetail.vue
 msgid "View as a learner"
 msgstr "Voir comme un apprenant"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Enlarge the video"
+msgstr "Agrandir la vidéo"
+
+#: frontend/src/utils/lessonVideoViewer.ts
+msgid "Close the enlarged view"
+msgstr "Fermer la vue agrandie"

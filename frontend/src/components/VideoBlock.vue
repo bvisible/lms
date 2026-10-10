@@ -371,6 +371,22 @@ const dropdownOptions = computed(() =>
 	width: 100%;
 	height: auto;
 }
+/* //// Neoffice — the full screen button puts `.video-block` (the container) in full screen, and the film inside is `width: 100%; height: auto`: on a
+   very wide screen its height is taller than the screen and the top and the bottom are cut. In full screen the film is scaled to fit inside
+   the box instead, with black around it. */
+.video-block:fullscreen {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #000;
+}
+.video-block:fullscreen video {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	border: 0;
+	border-radius: 0;
+}
 
 iframe {
 	width: 100%;
