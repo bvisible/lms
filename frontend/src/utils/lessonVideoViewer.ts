@@ -91,6 +91,12 @@ export function enhanceVideos(root: ParentNode = document): void {
 		if (video.closest('.neo-video-viewer')) return
 		video.setAttribute(VIEWER_ATTRIBUTE, '1')
 		video.removeAttribute('controls') // no control bar over the picture: the controls are in the dialog, below it
+		// A film `foo.mp4` has its poster `foo.jpg` next to it: shown until the film is played (its first image is often the blank paper of the
+		// opening of the series). A missing poster is simply not shown.
+		if (!video.getAttribute('poster')) {
+			const src = video.getAttribute('src') || video.querySelector('source')?.getAttribute('src') || ''
+			if (/\.(mp4|webm|mov)$/i.test(src)) video.setAttribute('poster', src.replace(/\.(mp4|webm|mov)$/i, '.jpg'))
+		}
 		video.style.cursor = 'pointer'
 		if (typeof IntersectionObserver === 'function') {
 			observer = observer || new IntersectionObserver((entries) => {

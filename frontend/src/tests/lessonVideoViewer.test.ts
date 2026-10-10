@@ -30,6 +30,22 @@ describe('lessonVideoViewer', () => {
 		expect(document.querySelectorAll('.neo-video-mark').length).toBe(1)
 	})
 
+	it('shows the jpg next to a film as its poster, and keeps a poster that is already there', () => {
+		const film = filmWithControls()
+		const withPoster = document.createElement('video')
+		withPoster.setAttribute('controls', '')
+		withPoster.setAttribute('src', '/files/other.mp4')
+		withPoster.setAttribute('poster', '/files/cover.png')
+		const withSource = document.createElement('video')
+		withSource.setAttribute('controls', '')
+		withSource.innerHTML = '<source src="/files/third.mp4" type="video/mp4">'
+		document.body.append(withPoster, withSource)
+		enhanceVideos(document)
+		expect(film.getAttribute('poster')).toBe('/files/film.jpg')
+		expect(withPoster.getAttribute('poster')).toBe('/files/cover.png')
+		expect(withSource.getAttribute('poster')).toBe('/files/third.jpg')
+	})
+
 	it('leaves a video without controls alone', () => {
 		const video = document.createElement('video')
 		document.body.appendChild(video)
