@@ -126,3 +126,7 @@ which is what keeps the merge surface at zero:
 **No whitespace-only divergence** was found: no source file's diff against BASE disappears under
 `git diff -w --ignore-blank-lines`, so there is nothing to "just take upstream" for formatting.
 **No whole-file reformat** either — our largest source diff is 75 added lines (`lms/hooks.py`).
+
+## Auto-marked (fork-markers workflow)
+
+- `lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json` — new DocType `Neoffice External Learner` (added file, no upstream equivalent): instance, e-mail, account, customer, access models, access valid until, enabled, first/last entry fields — backs the signed entry of a customer's employee into the courses via `lms.lms.neoffice_enter.enter`; switching a row off disables the linked account and ends its sessions (69b1b8395 "feat(lms): signed entry of a customer's employee into the courses (door A of the learner / instance plan)")
