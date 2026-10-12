@@ -72,6 +72,9 @@ class TestInstanceLinkAddress(UnitTestCase):
 		self.assertEqual(ni.get_instance_base(), {"mode": "none", "base": ""})
 
 
+UNSET = object()
+
+
 class TestFiduciaryDoor(UnitTestCase):
 	"""Door B: the staff of an accounting firm chooses a client and the hub opens it."""
 
@@ -90,13 +93,13 @@ class TestFiduciaryDoor(UnitTestCase):
 		frappe.set_user(self.original_user)
 		frappe.conf.pop("neoffice_lms_mode", None)
 
-	def hooks(self, options=None, link=None):
+	def hooks(self, options=None, link=UNSET):
 		def list_instances():
 			return self.OPTIONS if options is None else options
 
 		def open_url(instance, path):
 			self.calls.append((instance, path))
-			return link or self.LINK
+			return self.LINK if link is UNSET else link
 
 		self.fake_instances, self.fake_open = list_instances, open_url
 		module = "lms.lms.test_neoffice_instance"
