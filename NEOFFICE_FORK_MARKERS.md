@@ -60,9 +60,10 @@ commit since BASE is ours.*
 ### Build artifacts — mark the SOURCE, never the artifact
 
 These are committed **outputs**. Any marker written into them is erased by the next build, so
-they are deliberately left unmarked; the checker still lists them, which is expected.
+they are deliberately left unmarked, and the checker skips them because this table is headed `Artifact`, the only
+word it reads (a table headed `Path` was ignored: `lms/www/_lms.html` was flagged after every build, 10 October 2026).
 
-| Path | Produced by | Source that carries the marker |
+| Artifact | Produced by | Source that carries the marker |
 |---|---|---|
 | `lms/public/frontend/**` (438 files, +10 353 lines) | `yarn build` in `frontend/`, committed by `.github/workflows/build-and-commit-assets.yml` | `frontend/src/**` (marked) and `.gitignore` (marked: the three ignores upstream has are commented out on purpose) |
 | `lms/www/lms.html`, `lms/www/_lms.html` | the same vite build — `frontend/vite.config.js` sets `buildConfig.indexHtmlPath: '../lms/www/_lms.html'` | `frontend/vite.config.js` (marked) and `.gitignore` (marked) |
