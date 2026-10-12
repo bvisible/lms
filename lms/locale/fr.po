@@ -11041,3 +11041,12 @@ msgstr "Ouvrir dans le Neoffice de :"
 #: lms/lms/neoffice_instance.py
 msgid "You do not have access to this client."
 msgstr "Vous n’avez pas accès à ce client."
+
+# //// Neoffice — the progress of the customers' employees (neoffice_team.py).
+#: lms/lms/report/neoffice_learner_progress/neoffice_learner_progress.py
+msgid "Neoffice Learner Progress"
+msgstr "Progression des apprenants Neoffice"
+
+#: lms/lms/report/neoffice_learner_progress/neoffice_learner_progress.py
+msgid "Lessons completed"
+msgstr "Leçons terminées"

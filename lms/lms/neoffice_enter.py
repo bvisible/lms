@@ -370,15 +370,15 @@ def leave(t: str = None):
 		return _refuse_call(EnterRefused("unexpected error", detail=frappe.get_traceback()), t if signed else None)
 
 
-def _refuse_call(e: EnterRefused, signed_token=None) -> dict:
+def _refuse_call(e: EnterRefused, signed_token=None, what: str = "leave") -> dict:
 	"""The refusal of an API call: a 403 with no detail, and the same trace as the entry door (no token, no secret)."""
 	try:
 		frappe.db.rollback(save_point=SAVEPOINT)
 	except Exception:
 		frappe.db.rollback()
-	frappe.logger("lms").warning(f"Learner leave refused: {e.reason}")
+	frappe.logger("lms").warning(f"Learner {what} refused: {e.reason}")
 	if _may_log_refusal(e.reason, signed_token):
-		frappe.log_error(f"Learner leave refused: {e.reason}"[:140], e.detail or e.reason)
+		frappe.log_error(f"Learner {what} refused: {e.reason}"[:140], e.detail or e.reason)
 		frappe.local.flags.commit = True
 	frappe.local.response["http_status_code"] = 403
 	return {"ok": False}
