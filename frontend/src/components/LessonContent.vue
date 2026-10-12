@@ -44,6 +44,11 @@
 				@ended="emit('video-ended')"
 			/>
 		</div>
+		<!-- //// Neoffice — the `{{ InstanceLink("/app/…", "label") }}` branch: a link to the learner's own Neoffice, in a new tab (see InstanceLink.vue
+		     and utils/instanceLink.ts). A malformed macro shows nothing rather than its source. -->
+		<div v-else-if="block.includes('{{ InstanceLink')">
+			<InstanceLink v-if="parseInstanceLink(block)" v-bind="parseInstanceLink(block)" />
+		</div>
 		<div v-else-if="block.includes('{{ Video')">
 			<!-- //// Neoffice — the film has the width of the text above it (the lesson column is centred and capped, see `.neo-lesson-column` in Lesson.vue),
 			     with 24px above and below (as the images of the lesson and the clips of the manual) and rounded corners (Daniel, 10 October 2026: « aligner les deux, film et texte »). The pop-up
@@ -89,6 +94,9 @@
 import Quiz from '@/components/QuizBlock.vue'
 //// Neoffice — 36c69d63: the player for subscription-gated Infomaniak videos.
 import SecureVideo from '@/components/SecureVideo.vue'
+//// Neoffice — the link of a lesson to the learner's own Neoffice.
+import InstanceLink from '@/components/InstanceLink.vue'
+import { parseInstanceLink } from '@/utils/instanceLink'
 import PdfBlock from '@/components/PdfBlock.vue'
 import MarkdownIt from 'markdown-it'
 import { getMacroArg } from '@/utils/lessonMacros'

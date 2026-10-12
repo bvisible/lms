@@ -10930,3 +10930,8 @@ msgstr "Volume"
 #: lms/neoffice_commerce.py
 msgid "Access months"
 msgstr "Mois d’accès"
+
+# //// Neoffice — the lesson link to the learner's own Neoffice (InstanceLink).
+#: frontend/src/components/InstanceLink.vue
+msgid "Open your Neoffice to try it yourself."
+msgstr "Ouvrez votre Neoffice pour l’essayer vous-même."
