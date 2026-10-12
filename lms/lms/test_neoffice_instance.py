@@ -1,4 +1,6 @@
 # //// Neoffice — added file (no upstream equivalent): the rules of the InstanceLink address.
+from unittest.mock import patch as unittest_patch
+
 import frappe
 from frappe.tests import UnitTestCase
 
@@ -68,3 +70,120 @@ class TestInstanceLinkAddress(UnitTestCase):
 
 	def test_nobody_is_linked_yet_on_a_hub(self):
 		self.assertEqual(ni.get_instance_base(), {"mode": "none", "base": ""})
+
+
+class TestFiduciaryDoor(UnitTestCase):
+	"""Door B: the staff of an accounting firm chooses a client and the hub opens it."""
+
+	OPTIONS = [
+		{"instance": "SRV-0029", "label": "Osiris SA", "host": "osiris.neoffice.me"},
+		{"instance": "SRV-0072", "label": "DMIS SA", "host": "dmis.ch"},
+	]
+	LINK = "https://osiris.neoffice.me/api/method/neoffice_theme.sso.sso_login?token=t"
+
+	def setUp(self):
+		self.original_user = frappe.session.user
+		self.calls = []
+		frappe.local.response = frappe._dict()
+
+	def tearDown(self):
+		frappe.set_user(self.original_user)
+		frappe.conf.pop("neoffice_lms_mode", None)
+
+	def hooks(self, options=None, link=None):
+		def list_instances():
+			return self.OPTIONS if options is None else options
+
+		def open_url(instance, path):
+			self.calls.append((instance, path))
+			return link or self.LINK
+
+		self.fake_instances, self.fake_open = list_instances, open_url
+		module = "lms.lms.test_neoffice_instance"
+		original = frappe.get_hooks
+		hooks = {
+			"neoffice_lms_fiduciary_instances": [f"{module}.FIDUCIARY_INSTANCES"],
+			"neoffice_lms_fiduciary_open": [f"{module}.FIDUCIARY_OPEN"],
+		}
+		globals()["FIDUCIARY_INSTANCES"], globals()["FIDUCIARY_OPEN"] = list_instances, open_url
+		return unittest_patch(frappe, "get_hooks", lambda name=None, *a, **k: hooks.get(name) if name in hooks else original(name, *a, **k))
+
+	def test_a_person_with_clients_is_offered_them_instead_of_nothing(self):
+		with self.hooks():
+			frappe.set_user("Administrator")
+			base = ni.get_instance_base()
+		self.assertEqual(base, {"mode": "fiduciary", "base": "", "options": self.OPTIONS})
+
+	def test_a_guest_and_a_person_without_clients_are_offered_nothing(self):
+		with self.hooks():
+			frappe.set_user("Guest")
+			self.assertEqual(ni.get_instance_base(), {"mode": "none", "base": ""})
+		with self.hooks(options=[]):
+			frappe.set_user("Administrator")
+			self.assertEqual(ni.get_instance_base(), {"mode": "none", "base": ""})
+
+	def test_nothing_is_offered_when_the_course_lives_on_an_instance(self):
+		frappe.conf["neoffice_lms_mode"] = "instance"
+		with self.hooks():
+			frappe.set_user("Administrator")
+			self.assertEqual(ni.get_instance_base(), {"mode": "local", "base": ""})
+
+	def test_the_options_are_cleaned(self):
+		with self.hooks(options=[{"instance": " SRV-1 ", "label": "x" * 300}, {"label": "no id"}, {"instance": ""}]):
+			frappe.set_user("Administrator")
+			options = ni.fiduciary_options()
+		self.assertEqual(len(options), 1)
+		self.assertEqual((options[0]["instance"], len(options[0]["label"]), options[0]["host"]), ("SRV-1", 140, ""))
+
+	def test_the_chosen_client_is_opened_through_the_hub(self):
+		with self.hooks():
+			frappe.set_user("Administrator")
+			ni.open_instance("SRV-0029", "/app/nora-demo/new")
+		self.assertEqual(self.calls, [("SRV-0029", "/app/nora-demo/new")])
+		self.assertEqual(frappe.local.response["type"], "redirect")
+		self.assertEqual(frappe.local.response["location"], self.LINK)
+
+	def test_a_client_the_hub_did_not_offer_this_person_is_never_opened(self):
+		with self.hooks():
+			frappe.set_user("Administrator")
+			for instance in ("SRV-9999", "", None, "SRV-0029 "):
+				frappe.local.response = frappe._dict()
+				ni.open_instance(instance, "/app/item/new")
+				self.assertEqual(frappe.local.response.get("http_status_code"), 403, instance)
+		self.assertEqual(self.calls, [])
+
+	def test_only_desk_paths_are_opened(self):
+		with self.hooks():
+			frappe.set_user("Administrator")
+			for path in ("/login", "/app/item?x=1", "https://evil.example", "/app/item/DOC-1", "", None):
+				frappe.local.response = frappe._dict()
+				ni.open_instance("SRV-0029", path)
+				self.assertEqual(frappe.local.response.get("http_status_code"), 403, path)
+		self.assertEqual(self.calls, [])
+
+	def test_a_link_that_is_not_the_signed_door_of_an_instance_is_refused(self):
+		for link in ("http://osiris.neoffice.me/api/method/neoffice_theme.sso.sso_login?token=t", "https://evil.example/", "/app", None):
+			with self.hooks(link=link):
+				frappe.set_user("Administrator")
+				frappe.local.response = frappe._dict()
+				ni.open_instance("SRV-0029", "/app/item")
+				self.assertEqual(frappe.local.response.get("http_status_code"), 403, link)
+				self.assertNotEqual(frappe.local.response.get("type"), "redirect")
+
+	def test_a_guest_cannot_open_anything(self):
+		with self.hooks():
+			frappe.set_user("Guest")
+			with self.assertRaises(frappe.PermissionError):
+				ni.open_instance("SRV-0029", "/app/item")
+		self.assertEqual(self.calls, [])
+
+	def test_the_hubs_refusal_is_a_plain_page(self):
+		def refuse(instance, path):
+			raise frappe.PermissionError("You do not have access to this client.")
+
+		with self.hooks():
+			globals()["FIDUCIARY_OPEN"] = refuse
+			frappe.set_user("Administrator")
+			ni.open_instance("SRV-0029", "/app/item")
+		self.assertEqual(frappe.local.response.get("http_status_code"), 403)
+		self.assertNotEqual(frappe.local.response.get("type"), "redirect")

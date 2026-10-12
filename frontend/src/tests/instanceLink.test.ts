@@ -1,10 +1,12 @@
 //// Neoffice — added file (no upstream equivalent): the macro `{{ InstanceLink("/app/…", "…") }}` and its address rules.
 import { describe, expect, it } from 'vitest'
 import {
+	buildFiduciaryUrl,
 	buildInstanceUrl,
 	isAllowedOrigin,
 	isAllowedPath,
 	parseInstanceLink,
+	pickFiduciaryOption,
 } from '@/utils/instanceLink'
 
 describe('parseInstanceLink', () => {
@@ -106,5 +108,40 @@ describe('buildInstanceUrl', () => {
 		expect(buildInstanceUrl('https://dmis.neoffice.me', '/app/item?x=1')).toBeNull()
 		expect(buildInstanceUrl('http://dmis.neoffice.me', '/app/item')).toBeNull()
 		expect(buildInstanceUrl('https://dmis.neoffice.me/x', '/app/item')).toBeNull()
+	})
+})
+
+describe('buildFiduciaryUrl', () => {
+	it('goes through the hub with the client and the page, both encoded', () => {
+		expect(buildFiduciaryUrl('SRV-0029', '/app/nora-demo/new')).toBe(
+			'/api/method/lms.lms.neoffice_instance.open_instance?instance=SRV-0029&path=%2Fapp%2Fnora-demo%2Fnew'
+		)
+	})
+
+	it('returns null when the page or the client is not acceptable', () => {
+		expect(buildFiduciaryUrl('SRV-0029', '/login')).toBeNull()
+		expect(buildFiduciaryUrl('SRV-0029', '/app/item?x=1')).toBeNull()
+		for (const instance of ['', ' SRV-0029', 'SRV 0029', 'a/b', 'a&path=/login', '-x', 'x'.repeat(141)])
+			expect(buildFiduciaryUrl(instance, '/app/item')).toBeNull()
+	})
+})
+
+describe('pickFiduciaryOption', () => {
+	const options = [
+		{ instance: 'SRV-0029', label: 'Osiris SA', host: 'osiris.neoffice.me' },
+		{ instance: 'SRV-0072', label: 'DMIS SA', host: 'dmis.ch' },
+	]
+
+	it('keeps the remembered client while it is still offered', () => {
+		expect(pickFiduciaryOption(options, 'SRV-0072')?.label).toBe('DMIS SA')
+	})
+
+	it('falls back to the first client', () => {
+		expect(pickFiduciaryOption(options, null)?.instance).toBe('SRV-0029')
+		expect(pickFiduciaryOption(options, 'SRV-0001')?.instance).toBe('SRV-0029')
+	})
+
+	it('has nothing to pick without clients', () => {
+		expect(pickFiduciaryOption([], 'SRV-0029')).toBeNull()
 	})
 })

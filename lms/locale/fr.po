@@ -11032,3 +11032,12 @@ msgstr "Première entrée"
 #: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
 msgid "Last seen"
 msgstr "Dernière entrée"
+
+# //// Neoffice — door B: the staff of an accounting firm opens a client's Neoffice from a lesson.
+#: frontend/src/components/InstanceLink.vue
+msgid "Open in the Neoffice of:"
+msgstr "Ouvrir dans le Neoffice de :"
+
+#: lms/lms/neoffice_instance.py
+msgid "You do not have access to this client."
+msgstr "Vous n’avez pas accès à ce client."

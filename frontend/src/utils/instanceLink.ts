@@ -7,7 +7,9 @@
 ////  - the path is a desk path of a doctype, a new document or a list, nothing else (`/app/<doctype>`, `/app/<doctype>/new`,
 ////    `/app/<doctype>/view/list`), with no query string and no fragment: a lesson cannot carry data to the instance;
 ////  - the base is an https origin with no path, taken from the learner's registered instance (or empty when the course lives on
-////    the instance itself: the link is then relative to the same site).
+////    the instance itself: the link is then relative to the same site);
+////  - for the staff of an accounting firm (one Neoffice per client) the link goes through the hub, which checks the mandate and
+////    signs the person in: `/api/method/lms.lms.neoffice_instance.open_instance?instance=<id>&path=<path>`.
 //// At the merge: kept whole.
 
 export interface InstanceLinkMacro {
@@ -52,4 +54,36 @@ export function buildInstanceUrl(base: string, path: string): string | null {
 	if (!base) return path
 	if (!isAllowedOrigin(base)) return null
 	return base + path
+}
+
+export interface FiduciaryOption {
+	instance: string
+	label: string
+	host: string
+}
+
+// The id of a client instance as the hub names it (SRV-0029): letters, digits, dot, dash, underscore.
+const INSTANCE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,139}$/
+
+/**
+ * The address of a link for the staff of an accounting firm: the hub opens the chosen client's Neoffice, signed in, on the page
+ * of the lesson. null when the path or the client is not acceptable: the caller then shows no link.
+ */
+export function buildFiduciaryUrl(instance: string, path: string): string | null {
+	if (!isAllowedPath(path) || !INSTANCE_ID.test(instance)) return null
+	return (
+		'/api/method/lms.lms.neoffice_instance.open_instance?instance=' +
+		encodeURIComponent(instance) +
+		'&path=' +
+		encodeURIComponent(path)
+	)
+}
+
+/** The client to preselect: the one remembered if it is still offered, the first (or only) one otherwise. */
+export function pickFiduciaryOption(
+	options: FiduciaryOption[],
+	remembered: string | null
+): FiduciaryOption | null {
+	if (!options.length) return null
+	return options.find((option) => option.instance === remembered) || options[0]
 }
