@@ -28,6 +28,10 @@ the json is::
   instance, never an account the site already had. A person who works for two customers gets two accounts
   and two labels.
 
+The way out: when a person's account is disabled or deleted on the instance, the instance tells this site with a token of
+``purpose`` ``lms-leave`` (:func:`leave`); the learner is switched off and the account here is disabled. A later entry
+signed by the same instance switches it back on, but only if the instance was the one to switch it off.
+
 Where the secret of an instance comes from: the hook ``neoffice_lms_instance_secret`` (a function taking
 the host; the hub's app answers from its Cloud Instance), then ``site_config.json``'s
 ``neoffice_lms_instance_secrets`` (``{"host": "secret"}``, enough for a test).
@@ -50,6 +54,7 @@ from frappe.utils import getdate, now_datetime, nowdate, validate_email_address
 from lms.lms import neoffice_instance
 
 PURPOSE = "lms-enter"
+LEAVE_PURPOSE = "lms-leave"
 MAX_TOKEN_LENGTH = 4096
 MAX_LIFETIME = 300  # a token living longer than this is refused, whatever the instance signed
 CLOCK_SKEW = 5
@@ -102,8 +107,11 @@ def instance_secret(host: str) -> str | None:
 	return None
 
 
-def verify_token(token, now: int | None = None) -> dict:
-	"""The claims of a token, once its signature and every claim checked. Raises EnterRefused."""
+def verify_token(token, now: int | None = None, purpose: str = PURPOSE) -> dict:
+	"""The claims of a token, once its signature and every claim checked. Raises EnterRefused.
+
+	``purpose`` is the one the caller expects: an entry token cannot switch an access off, nor the other way round.
+	"""
 	if not token or not isinstance(token, str) or "." not in token or len(token) > MAX_TOKEN_LENGTH:
 		raise EnterRefused("malformed token")
 	body_b64, sig = token.rsplit(".", 1)
@@ -129,8 +137,8 @@ def verify_token(token, now: int | None = None) -> dict:
 	def refuse(reason, message=None):
 		return EnterRefused(reason, message, detail=f"instance: {host}\nreason: {reason}", signed=True)
 
-	if claims.get("v") != 1 or claims.get("purpose") != PURPOSE:
-		raise refuse("not an lms-enter token")
+	if claims.get("v") != 1 or claims.get("purpose") != purpose:
+		raise refuse(f"not an {purpose} token")
 	now = int(time.time() if now is None else now)
 	exp, iat = claims.get("exp"), claims.get("iat")
 	for value in (exp, iat):
@@ -225,6 +233,11 @@ def ensure_learner(claims: dict) -> str:
 				"first_seen": now_datetime(),
 			}
 		)
+	if row.get("left_instance") and not row.enabled:
+		# The instance reported that this person left, and now signs an entry for them: it considers them an employee
+		# again. An access switched off here (left_instance unset) is Neoffice's decision, which the instance never undoes.
+		row.enabled = 1
+		row.left_instance = 0
 	row.full_name = full_name
 	row.customer = customer
 	row.access_models = models_text
@@ -322,3 +335,50 @@ def enter(t: str = None, next: str = None):
 			),
 			t if signed else None,
 		)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=60, seconds=60, ip_based=True)
+def leave(t: str = None):
+	"""A customer's Neoffice reports that a person left (account disabled or deleted): their access here is switched off.
+
+	The token is signed like the entry token, with ``purpose`` ``lms-leave``. The account of the person is disabled and its
+	sessions end (``Neoffice External Learner.on_update``). Only the instance a learner came from can switch them off, and an
+	access already switched off here stays as Neoffice left it. Answers ``{"ok": true, "found": <a learner existed>}``.
+	"""
+	frappe.db.savepoint(SAVEPOINT)
+	signed = False
+	try:
+		claims = verify_token(t, purpose=LEAVE_PURPOSE)
+		signed = True
+		consume_once(claims["jti"], claims["exp"])
+		row_name = frappe.db.get_value(
+			"Neoffice External Learner", {"instance": claims["iss"], "learner_email": claims["sub"]}, "name"
+		)
+		if row_name:
+			row = frappe.get_doc("Neoffice External Learner", row_name)
+			if row.enabled:
+				row.enabled = 0
+				row.left_instance = 1
+				row.flags.ignore_permissions = True
+				row.save()
+		frappe.local.response["http_status_code"] = 200
+		return {"ok": True, "found": bool(row_name)}
+	except EnterRefused as e:
+		return _refuse_call(e, t if (signed or e.signed) else None)
+	except Exception:
+		return _refuse_call(EnterRefused("unexpected error", detail=frappe.get_traceback()), t if signed else None)
+
+
+def _refuse_call(e: EnterRefused, signed_token=None) -> dict:
+	"""The refusal of an API call: a 403 with no detail, and the same trace as the entry door (no token, no secret)."""
+	try:
+		frappe.db.rollback(save_point=SAVEPOINT)
+	except Exception:
+		frappe.db.rollback()
+	frappe.logger("lms").warning(f"Learner leave refused: {e.reason}")
+	if _may_log_refusal(e.reason, signed_token):
+		frappe.log_error(f"Learner leave refused: {e.reason}"[:140], e.detail or e.reason)
+		frappe.local.flags.commit = True
+	frappe.local.response["http_status_code"] = 403
+	return {"ok": False}

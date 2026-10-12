@@ -173,3 +173,88 @@ class TestAccounts(UnitTestCase):
 			self.assertEqual(neoffice_instance.get_instance_base(), {"mode": "linked", "base": f"https://{HOST}"})
 		finally:
 			frappe.set_user(original)
+
+
+def leave(token):
+	"""The endpoint without its rate limiter, which reads the request instead of the arguments."""
+	return ne.leave.__wrapped__(token)
+
+
+class TestLeave(UnitTestCase):
+	def setUp(self):
+		frappe.conf["neoffice_lms_instance_secrets"] = {HOST: SECRET}
+		frappe.db.delete("Neoffice External Learner", {"instance": HOST})
+		frappe.local.response = frappe._dict()
+
+	def tearDown(self):
+		frappe.conf.pop("neoffice_lms_instance_secrets", None)
+		frappe.db.rollback()
+
+	def leave_token(self, **over):
+		return ne.sign_token(SECRET, claims(purpose="lms-leave", **over))
+
+	def row(self):
+		return frappe.get_doc("Neoffice External Learner", {"instance": HOST, "learner_email": "jean.dupont@client-example.ch"})
+
+	def test_a_leave_token_switches_the_learner_and_the_account_off(self):
+		user = ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		out = leave(self.leave_token())
+		self.assertEqual(out, {"ok": True, "found": True})
+		row = self.row()
+		self.assertEqual((row.enabled, row.left_instance), (0, 1))
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
+
+	def test_a_person_the_site_never_saw_is_not_an_error(self):
+		self.assertEqual(leave(self.leave_token(sub="nobody@client-example.ch")), {"ok": True, "found": False})
+		self.assertFalse(frappe.db.exists("Neoffice External Learner", {"learner_email": "nobody@client-example.ch"}))
+
+	def test_the_two_purposes_are_not_interchangeable(self):
+		ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		# an entry token cannot switch anyone off
+		out = leave(ne.sign_token(SECRET, claims()))
+		self.assertEqual(out, {"ok": False})
+		self.assertEqual(frappe.local.response["http_status_code"], 403)
+		self.assertEqual(self.row().enabled, 1)
+		# and a leave token does not open a session
+		with self.assertRaises(ne.EnterRefused) as ctx:
+			ne.verify_token(self.leave_token())
+		self.assertEqual(ctx.exception.reason, "not an lms-enter token")
+
+	def test_only_the_instance_the_learner_came_from_can_switch_them_off(self):
+		ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		other = "other.neoffice.me"
+		frappe.conf["neoffice_lms_instance_secrets"][other] = "another-secret-0123456789abcdef0123456789"
+		token = ne.sign_token("another-secret-0123456789abcdef0123456789", claims(purpose="lms-leave", iss=other))
+		self.assertEqual(leave(token), {"ok": True, "found": False})
+		self.assertEqual(self.row().enabled, 1)
+
+	def test_a_forged_or_replayed_token_changes_nothing(self):
+		ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		self.assertEqual(leave(ne.sign_token("not-the-secret", claims(purpose="lms-leave"))), {"ok": False})
+		self.assertEqual(leave("garbage"), {"ok": False})
+		self.assertEqual(self.row().enabled, 1)
+		token = self.leave_token()
+		self.assertEqual(leave(token), {"ok": True, "found": True})
+		self.assertEqual(leave(token), {"ok": False})
+
+	def test_an_entry_after_the_instance_left_and_came_back_switches_the_access_on_again(self):
+		user = ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		leave(self.leave_token())
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
+		self.assertEqual(ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims()))), user)
+		row = self.row()
+		self.assertEqual((row.enabled, row.left_instance), (1, 0))
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
+
+	def test_an_access_switched_off_by_neoffice_is_never_switched_on_by_the_instance(self):
+		ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		row = self.row()
+		row.enabled = 0
+		row.save(ignore_permissions=True)
+		# the instance reporting the departure changes nothing of what Neoffice decided...
+		self.assertEqual(leave(self.leave_token()), {"ok": True, "found": True})
+		self.assertEqual(self.row().left_instance, 0)
+		# ...and its next entry stays refused
+		with self.assertRaises(ne.EnterRefused) as ctx:
+			ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
+		self.assertEqual(ctx.exception.reason, "learner switched off")

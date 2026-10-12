@@ -18,6 +18,7 @@
   "column_break_access",
   "access_valid_till",
   "enabled",
+  "left_instance",
   "section_seen",
   "first_seen",
   "column_break_seen",
@@ -110,6 +111,14 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Enabled"
+  },
+  {
+   "default": "0",
+   "description": "Set when the customer's Neoffice reported that this person left (account disabled or deleted). The next signed entry from that Neoffice switches the access back on; an access switched off here is never switched back on by the instance.",
+   "fieldname": "left_instance",
+   "fieldtype": "Check",
+   "label": "Left the instance",
+   "read_only": 1
   },
   {
    "fieldname": "section_seen",

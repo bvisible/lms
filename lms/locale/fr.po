@@ -10935,3 +10935,100 @@ msgstr "Mois d’accès"
 #: frontend/src/components/InstanceLink.vue
 msgid "Open your Neoffice to try it yourself."
 msgstr "Ouvrez votre Neoffice pour l’essayer vous-même."
+
+# //// Neoffice — the entry of a customer's employees into the courses (neoffice_enter.py, Neoffice External Learner).
+#: lms/lms/neoffice_enter.py
+msgid "Access refused"
+msgstr "Accès refusé"
+
+#: lms/lms/neoffice_enter.py
+msgid "This link has expired. Please open it again from your Neoffice."
+msgstr "Ce lien a expiré. Veuillez le rouvrir depuis votre Neoffice."
+
+#: lms/lms/neoffice_enter.py
+msgid "This link was already used. Please open it again from your Neoffice."
+msgstr "Ce lien a déjà été utilisé. Veuillez le rouvrir depuis votre Neoffice."
+
+#: lms/lms/neoffice_enter.py
+msgid "Your access to the courses has been switched off. Please ask the administrator of your Neoffice."
+msgstr "Votre accès aux cours a été désactivé. Veuillez vous adresser à l’administrateur de votre Neoffice."
+
+#: lms/lms/neoffice_enter.py
+msgid "Your access to the courses has ended. Please ask the administrator of your Neoffice."
+msgstr "Votre accès aux cours est terminé. Veuillez vous adresser à l’administrateur de votre Neoffice."
+
+#: lms/lms/neoffice_enter.py
+msgid "This link is not valid. Please open it again from your Neoffice."
+msgstr "Ce lien n’est pas valable. Veuillez le rouvrir depuis votre Neoffice."
+
+#: lms/lms/neoffice_enter.py
+msgid "The access could not be opened. Please try again or contact Neoffice."
+msgstr "L’accès n’a pas pu être ouvert. Veuillez réessayer ou contacter Neoffice."
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.py
+msgid "{0} is not a valid e-mail address"
+msgstr "{0} n’est pas une adresse e-mail valide"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.py
+msgid "{0} is not an instance address this site accepts"
+msgstr "{0} n’est pas une adresse d’instance acceptée par ce site"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.py
+msgid "{0} is already registered for {1}"
+msgstr "{0} est déjà enregistré pour {1}"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Neoffice External Learner"
+msgstr "Apprenant externe Neoffice"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Learner e-mail"
+msgstr "E-mail de l’apprenant"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Full name"
+msgstr "Nom complet"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Instance"
+msgstr "Instance"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Instance address"
+msgstr "Adresse de l’instance"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Customer"
+msgstr "Client"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Access"
+msgstr "Accès"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Entry"
+msgstr "Entrée"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Fiduciary"
+msgstr "Fiduciaire"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Access models"
+msgstr "Modèles d’accès"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Access valid until"
+msgstr "Accès valable jusqu’au"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Left the instance"
+msgstr "A quitté l’instance"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "First seen"
+msgstr "Première entrée"
+
+#: lms/lms/doctype/neoffice_external_learner/neoffice_external_learner.json
+msgid "Last seen"
+msgstr "Dernière entrée"
