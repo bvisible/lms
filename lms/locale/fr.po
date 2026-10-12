@@ -10926,3 +10926,7 @@ msgstr "Couper le son"
 #: frontend/src/utils/lessonVideoViewer.ts
 msgid "Volume"
 msgstr "Volume"
+# //// Neoffice — translations added by our fork (12.10.2026): labels and messages that read in English on a French screen.
+#: lms/neoffice_commerce.py
+msgid "Access months"
+msgstr "Mois d’accès"
