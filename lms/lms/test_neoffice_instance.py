@@ -106,7 +106,9 @@ class TestFiduciaryDoor(UnitTestCase):
 			"neoffice_lms_fiduciary_open": [f"{module}.FIDUCIARY_OPEN"],
 		}
 		globals()["FIDUCIARY_INSTANCES"], globals()["FIDUCIARY_OPEN"] = list_instances, open_url
-		return unittest_patch(frappe, "get_hooks", lambda name=None, *a, **k: hooks.get(name) if name in hooks else original(name, *a, **k))
+		return unittest_patch.object(
+			frappe, "get_hooks", lambda name=None, *a, **k: hooks[name] if name in hooks else original(name, *a, **k)
+		)
 
 	def test_a_person_with_clients_is_offered_them_instead_of_nothing(self):
 		with self.hooks():
