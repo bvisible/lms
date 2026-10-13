@@ -62,6 +62,19 @@ def get_lms_route(path=""):
 	return f"{base}/{path.lstrip('/')}"
 
 
+# //// Neoffice — the courses are reached under their brand domain (lms.neoffice.ch), never under the technical name of the hub
+# //// (Daniel, 2026-10-13: "il ne doit avoir aucun lien sur Neoservice"). Upstream builds every absolute link of an e-mail with
+# //// frappe.utils.get_url(), i.e. the `host_name` of the site, which on the hub is the desk host. When the site sets
+# //// `lms_canonical_host` (like the wiki's `wiki_canonical_host`), that host is used instead. Remove when upstream has such a setting.
+def get_lms_url(path=""):
+	host = (frappe.conf.get("lms_canonical_host") or "").strip().rstrip("/")
+	if not host:
+		return frappe.utils.get_url(path) if path else frappe.utils.get_url()
+	if not host.startswith("http"):
+		host = f"https://{host}"
+	return f"{host}/{path.lstrip('/')}" if path else host
+
+
 def extend_bootinfo(bootinfo: dict):
 	bootinfo["lms_path"] = get_lms_path()
 

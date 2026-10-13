@@ -15,6 +15,7 @@ from ...utils import (
 	get_instructors,
 	get_lesson_count,
 	get_lms_route,
+	get_lms_url,  # //// Neoffice — brand domain
 	update_payment_record,
 	validate_image,
 )
@@ -123,7 +124,7 @@ class LMSCourse(Document):
 			"title": self.title,
 			"course_link": get_lms_route(f"courses/{self.name}"),
 			"app_name": frappe.db.get_single_value("System Settings", "app_name"),
-			"site_url": frappe.utils.get_url(),
+			"site_url": get_lms_url(),  # //// Neoffice — brand domain, see lms.lms.utils.get_lms_url
 		}
 
 		for user in interested_users:
@@ -186,7 +187,7 @@ def send_email_notification_for_published_courses(courses):
 			"title": course.title,
 			"short_introduction": course.short_introduction,
 			"instructors": instructors,
-			"course_url": frappe.utils.get_url(get_lms_route(f"courses/{course.name}")),
+			"course_url": get_lms_url(get_lms_route(f"courses/{course.name}")),  # //// Neoffice — brand domain
 		}
 
 		frappe.sendmail(

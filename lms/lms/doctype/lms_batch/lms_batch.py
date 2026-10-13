@@ -19,6 +19,7 @@ from lms.lms.utils import (
 	get_lesson_index,
 	get_lesson_url,
 	get_lms_route,
+	get_lms_url,  # //// Neoffice — brand domain
 	get_quiz_details,
 	guest_access_allowed,
 	update_payment_record,
@@ -193,7 +194,7 @@ def send_email_notification_for_published_batch(batch):
 		"medium": batch.medium,
 		"timezone": batch.timezone,
 		"instructors": instructors,
-		"batch_url": frappe.utils.get_url(get_lms_route(f"batches/{batch.name}")),
+		"batch_url": get_lms_url(get_lms_route(f"batches/{batch.name}")),  # //// Neoffice — brand domain
 	}
 
 	frappe.sendmail(
