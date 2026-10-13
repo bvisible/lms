@@ -72,20 +72,20 @@ describe('isAllowedPath', () => {
 
 describe('isAllowedOrigin', () => {
 	it('accepts an https host with no path', () => {
-		expect(isAllowedOrigin('https://dmis.neoffice.me')).toBe(true)
+		expect(isAllowedOrigin('https://example.neoffice.me')).toBe(true)
 		expect(isAllowedOrigin('https://erp.client-example.ch')).toBe(true)
 	})
 
 	it('refuses http, a path, a port and credentials (look-alike domains are the server list\'s job)', () => {
 		for (const origin of [
-			'http://dmis.neoffice.me',
-			'https://dmis.neoffice.me/',
-			'https://dmis.neoffice.me/app',
-			'https://dmis.neoffice.me:8000',
-			'https://user:pass@dmis.neoffice.me',
+			'http://example.neoffice.me',
+			'https://example.neoffice.me/',
+			'https://example.neoffice.me/app',
+			'https://example.neoffice.me:8000',
+			'https://user:pass@example.neoffice.me',
 			'https://localhost',
-			'//dmis.neoffice.me',
-			'dmis.neoffice.me',
+			'//example.neoffice.me',
+			'example.neoffice.me',
 			'',
 		])
 			expect(isAllowedOrigin(origin)).toBe(false)
@@ -98,50 +98,50 @@ describe('buildInstanceUrl', () => {
 	})
 
 	it('joins a registered instance and the path', () => {
-		expect(buildInstanceUrl('https://dmis.neoffice.me', '/app/item/new')).toBe(
-			'https://dmis.neoffice.me/app/item/new'
+		expect(buildInstanceUrl('https://example.neoffice.me', '/app/item/new')).toBe(
+			'https://example.neoffice.me/app/item/new'
 		)
 	})
 
 	it('returns null when the path or the base is not acceptable', () => {
 		expect(buildInstanceUrl('', '/login')).toBeNull()
-		expect(buildInstanceUrl('https://dmis.neoffice.me', '/app/item?x=1')).toBeNull()
-		expect(buildInstanceUrl('http://dmis.neoffice.me', '/app/item')).toBeNull()
-		expect(buildInstanceUrl('https://dmis.neoffice.me/x', '/app/item')).toBeNull()
+		expect(buildInstanceUrl('https://example.neoffice.me', '/app/item?x=1')).toBeNull()
+		expect(buildInstanceUrl('http://example.neoffice.me', '/app/item')).toBeNull()
+		expect(buildInstanceUrl('https://example.neoffice.me/x', '/app/item')).toBeNull()
 	})
 })
 
 describe('buildFiduciaryUrl', () => {
 	it('goes through the hub with the client and the page, both encoded', () => {
-		expect(buildFiduciaryUrl('SRV-0029', '/app/nora-demo/new')).toBe(
-			'/api/method/lms.lms.neoffice_instance.open_instance?instance=SRV-0029&path=%2Fapp%2Fnora-demo%2Fnew'
+		expect(buildFiduciaryUrl('SRV-9001', '/app/nora-demo/new')).toBe(
+			'/api/method/lms.lms.neoffice_instance.open_instance?instance=SRV-9001&path=%2Fapp%2Fnora-demo%2Fnew'
 		)
 	})
 
 	it('returns null when the page or the client is not acceptable', () => {
-		expect(buildFiduciaryUrl('SRV-0029', '/login')).toBeNull()
-		expect(buildFiduciaryUrl('SRV-0029', '/app/item?x=1')).toBeNull()
-		for (const instance of ['', ' SRV-0029', 'SRV 0029', 'a/b', 'a&path=/login', '-x', 'x'.repeat(141)])
+		expect(buildFiduciaryUrl('SRV-9001', '/login')).toBeNull()
+		expect(buildFiduciaryUrl('SRV-9001', '/app/item?x=1')).toBeNull()
+		for (const instance of ['', ' SRV-9001', 'SRV 0029', 'a/b', 'a&path=/login', '-x', 'x'.repeat(141)])
 			expect(buildFiduciaryUrl(instance, '/app/item')).toBeNull()
 	})
 })
 
 describe('pickFiduciaryOption', () => {
 	const options = [
-		{ instance: 'SRV-0029', label: 'Osiris SA', host: 'osiris.neoffice.me' },
-		{ instance: 'SRV-0072', label: 'DMIS SA', host: 'dmis.ch' },
+		{ instance: 'SRV-9001', label: 'Osiris SA', host: 'osiris.neoffice.me' },
+		{ instance: 'SRV-9002', label: 'Example SA', host: 'example.ch' },
 	]
 
 	it('keeps the remembered client while it is still offered', () => {
-		expect(pickFiduciaryOption(options, 'SRV-0072')?.label).toBe('DMIS SA')
+		expect(pickFiduciaryOption(options, 'SRV-9002')?.label).toBe('Example SA')
 	})
 
 	it('falls back to the first client', () => {
-		expect(pickFiduciaryOption(options, null)?.instance).toBe('SRV-0029')
-		expect(pickFiduciaryOption(options, 'SRV-0001')?.instance).toBe('SRV-0029')
+		expect(pickFiduciaryOption(options, null)?.instance).toBe('SRV-9001')
+		expect(pickFiduciaryOption(options, 'SRV-9003')?.instance).toBe('SRV-9001')
 	})
 
 	it('has nothing to pick without clients', () => {
-		expect(pickFiduciaryOption([], 'SRV-0029')).toBeNull()
+		expect(pickFiduciaryOption([], 'SRV-9001')).toBeNull()
 	})
 })

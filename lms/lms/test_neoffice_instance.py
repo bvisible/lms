@@ -32,15 +32,15 @@ class TestInstanceLinkAddress(UnitTestCase):
 			self.assertFalse(ni.is_allowed_path(path), path)
 
 	def test_origin_must_be_https_under_an_allowed_domain(self):
-		self.assertEqual(ni.clean_origin("https://dmis.neoffice.me"), "https://dmis.neoffice.me")
-		self.assertEqual(ni.clean_origin(" https://DMIS.neoffice.me/ "), "https://dmis.neoffice.me")
+		self.assertEqual(ni.clean_origin("https://example.neoffice.me"), "https://example.neoffice.me")
+		self.assertEqual(ni.clean_origin(" https://EXAMPLE.neoffice.me/ "), "https://example.neoffice.me")
 		self.assertEqual(ni.clean_origin("https://cabinet.neoffice.ch"), "https://cabinet.neoffice.ch")
 		for url in (
-			"http://dmis.neoffice.me",
-			"https://dmis.neoffice.me/app",
-			"https://dmis.neoffice.me:8000",
-			"https://user:pw@dmis.neoffice.me",
-			"https://dmis.neoffice.me.evil.example",
+			"http://example.neoffice.me",
+			"https://example.neoffice.me/app",
+			"https://example.neoffice.me:8000",
+			"https://user:pw@example.neoffice.me",
+			"https://example.neoffice.me.evil.example",
 			"https://neoffice.me",
 			"https://evilneoffice.me",
 			"https://client.example.com",
@@ -53,14 +53,14 @@ class TestInstanceLinkAddress(UnitTestCase):
 	def test_the_list_of_domains_comes_from_the_site_config(self):
 		frappe.conf["neoffice_lms_allowed_domains"] = [".client-example.ch"]
 		self.assertEqual(ni.clean_origin("https://erp.client-example.ch"), "https://erp.client-example.ch")
-		self.assertIsNone(ni.clean_origin("https://dmis.neoffice.me"))
+		self.assertIsNone(ni.clean_origin("https://example.neoffice.me"))
 
 	def test_build_url(self):
 		self.assertEqual(ni.build_url("", "/app/item/new"), "/app/item/new")
-		self.assertEqual(ni.build_url("https://dmis.neoffice.me", "/app/item/new"), "https://dmis.neoffice.me/app/item/new")
+		self.assertEqual(ni.build_url("https://example.neoffice.me", "/app/item/new"), "https://example.neoffice.me/app/item/new")
 		self.assertIsNone(ni.build_url("", "/login"))
 		self.assertIsNone(ni.build_url("https://evil.example", "/app/item"))
-		self.assertIsNone(ni.build_url("https://dmis.neoffice.me", "/app/item?x=1"))
+		self.assertIsNone(ni.build_url("https://example.neoffice.me", "/app/item?x=1"))
 
 	def test_a_site_is_a_hub_unless_it_says_it_is_an_instance(self):
 		self.assertEqual(ni.hosting_mode(), "hub")
@@ -79,8 +79,8 @@ class TestFiduciaryDoor(UnitTestCase):
 	"""Door B: the staff of an accounting firm chooses a client and the hub opens it."""
 
 	OPTIONS = [
-		{"instance": "SRV-0029", "label": "Osiris SA", "host": "osiris.neoffice.me"},
-		{"instance": "SRV-0072", "label": "DMIS SA", "host": "dmis.ch"},
+		{"instance": "SRV-9001", "label": "Osiris SA", "host": "osiris.neoffice.me"},
+		{"instance": "SRV-9002", "label": "Example SA", "host": "example.ch"},
 	]
 	LINK = "https://osiris.neoffice.me/api/method/neoffice_theme.sso.sso_login?token=t"
 
@@ -143,15 +143,15 @@ class TestFiduciaryDoor(UnitTestCase):
 	def test_the_chosen_client_is_opened_through_the_hub(self):
 		with self.hooks():
 			frappe.set_user("Administrator")
-			ni.open_instance("SRV-0029", "/app/nora-demo/new")
-		self.assertEqual(self.calls, [("SRV-0029", "/app/nora-demo/new")])
+			ni.open_instance("SRV-9001", "/app/nora-demo/new")
+		self.assertEqual(self.calls, [("SRV-9001", "/app/nora-demo/new")])
 		self.assertEqual(frappe.local.response["type"], "redirect")
 		self.assertEqual(frappe.local.response["location"], self.LINK)
 
 	def test_a_client_the_hub_did_not_offer_this_person_is_never_opened(self):
 		with self.hooks():
 			frappe.set_user("Administrator")
-			for instance in ("SRV-9999", "", None, "SRV-0029 "):
+			for instance in ("SRV-9999", "", None, "SRV-9001 "):
 				frappe.local.response = frappe._dict()
 				ni.open_instance(instance, "/app/item/new")
 				self.assertEqual(frappe.local.response.get("http_status_code"), 403, instance)
@@ -162,7 +162,7 @@ class TestFiduciaryDoor(UnitTestCase):
 			frappe.set_user("Administrator")
 			for path in ("/login", "/app/item?x=1", "https://evil.example", "/app/item/DOC-1", "", None):
 				frappe.local.response = frappe._dict()
-				ni.open_instance("SRV-0029", path)
+				ni.open_instance("SRV-9001", path)
 				self.assertEqual(frappe.local.response.get("http_status_code"), 403, path)
 		self.assertEqual(self.calls, [])
 
@@ -171,7 +171,7 @@ class TestFiduciaryDoor(UnitTestCase):
 			with self.hooks(link=link):
 				frappe.set_user("Administrator")
 				frappe.local.response = frappe._dict()
-				ni.open_instance("SRV-0029", "/app/item")
+				ni.open_instance("SRV-9001", "/app/item")
 				self.assertEqual(frappe.local.response.get("http_status_code"), 403, link)
 				self.assertNotEqual(frappe.local.response.get("type"), "redirect")
 
@@ -179,7 +179,7 @@ class TestFiduciaryDoor(UnitTestCase):
 		with self.hooks():
 			frappe.set_user("Guest")
 			with self.assertRaises(frappe.PermissionError):
-				ni.open_instance("SRV-0029", "/app/item")
+				ni.open_instance("SRV-9001", "/app/item")
 		self.assertEqual(self.calls, [])
 
 	def test_the_hubs_refusal_is_a_plain_page(self):
@@ -189,6 +189,6 @@ class TestFiduciaryDoor(UnitTestCase):
 		with self.hooks():
 			globals()["FIDUCIARY_OPEN"] = refuse
 			frappe.set_user("Administrator")
-			ni.open_instance("SRV-0029", "/app/item")
+			ni.open_instance("SRV-9001", "/app/item")
 		self.assertEqual(frappe.local.response.get("http_status_code"), 403)
 		self.assertNotEqual(frappe.local.response.get("type"), "redirect")

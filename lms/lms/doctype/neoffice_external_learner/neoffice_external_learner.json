@@ -55,7 +55,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "The host of the customer's Neoffice, for instance dmis.neoffice.me.",
+   "description": "The host of the customer's Neoffice, for instance example.neoffice.me.",
    "fieldname": "instance",
    "fieldtype": "Data",
    "in_list_view": 1,

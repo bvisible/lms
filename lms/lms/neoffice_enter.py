@@ -16,8 +16,8 @@ Token: ``<base64url(json)>.<hex hmac-sha256(json, secret of the instance)>`` whe
 instance's ``sso_secret`` (the one the hub already holds to open the instances for the fiduciaries), and
 the json is::
 
-    {"v": 1, "purpose": "lms-enter", "iss": "dmis.neoffice.me", "sub": "jean@client.ch",
-     "name": "Jean Dupont", "customer": "DMIS SA", "models": ["Compta"], "source": "instance",
+    {"v": 1, "purpose": "lms-enter", "iss": "example.neoffice.me", "sub": "jean@client.ch",
+     "name": "Jean Dupont", "customer": "Example SA", "models": ["Compta"], "source": "instance",
      "iat": 1790000000, "exp": 1790000060, "jti": "<32 hex>"}
 
 - ``purpose`` keeps this token apart from the others signed with the same secret (the hub's tokens that
@@ -172,7 +172,7 @@ def consume_once(jti: str, exp: int) -> None:
 
 
 def portal_user_name(email: str, host: str) -> str:
-	"""``jean@client.ch`` on ``dmis.neoffice.me`` -> ``jean+dmis-3fa9@client.ch``: same mailbox, one account per instance."""
+	"""``jean@client.ch`` on ``example.neoffice.me`` -> ``jean+example-3fa9@client.ch``: same mailbox, one account per instance."""
 	local, _, domain = email.partition("@")
 	label = re.sub(r"[^a-z0-9]", "", host.split(".")[0])[:20] or "inst"
 	digest = hashlib.sha1(host.encode()).hexdigest()[:4]

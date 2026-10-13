@@ -60,9 +60,9 @@ def is_allowed_path(path) -> bool:
 def clean_origin(url) -> str | None:
 	"""The https origin of a registered instance address, or None if it is not acceptable.
 
-	Accepts `https://dmis.neoffice.me` and `https://dmis.neoffice.me/` (a trailing slash is removed);
+	Accepts `https://example.neoffice.me` and `https://example.neoffice.me/` (a trailing slash is removed);
 	refuses http, a path, a port, credentials, an address that is not under an allowed domain, and a
-	look-alike (`dmis.neoffice.me.evil` does not end with `.neoffice.me`).
+	look-alike (`example.neoffice.me.evil` does not end with `.neoffice.me`).
 	"""
 	if not isinstance(url, str):
 		return None

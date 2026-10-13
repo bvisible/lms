@@ -6,8 +6,8 @@ from frappe.tests import UnitTestCase
 
 from lms.lms import neoffice_enter as ne
 
-HOST = "dmis.neoffice.me"
-SECRET = "test-secret-for-dmis-0123456789abcdef"
+HOST = "example.neoffice.me"
+SECRET = "test-secret-for-example-0123456789abcdef"
 
 
 def claims(**over):
@@ -18,7 +18,7 @@ def claims(**over):
 		"iss": HOST,
 		"sub": "jean.dupont@client-example.ch",
 		"name": "Jean Dupont",
-		"customer": "DMIS SA",
+		"customer": "Example SA",
 		"models": ["Comptabilité"],
 		"source": "instance",
 		"iat": now,
@@ -65,10 +65,10 @@ class TestVerifyToken(UnitTestCase):
 		self.refused(body + "." + other.rsplit(".", 1)[1], "invalid signature")
 
 	def test_the_instance_must_be_known_and_allowed(self):
-		self.refused(self.sign(claims(iss="unknown.neoffice.me")), "no secret registered for this instance")
+		self.refused(self.sign(claims(iss="votre-site.neoffice.me")), "no secret registered for this instance")
 		frappe.conf["neoffice_lms_instance_secrets"]["evil.example.com"] = SECRET
 		self.refused(self.sign(claims(iss="evil.example.com")), "unknown or refused instance")
-		for host in ("DMIS.neoffice.me", "dmis.neoffice.me/x", "dmis.neoffice.me:8000", "neoffice.me", ""):
+		for host in ("EXAMPLE.neoffice.me", "example.neoffice.me/x", "example.neoffice.me:8000", "neoffice.me", ""):
 			self.refused(self.sign(claims(iss=host)), "unknown or refused instance")
 
 	def test_a_token_of_another_purpose_is_refused(self):
@@ -113,10 +113,10 @@ class TestAccounts(UnitTestCase):
 
 	def test_the_account_name_keeps_the_mailbox_and_the_instance_apart(self):
 		self.assertEqual(ne.portal_user_name("jean@client.ch", HOST), ne.portal_user_name("jean@client.ch", HOST))
-		a = ne.portal_user_name("jean@client.ch", "dmis.neoffice.me")
-		b = ne.portal_user_name("jean@client.ch", "dmis.other-example.ch")
+		a = ne.portal_user_name("jean@client.ch", "example.neoffice.me")
+		b = ne.portal_user_name("jean@client.ch", "example.other-example.ch")
 		self.assertNotEqual(a, b)
-		self.assertTrue(a.startswith("jean+dmis-") and a.endswith("@client.ch"))
+		self.assertTrue(a.startswith("jean+example-") and a.endswith("@client.ch"))
 
 	def test_first_entry_creates_the_account_and_the_row_then_finds_them(self):
 		c = ne.verify_token(ne.sign_token(SECRET, claims()))
@@ -125,11 +125,11 @@ class TestAccounts(UnitTestCase):
 		self.assertEqual(frappe.db.get_value("User", user, "user_type"), "Website User")
 		self.assertIn(ne.LEARNER_ROLE, frappe.get_roles(user))
 		row = frappe.get_doc("Neoffice External Learner", {"instance": HOST, "learner_email": "jean.dupont@client-example.ch"})
-		self.assertEqual((row.user, row.customer, row.access_models, row.instance_url), (user, "DMIS SA", "Comptabilité", f"https://{HOST}"))
-		again = ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims(customer="DMIS SA 2"))))
+		self.assertEqual((row.user, row.customer, row.access_models, row.instance_url), (user, "Example SA", "Comptabilité", f"https://{HOST}"))
+		again = ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims(customer="Example SA 2"))))
 		self.assertEqual(again, user)
 		self.assertEqual(frappe.db.count("Neoffice External Learner", {"instance": HOST}), 1)
-		self.assertEqual(frappe.db.get_value("Neoffice External Learner", row.name, "customer"), "DMIS SA 2")
+		self.assertEqual(frappe.db.get_value("Neoffice External Learner", row.name, "customer"), "Example SA 2")
 
 	def test_an_account_the_site_already_had_is_never_taken_over(self):
 		name = ne.portal_user_name("staff@client-example.ch", HOST)
@@ -222,7 +222,7 @@ class TestLeave(UnitTestCase):
 
 	def test_only_the_instance_the_learner_came_from_can_switch_them_off(self):
 		ne.ensure_learner(ne.verify_token(ne.sign_token(SECRET, claims())))
-		other = "other.neoffice.me"
+		other = "exemple.neoffice.me"
 		frappe.conf["neoffice_lms_instance_secrets"][other] = "another-secret-0123456789abcdef0123456789"
 		token = ne.sign_token("another-secret-0123456789abcdef0123456789", claims(purpose="lms-leave", iss=other))
 		self.assertEqual(leave(token), {"ok": True, "found": False})

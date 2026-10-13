@@ -62,7 +62,7 @@ export interface FiduciaryOption {
 	host: string
 }
 
-// The id of a client instance as the hub names it (SRV-0029): letters, digits, dot, dash, underscore.
+// The id of a client instance as the hub names it (SRV-9001): letters, digits, dot, dash, underscore.
 const INSTANCE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,139}$/
 
 /**

@@ -8,9 +8,9 @@ from frappe.tests import UnitTestCase
 from lms.lms import neoffice_enter as ne
 from lms.lms import neoffice_team as nt
 
-HOST = "dmis.neoffice.me"
-OTHER = "other.neoffice.me"
-SECRET = "test-secret-for-dmis-0123456789abcdef"
+HOST = "example.neoffice.me"
+OTHER = "exemple.neoffice.me"
+SECRET = "test-secret-for-example-0123456789abcdef"
 OTHER_SECRET = "test-secret-for-other-0123456789abcdef"
 COURSES = {"BIEN": "Bien démarrer", "VENDRE": "Vendre avec Neoffice"}
 
@@ -23,7 +23,7 @@ def claims(purpose="lms-enter", iss=HOST, sub="jean.dupont@client-example.ch", *
 		"iss": iss,
 		"sub": sub,
 		"name": over.pop("name", "Jean Dupont"),
-		"customer": over.pop("customer", "DMIS SA"),
+		"customer": over.pop("customer", "Example SA"),
 		"source": "instance",
 		"iat": now,
 		"exp": now + 60,
@@ -86,7 +86,7 @@ class TestLearnerProgress(UnitTestCase):
 		marie = [r for r in rows if r["email"] == "marie.martin@client-example.ch"]
 		self.assertEqual(len(marie), 1)
 		self.assertEqual((marie[0]["course"], marie[0]["progress"], marie[0]["lessons_done"]), (None, 0, 0))
-		self.assertEqual((marie[0]["customer"], marie[0]["instance"], marie[0]["enabled"]), ("DMIS SA", HOST, 1))
+		self.assertEqual((marie[0]["customer"], marie[0]["instance"], marie[0]["enabled"]), ("Example SA", HOST, 1))
 
 	def test_one_row_per_learner_and_course_with_progress_and_lessons_done(self):
 		with self.enrolled():
