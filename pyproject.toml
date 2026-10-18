@@ -10,9 +10,9 @@ dynamic = ["version"]
 dependencies = [
     # core dependencies
     "websocket_client~=1.6.4",
-    "markdown~=3.5.1",
-    "beautifulsoup4>=4.12,<4.14",
-    "lxml~=6.0.2",
+    "markdown>=3.5.1,<4",  # //// Neoffice — was ~=3.5.1; suite needs ==3.8.2 (maintenance#1679)
+    "beautifulsoup4>=4.12,<5",  # //// Neoffice — was <4.14; suite needs >=4.13.5 (maintenance#1679)
+    "lxml>=6.0.2,<7",  # //// Neoffice — was ~=6.0.2; suite needs ~=6.1 (maintenance#1679)
     "cairocffi==1.5.1",
     "fuzzywuzzy~=0.18.0",
 ]
