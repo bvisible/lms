@@ -220,6 +220,7 @@ doc_events = {
 		"before_insert": "lms.lms.user.add_lms_student_role",
 	},
 	# Product events for Pulse: one per step a site takes (see lms.lms.telemetry).
+	# //// Neoffice — upstream's "LMS Course" and "LMS Settings" telemetry entries live in our merged entries below (see the block marker).
 	"Course Chapter": {"after_insert": "lms.lms.telemetry.chapter_created"},
 	"Course Lesson": {"after_insert": "lms.lms.telemetry.lesson_created"},
 	"LMS Batch": {"on_update": "lms.lms.telemetry.batch_saved"},

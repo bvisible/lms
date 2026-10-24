@@ -12,6 +12,7 @@
 			class="size-full"
 			allowfullscreen
 		/>
+		<!-- //// Neoffice — see the block marker above: course image as poster -->
 		<video
 			v-else-if="videoPreview.type === 'file' && !videoError"
 			:src="safeUrl(videoPreview.src)"
