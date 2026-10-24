@@ -8,7 +8,7 @@ import frappe
 from frappe.email.email_body import replace_filename_with_cid
 
 from lms.lms.api import send_contact_us_email
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
 from lms.lms.utils import attach_file_to_doc, has_message, prepare_inline_images
 
 CONTACT_ADDRESS = "support@example.com"
@@ -109,6 +109,7 @@ class TestPrepareInlineImages(ContactUsTestCase):
 		self.assertNotIn("embed=", body)
 		self.assertEqual(images, [])
 
+	@skip_on_frappe_v15("the fixture saves a PNG made of the bare signature plus bytes and the Pillow of the v15 stack refuses it; upstream runs it on v16 only")  # //// Neoffice
 	def test_a_case_variant_path_cannot_reach_another_users_file(self):
 		"""tabFile.file_url is utf8mb4_unicode_ci and the filesystem is not.
 

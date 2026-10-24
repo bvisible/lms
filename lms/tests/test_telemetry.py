@@ -3,7 +3,7 @@ from unittest.mock import patch
 import frappe
 
 from lms.lms import telemetry
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
 
 
 class TestTelemetry(BaseTestUtils):
@@ -108,6 +108,7 @@ class TestTelemetry(BaseTestUtils):
 
 		self.assertEqual(self._first("probe"), [True, False])
 
+	@skip_on_frappe_v15("v15's db.set_value writes '' for None into a datetime column and MariaDB refuses it (1292); upstream runs it on v16 only")  # //// Neoffice
 	def test_publishing_again_is_not_a_second_first(self):
 		frappe.db.set_value("LMS Course", {"published_on": ["is", "set"]}, "published_on", None)
 		frappe.db.delete("DefaultValue", {"defkey": "lms_telemetry_sent:course_published"})
