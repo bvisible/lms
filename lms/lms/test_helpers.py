@@ -1,4 +1,5 @@
 import json
+import unittest  # //// Neoffice — for skip_on_frappe_v15 below
 # //// Neoffice — contextmanager import is used by guards_enforced() below too (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours")
 from contextlib import contextmanager
 from unittest.mock import patch
@@ -78,6 +79,17 @@ def released_frappe_sanitizer():
 		patch("lms.lms.html_sanitizer.sanitize_html", released_sanitize_html),
 	):
 		yield
+
+
+# //// Neoffice — frappe v15's sanitize_html is bleach-based, v16's is nh3-based, and a few upstream tests pin
+# //// nh3's exact output (a trailing `;` in a style, `rel` gained by a link, a dropped tag instead of escaped text).
+# //// Upstream runs its tests on v16 only. On v15 those tests are skipped, each one named and with its reason:
+# //// a pass there would prove nothing and a fail is the library difference, not a regression of ours.
+FRAPPE_MAJOR = int(frappe.__version__.split(".")[0])
+
+
+def skip_on_frappe_v15(reason):
+	return unittest.skipIf(FRAPPE_MAJOR < 16, f"frappe v15: {reason}")
 
 
 class BaseTestUtils(IntegrationTestCase):

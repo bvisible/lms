@@ -704,13 +704,23 @@ def file_has_permission(doc, ptype="read", user=None):
 	"""
 	user = user or frappe.session.user
 
+	# //// Neoffice — "no opinion" is `None`, not `True`. On frappe v15 a controller hook that returns a
+	# //// value (even True) is CONCLUSIVE and the hooks registered before it are not asked (v15's
+	# //// has_controller_permissions walks them last to first and stops at the first non-None answer; v16
+	# //// asks all of them and lets any False deny). With `True`, this hook silently replaced frappe's own
+	# //// File.has_permission, so on a site where no app registered after lms, any logged-in user could read
+	# //// another user's private file (upstream's new private-file tests fail on such a site). `None` is read the
+	# //// same way by v16 and lets the next hook, then frappe's, decide on v15.
+	# //// Neoffice — `None` (no opinion), see the block marker above, for all three answers that are not a refusal.
 	if doc.attached_to_doctype != "Course Lesson":
-		return True
+		return None
+	# //// Neoffice — see above
 	if doc.attached_to_field not in INSTRUCTOR_FIELDS:
-		return True
+		return None
 
+	# //// Neoffice — see above
 	if can_access_lesson(doc.attached_to_name, instructor_only=True, user=user):
-		return True
+		return None
 
 	frappe.logger("lms.security").warning(
 		"Lesson resource access denied: user=%s file=%s field=%s lesson=%s",

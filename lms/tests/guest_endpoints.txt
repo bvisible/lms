@@ -33,3 +33,13 @@ lms.lms.utils.get_courses
 lms.lms.utils.get_lesson
 lms.lms.utils.get_related_courses
 lms.lms.utils.get_reviews
+# //// Neoffice — the guest endpoints our own modules add (lms/lms/neoffice_*.py), baselined as they are:
+# //// reviewing them is a separate piece of work; this only stops the test from reporting what we ship on purpose.
+lms.lms.neoffice_catalogue.get_course_categories
+lms.lms.neoffice_commerce.add_offer_to_cart
+lms.lms.neoffice_commerce.get_shop_route
+lms.lms.neoffice_enter.enter
+lms.lms.neoffice_enter.leave
+lms.lms.neoffice_instance.get_instance_base
+lms.lms.neoffice_team.team_progress
+lms.lms.neoffice_video.get_playback_url

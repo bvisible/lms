@@ -13,7 +13,7 @@ from lms.lms.doctype.course_lesson.course_lesson import (
 	UNTITLED_LESSON_TITLE,
 	rename_settled_untitled_lessons,
 )
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
 from lms.lms.utils import can_modify_course
 
 IGNORE_TEST_RECORD_DEPENDENCIES = ["Course Chapter", "LMS Course"]
@@ -434,11 +434,13 @@ class TestLessonContentSurvivesSave(BaseTestUtils):
 				f"{fieldname} must carry ignore_xss_filter; run bench migrate",
 			)
 
+	@skip_on_frappe_v15("bleach writes a style without the nh3 trailing semicolon")  # //// Neoffice
 	def test_attribute_bearing_inline_markup_round_trips(self):
 		for name, markup in self.ATTRIBUTE_MARKUP.items():
 			with self.subTest(markup=name):
 				self.assertEqual(self._saved_text(markup, f"Lesson {name}"), markup)
 
+	@skip_on_frappe_v15("bleach does not add rel on save (the SPA adds it when it renders)")  # //// Neoffice
 	def test_link_keeps_its_href_and_gains_rel(self):
 		saved = self._saved_text('<a href="https://frappe.io/">here</a>', "Lesson link")
 		self.assertIn('href="https://frappe.io/"', saved)

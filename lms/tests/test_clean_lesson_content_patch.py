@@ -5,7 +5,7 @@ from contextlib import redirect_stdout
 import frappe
 from frappe.utils import escape_html
 
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
 from lms.patches.v2_0.clean_lesson_content import execute
 
 MANGLED = (
@@ -59,6 +59,7 @@ class TestCleanLessonContentPatch(BaseTestUtils):
 		self.assertNotIn("onerror", stored)
 		self.assertNotIn("onload", stored)
 
+	@skip_on_frappe_v15("bleach escapes a script tag as text, nh3 drops it")  # //// Neoffice
 	def test_repairs_and_cleans_a_row_the_old_sanitiser_mangled(self):
 		name = self._seed("Mangled lesson", MANGLED)
 		execute()

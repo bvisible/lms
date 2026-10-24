@@ -14,7 +14,7 @@ from frappe.utils import escape_html, get_system_timezone, getdate, to_timedelta
 
 import lms
 from lms.lms.doctype.lms_certificate.lms_certificate import is_certified
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
 from lms.lms.utils import (
 	DEFAULT_PAGE_LENGTH,
 	MAX_EDITORJS_DEPTH,
@@ -729,6 +729,7 @@ class TestEditorJsSanitisation(unittest.TestCase):
 	def _payload(self, text):
 		return json.dumps({"blocks": [{"type": "paragraph", "data": {"text": text}}]})
 
+	@skip_on_frappe_v15("bleach writes the style with a space after the colon")  # //// Neoffice
 	def test_keeps_a_span_carrying_class_and_style(self):
 		# The align tool carries its whole payload in an attribute, so it is the
 		# one a tag-level allowlist can silently strip.
@@ -743,6 +744,7 @@ class TestEditorJsSanitisation(unittest.TestCase):
 		for tag in ("<b>", "<u>", "<s>"):
 			self.assertIn(tag, out)
 
+	@skip_on_frappe_v15("bleach escapes an unknown element as text, nh3 unwraps it")  # //// Neoffice
 	def test_a_custom_element_is_unwrapped(self):
 		# Why the contract above is pinned. frappe's sanitiser allowlists tags by
 		# name and knows no custom elements, so one is unwrapped and its styling

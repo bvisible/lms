@@ -971,6 +971,15 @@
 			"export"
 		]
 	},
+	"Neoffice External Learner": {
+		"Moderator#0": [
+			"read",
+			"write",
+			"create",
+			"delete",
+			"report"
+		]
+	},
 	"User Skill": {
 		"LMS Student#0": [
 			"read",

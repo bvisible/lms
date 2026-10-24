@@ -4,7 +4,7 @@
 import frappe
 
 from lms.lms.html_sanitizer import sanitize_rich_text, to_plain_text
-from lms.lms.test_helpers import BaseTestUtils
+from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
 from lms.widgets import Widgets
 
 TESTIMONIALS = "lms/lms/web_template/multiple_testimonials/multiple_testimonials.html"
@@ -67,6 +67,7 @@ class TestLMSCourseReview(BaseTestUtils):
 
 
 class TestRichText(BaseTestUtils):
+	@skip_on_frappe_v15("bleach escapes an unclosed tag as text, nh3 drops it")  # //// Neoffice
 	def test_text_ending_in_an_unclosed_tag_is_cleaned(self):
 		self.assertEqual(sanitize_rich_text("tail <img src=x onerror=alert(1)"), "tail ")
 
