@@ -1,0 +1,1 @@
+.avatar-group{align-items:center;display:inline-flex}.avatar-group .avatar{transition:margin .1s ease-in-out}.avatar-group.overlap .avatar+.avatar{margin-inline-start:-8px}.short-introduction{-webkit-line-clamp:2;text-overflow:ellipsis;-webkit-box-orient:vertical;width:100%;margin:.25rem 0 1.25rem;line-height:1.5;display:-webkit-box;overflow:hidden}

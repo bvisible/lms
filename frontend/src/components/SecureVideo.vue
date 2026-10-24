@@ -10,14 +10,14 @@
 	<div class="secure-video">
 		<div
 			v-if="error"
-			class="flex items-center justify-center rounded-md border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700"
+			class="flex items-center justify-center rounded-5 border border-outline-red-1 bg-surface-red-1 p-6 text-center text-sm text-ink-red-5"
 			:style="{ minHeight: height + 'px' }"
 		>
 			{{ error }}
 		</div>
 		<div
 			v-else-if="!src"
-			class="flex items-center justify-center rounded-md bg-surface-gray-2 text-sm text-ink-gray-5"
+			class="flex items-center justify-center rounded-5 bg-surface-gray-2 text-sm text-ink-gray-5"
 			:style="{ minHeight: height + 'px' }"
 		>
 			{{ __('Loading video…') }}
@@ -25,8 +25,8 @@
 		<iframe
 			v-else
 			ref="frame"
-			:src="src"
-			class="w-full rounded-md bg-black"
+			:src="safeUrl(src)"
+			class="w-full rounded-5 bg-black-overlay-950"
 			:height="height"
 			frameborder="0"
 			allowfullscreen
@@ -39,6 +39,7 @@
 import { call } from 'frappe-ui'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useScreenSize } from '@/utils/composables'
+import { safeUrl } from '@/utils/safeUrl'
 import {
 	PLAYER_ORIGIN,
 	isRealProgress,

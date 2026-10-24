@@ -1,0 +1,1 @@
+throw Error(`Could not resolve "@codemirror/lang-xml" imported by "frappe-ui". Is it installed?`);

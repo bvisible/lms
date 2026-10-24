@@ -1,31 +1,27 @@
 <template>
-	<!-- //// Neoffice — the two YouTube iframes below keep a 16:9 shape (`aspect-ratio`, height auto). Upstream gives them a fixed height of 400
-	     (200 on a phone) at 100% width: on a wide column a 16:9 film is letterboxed with black bars on both sides. The address comes from
-	     `youtubeEmbed.ts` (no « more videos » from other channels, no automatic captions by default). At the merge: keep ours. -->
-	<div v-if="youtube">
-		<!-- //// Neoffice — see the block marker above: 16:9 aspect-ratio fix -->
-		<iframe
-			class="youtube-video"
-			:src="getYouTubeVideoSource(youtube.split('/').pop())"
-			:title="__('YouTube video')"
-			width="100%"
-			style="aspect-ratio: 16 / 9; height: auto"
-			frameborder="0"
-			allowfullscreen
-		></iframe>
+	<div v-if="youtubeEmbedId(youtube)" :key="youtubeEmbedId(youtube)">
+		<div
+			class="video-player"
+			data-plyr-provider="youtube"
+			:data-plyr-embed-id="youtubeEmbedId(youtube)"
+		></div>
 	</div>
-	<div v-for="(block, index) in content?.split('\n\n')" :key="index">
+	<!-- Keyed on the block text, not just the index: position N of the outgoing
+	     lesson and position N of the incoming one share an index, so Vue reuses
+	     the instance and hands a <PdfBlock> a new `file`, which it only reads
+	     once, at setup. Including the text forces a fresh instance. -->
+	<div
+		v-for="(block, index) in content?.split('\n\n')"
+		:key="`${index}:${block}`"
+	>
 		<div v-if="block.includes('{{ YouTubeVideo')">
-			<!-- //// Neoffice — see the block marker above: 16:9 aspect-ratio fix -->
-			<iframe
-				class="youtube-video"
-				:src="getYouTubeVideoSource(block)"
-				:title="__('YouTube video')"
-				width="100%"
-				style="aspect-ratio: 16 / 9; height: auto"
-				frameborder="0"
-				allowfullscreen
-			></iframe>
+			<div
+				v-if="youtubeEmbedId(getId(block))"
+				:key="youtubeEmbedId(getId(block))"
+				class="video-player"
+				data-plyr-provider="youtube"
+				:data-plyr-embed-id="youtubeEmbedId(getId(block))"
+			></div>
 		</div>
 		<div v-else-if="block.includes('{{ Quiz')">
 			<Quiz :quiz="getId(block)" />
@@ -60,22 +56,31 @@
 				oncontextmenu="return false;"
 				style="display: block; width: 100%; margin: 24px 0; border-radius: 10px"
 			>
-				<source :src="getId(block)" type="video/mp4" />
+				<source :src="safeUrl(getId(block))" type="video/mp4" />
 			</video>
 		</div>
 		<div v-else-if="block.includes('{{ PDF')">
-			<PdfBlock :file="getId(block)" />
+			<PdfBlock v-if="inlinePdf" :file="getId(block)" />
+			<iframe
+				v-else
+				:src="safeUrl(getId(block))"
+				:title="__('PDF document')"
+				width="100%"
+				height="700px"
+				class="mb-4"
+				type="application/pdf"
+			></iframe>
 		</div>
 		<div v-else-if="block.includes('{{ Audio')">
 			<audio width="100%" controls controlsList="nodownload">
-				<source :src="getId(block)" type="audio/mp3" />
+				<source :src="safeUrl(getId(block))" type="audio/mp3" />
 			</audio>
 		</div>
 		<div v-else-if="block.includes('{{ Embed')">
 			<iframe
 				width="100%"
 				height="400"
-				:src="getId(block)"
+				:src="safeUrl(getId(block))"
 				:title="__('Embedded content')"
 				frameborder="0"
 				allowfullscreen
@@ -84,7 +89,7 @@
 		</div>
 		<!-- //// Neoffice — the rendered Markdown gets `neo-lesson-md`: upstream's `.lesson-content` rules are applied nowhere, so a
 		     capture showed at its natural width, up to the whole column, however small the part of the screen it shows. -->
-		<div v-else class="neo-lesson-md" v-html="renderSafe(block)"></div>
+		<div v-else class="neo-lesson-md" v-safe-html:rich="renderMarkdown(block)"></div>
 	</div>
 	<div v-if="quizId">
 		<Quiz :quiz="quizId" />
@@ -99,27 +104,25 @@ import InstanceLink from '@/components/InstanceLink.vue'
 import { parseInstanceLink } from '@/utils/instanceLink'
 import PdfBlock from '@/components/PdfBlock.vue'
 import MarkdownIt from 'markdown-it'
-import { getMacroArg } from '@/utils/lessonMacros'
-//// Neoffice — the address of an embedded YouTube video (see the file).
-import { youtubeEmbedUrl } from '@/utils/youtubeEmbed'
-import { sanitizeRichHTML } from '@/utils/sanitizeRichHTML'
+import { extractYoutubeID, getMacroArg } from '@/utils/lessonMacros'
+import { usesWebkitPdfViewer } from '@/utils/pdfViewer'
+import { safeUrl } from '@/utils/safeUrl'
 
 //// Neoffice — a789500f: upstream declares no emit here. The Infomaniak iframe is the
 //// only player whose end-of-video the parent cannot observe from the DOM, so it has to
 //// be forwarded; Lesson.vue turns it into markProgress() + trackVideoWatchDuration().
 const emit = defineEmits(['video-ended'])
 
+const inlinePdf = usesWebkitPdfViewer()
 
 const markdown = new MarkdownIt({
 	html: true,
 	linkify: true,
 })
 
-// Route markdown output through the shared sanitizer so the anchor-target
-// hook (open in new tab) and form-tag blocklist are applied uniformly with
-// the rest of the LMS render pipelines. Keeps one source of truth for what
-// counts as safe user-authored HTML.
-const renderSafe = (block) => sanitizeRichHTML(markdown.render(block))
+// The directive sanitizes at the rich level, which is where the anchor-target
+// hook and the form-tag blocklist live. This only does the markdown pass.
+const renderMarkdown = (block) => markdown.render(block)
 
 const props = defineProps({
 	content: {
@@ -156,20 +159,17 @@ const watchedSeconds = (media) => {
 	return row ? Number(row.watch_time) || 0 : 0
 }
 
-const getYouTubeVideoSource = (block) => {
-	if (block.includes('{{')) {
-		block = getId(block)
-	}
-	//// Neoffice — 36c69d63: upstream embeds `youtube.com`; we embed `youtube-nocookie.com`
-	//// so no Google cookie is dropped before the visitor presses play (same change in
-	//// lms/plugins.py). At the merge: keep ours, upstream's host is the regression.
-	//// Neoffice: the address is built in `youtubeEmbed.ts` (also adds `rel=0` etc., see there).
-	return youtubeEmbedUrl(block)
-}
-
 const getId = (block) => {
 	// Guard the match: a malformed `{{ PDF() }}` / unbalanced-quote macro yields
 	// null, and the old unguarded [1] threw and killed the whole lesson render.
 	return getMacroArg(block) ?? ''
 }
+
+// Both authoring paths (the `youtube` field and the `{{ YouTubeVideo }}` macro)
+// must land in the same Plyr-wrapped `.video-player` the EditorJS embed block
+// renders. A bare <iframe> is invisible to the watch tracker in Lesson.vue, so
+// enforce_video_completion saw "no video" and auto-completed on the dwell timer.
+// Falsy id => render nothing rather than a Plyr player with no video, which
+// would suppress the dwell timer and leave the lesson uncompletable.
+const youtubeEmbedId = (source) => (source ? extractYoutubeID(source) : '')
 </script>

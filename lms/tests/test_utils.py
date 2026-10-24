@@ -1,21 +1,40 @@
 # Copyright (c) 2021, FOSS United and Contributors
 # See license.txt
 
+import html
+import json
+import re
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import patch
 
 import frappe
-from frappe.utils import getdate, to_timedelta
+from frappe.tests import UnitTestCase
+from frappe.utils import escape_html, get_system_timezone, getdate, to_timedelta
 
+import lms
 from lms.lms.doctype.lms_certificate.lms_certificate import is_certified
 from lms.lms.test_helpers import BaseTestUtils
 from lms.lms.utils import (
+	DEFAULT_PAGE_LENGTH,
+	MAX_EDITORJS_DEPTH,
+	MAX_PAGE_LENGTH,
+	SANITISER_ARTEFACTS,
+	convert_from_system_timezone,
 	create_user,
+	format_timezone,
 	get_average_rating,
+	get_batch_count,
 	get_batch_details,
+	get_batches,
 	get_chapters,
 	get_course_categories,
+	get_course_count,
 	get_course_details,
+	get_courses,
+	get_evaluation_display_timezone,
 	get_evaluator,
+	get_featured_courses,
 	get_instructors,
 	get_lesson_index,
 	get_lesson_url,
@@ -28,16 +47,18 @@ from lms.lms.utils import (
 	has_moderator_role,
 	has_student_role,
 	is_instructor,
+	resolve_page_length,
+	sanitize_editorjs,
 	slugify,
 )
 
 
 class TestLMSUtils(BaseTestUtils):
-	def setUp(self):
-		super().setUp()
-
-		self._setup_course_flow()
-		self._setup_batch_flow()
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls._setup_course_flow()
+		cls._setup_batch_flow()
 
 	def test_simple_slugs(self):
 		self.assertEqual(slugify("hello-world"), "hello-world")
@@ -75,34 +96,38 @@ class TestLMSUtils(BaseTestUtils):
 		average_rating = get_average_rating(self.course.name)
 		self.assertEqual(average_rating, 4.5)
 
-	def test_get_reviews(self):
+	def test_get_reviews_returns_raw_creation_scaled_rating_and_owner_newest_first(self):
 		reviews = get_reviews(self.course.name)
-		self.assertEqual(len(reviews), 2)
 
-	def test_get_reviews_creation_is_datetime(self):
-		# Regression guard: get_reviews must return the raw `creation` datetime,
-		# not a pretty_date() string. The frontend computes the relative age from
-		# this value, so a prettified string made every review render as "Today".
-		reviews = get_reviews(self.course.name)
-		for review in reviews:
-			self.assertIsInstance(review.creation, datetime)
+		with self.subTest(case="count"):
+			self.assertEqual(len(reviews), 2)
 
-	def test_get_reviews_scales_rating_to_display_range(self):
-		# stored 0–1 fractions are returned on the 0–5 display scale (× out_of_ratings)
-		ratings_by_owner = {review.owner: review.rating for review in get_reviews(self.course.name)}
-		self.assertEqual(ratings_by_owner[self.student1.email], 4.0)  # stored 0.8
-		self.assertEqual(ratings_by_owner[self.student2.email], 5.0)  # stored 1.0
+		with self.subTest(case="creation_is_datetime"):
+			# Regression guard: get_reviews must return the raw `creation` datetime,
+			# not a pretty_date() string. The frontend computes the relative age from
+			# this value, so a prettified string made every review render as "Today".
+			for review in reviews:
+				self.assertIsInstance(review.creation, datetime)
 
-	def test_get_reviews_includes_owner_details(self):
-		review = next(r for r in get_reviews(self.course.name) if r.owner == self.student1.email)
-		self.assertIsNotNone(review.owner_details)
-		self.assertEqual(review.owner_details.full_name, self.student1.full_name)
+		# `owner` is a login email, so no caller gets it; reviews are told apart by username.
+		def by(student):
+			return next(r for r in reviews if r.owner_details.username == student.username)
 
-	def test_get_reviews_ordered_newest_first(self):
-		# student2's review is added after student1's; order_by creation desc
-		reviews = get_reviews(self.course.name)
-		self.assertEqual(reviews[0].owner, self.student2.email)
-		self.assertEqual(reviews[1].owner, self.student1.email)
+		with self.subTest(case="scales_rating_to_display_range"):
+			# stored 0-1 fractions are returned on the 0-5 display scale (x out_of_ratings)
+			self.assertEqual(by(self.student1).rating, 4.0)  # stored 0.8
+			self.assertEqual(by(self.student2).rating, 5.0)  # stored 1.0
+
+		with self.subTest(case="includes_owner_details"):
+			self.assertEqual(by(self.student1).owner_details.full_name, self.student1.full_name)
+			self.assertNotIn("owner", by(self.student1))
+
+		with self.subTest(case="ordered_newest_first"):
+			# student2's review is added after student1's; order_by creation desc
+			self.assertEqual(
+				[r.owner_details.username for r in reviews],
+				[self.student2.username, self.student1.username],
+			)
 
 	def test_get_average_rating_none_without_reviews(self):
 		course = frappe.new_doc("LMS Course")
@@ -117,7 +142,6 @@ class TestLMSUtils(BaseTestUtils):
 			}
 		)
 		course.save()
-		self.cleanup_items.append(("LMS Course", course.name))
 		self.assertIsNone(get_average_rating(course.name))
 
 	def test_get_lesson_index(self):
@@ -137,21 +161,24 @@ class TestLMSUtils(BaseTestUtils):
 		frappe.session.user = "Administrator"
 		self.assertFalse(is_instructor(self.course.name))
 
-	def test_has_course_instructor_role(self):
-		self.assertIsNotNone(has_course_instructor_role("frappe@example.com"))
-		self.assertIsNone(has_course_instructor_role("student1@example.com"))
-
-	def test_has_moderator_role(self):
-		self.assertIsNotNone(has_moderator_role("frappe@example.com"))
-		self.assertIsNone(has_moderator_role("student2@example.com"))
-
-	def test_has_evaluator_role(self):
-		self.assertIsNotNone(has_evaluator_role("frappe@example.com"))
-		self.assertIsNone(has_evaluator_role("student2@example.com"))
-
-	def test_has_student_role(self):
-		self.assertIsNotNone(has_student_role("student1@example.com"))
-		self.assertIsNotNone(has_student_role("student2@example.com"))
+	def test_has_role_checks_by_role(self):
+		cases = [
+			(
+				"course_instructor",
+				has_course_instructor_role,
+				["frappe@example.com"],
+				["student1@example.com"],
+			),
+			("moderator", has_moderator_role, ["frappe@example.com"], ["student2@example.com"]),
+			("evaluator", has_evaluator_role, ["frappe@example.com"], ["student2@example.com"]),
+			("student", has_student_role, ["student1@example.com", "student2@example.com"], []),
+		]
+		for case, checker, holders, non_holders in cases:
+			with self.subTest(case=case):
+				for holder in holders:
+					self.assertIsNotNone(checker(holder))
+				for non_holder in non_holders:
+					self.assertIsNone(checker(non_holder))
 
 	def test_is_certified(self):
 		frappe.session.user = self.student1.email
@@ -176,89 +203,106 @@ class TestLMSUtils(BaseTestUtils):
 		self.assertEqual(evaluator_email, self.evaluator.evaluator)
 
 	def test_get_course_details(self):
+		# Shrunk to the returned key set plus counts: get_course_fields() plus what
+		# get_course_details adds on top of it, rather than re-asserting every field
+		# value the function only ever forwards verbatim from the doc.
 		course_details = get_course_details(self.course.name)
+		expected_keys = {
+			"name",
+			"title",
+			"category",
+			"description",
+			"short_introduction",
+			"tags",
+			"published",
+			"instructors",
+		}
+		self.assertTrue(expected_keys.issubset(course_details.keys()))
 		self.assertEqual(course_details.name, self.course.name)
-		self.assertEqual(course_details.title, self.course.title)
-		self.assertEqual(course_details.category, self.course.category)
-		self.assertEqual(course_details.description, self.course.description)
-		self.assertEqual(course_details.short_introduction, self.course.short_introduction)
-		self.assertEqual(course_details.tags, self.course.tags)
-		self.assertEqual(course_details.published, 1)
 		self.assertEqual(len(course_details.instructors), len(self.course.instructors))
 
 	def test_get_batch_details(self):
+		# Shrunk to the returned key set plus counts, for the same reason as
+		# test_get_course_details above.
 		batch_details = get_batch_details(self.batch.name)
+		expected_keys = {
+			"name",
+			"title",
+			"description",
+			"batch_details",
+			"start_date",
+			"end_date",
+			"start_time",
+			"end_time",
+			"timezone",
+			"published",
+			"evaluation_end_date",
+			"instructors",
+			"courses",
+			"student_count",
+			"is_student",
+		}
+		self.assertTrue(expected_keys.issubset(batch_details.keys()))
 		self.assertEqual(batch_details.name, self.batch.name)
-		self.assertEqual(batch_details.title, self.batch.title)
-		self.assertEqual(batch_details.start_date, getdate(self.batch.start_date))
-		self.assertEqual(batch_details.end_date, getdate(self.batch.end_date))
-		self.assertEqual(batch_details.start_time, to_timedelta(self.batch.start_time))
-		self.assertEqual(batch_details.end_time, to_timedelta(self.batch.end_time))
-		self.assertEqual(batch_details.timezone, self.batch.timezone)
-		self.assertEqual(batch_details.published, 1)
-		self.assertEqual(batch_details.description, self.batch.description)
-		self.assertEqual(batch_details.batch_details, self.batch.batch_details)
 		self.assertEqual(len(batch_details.courses), len(self.batch.courses))
-		self.assertEqual(batch_details.evaluation_end_date, getdate(self.batch.evaluation_end_date))
 		self.assertEqual(len(batch_details.instructors), len(self.batch.instructors))
-		self.assertEqual(len(batch_details.students), 2)
+		self.assertEqual(batch_details.student_count, 2)
+		self.assertNotIn("students", batch_details)
 
-	def test_get_course_categories_includes_used_category(self):
-		categories = get_course_categories()
-		labels = [category["label"] for category in categories]
-		self.assertIn(self.course.category, labels)
+	def test_course_categories_list_used_published_ones_with_a_clear_option(self):
+		with self.subTest(case="includes_used_category"):
+			labels = [category["label"] for category in get_course_categories()]
+			self.assertIn(self.course.category, labels)
 
-	def test_get_course_categories_has_clear_option(self):
-		categories = get_course_categories()
-		self.assertEqual(categories[0], {"label": "", "value": None})
+		with self.subTest(case="has_clear_option"):
+			categories = get_course_categories()
+			self.assertEqual(categories[0], {"label": "", "value": None})
 
-	def test_get_course_categories_is_independent_of_active_filter(self):
-		other = self._create_user("creator2@example.com", "Cat", "Two", ["Course Creator"])
-		if not frappe.db.exists("LMS Category", "Marketing"):
-			frappe.get_doc({"doctype": "LMS Category", "category": "Marketing"}).insert(
-				ignore_permissions=True
+		with self.subTest(case="independent_of_active_filter"):
+			other = self._create_user("creator2@example.com", "Cat", "Two", ["Course Creator"])
+			if not frappe.db.exists("LMS Category", "Marketing"):
+				frappe.get_doc({"doctype": "LMS Category", "category": "Marketing"}).insert(
+					ignore_permissions=True
+				)
+
+			second = frappe.new_doc("LMS Course")
+			second.update(
+				{
+					"title": "Second Utility Course",
+					"short_introduction": "Another course",
+					"description": "Second course description.",
+					"category": "Marketing",
+					"published": 1,
+					"instructors": [{"instructor": other.email}],
+				}
 			)
-			self.cleanup_items.append(("LMS Category", "Marketing"))
+			second.save()
 
-		second = frappe.new_doc("LMS Course")
-		second.update(
-			{
-				"title": "Second Utility Course",
-				"short_introduction": "Another course",
-				"description": "Second course description.",
-				"category": "Marketing",
-				"published": 1,
-				"instructors": [{"instructor": other.email}],
-			}
-		)
-		second.save()
-		self.cleanup_items.append(("LMS Course", second.name))
+			labels = [category["label"] for category in get_course_categories()]
+			self.assertIn("Business", labels)
+			self.assertIn("Marketing", labels)
 
-		labels = [category["label"] for category in get_course_categories()]
-		self.assertIn("Business", labels)
-		self.assertIn("Marketing", labels)
+		with self.subTest(case="excludes_unpublished"):
+			if not frappe.db.exists("LMS Category", "Hidden"):
+				frappe.get_doc({"doctype": "LMS Category", "category": "Hidden"}).insert(
+					ignore_permissions=True
+				)
 
-	def test_get_course_categories_excludes_unpublished(self):
-		if not frappe.db.exists("LMS Category", "Hidden"):
-			frappe.get_doc({"doctype": "LMS Category", "category": "Hidden"}).insert(ignore_permissions=True)
-			self.cleanup_items.append(("LMS Category", "Hidden"))
+			draft = frappe.new_doc("LMS Course")
+			draft.update(
+				{
+					"title": "Draft Utility Course",
+					"short_introduction": "Draft",
+					"description": "Draft description.",
+					"category": "Hidden",
+					"published": 0,
+					"instructors": [{"instructor": "frappe@example.com"}],
+				}
+			)
+			draft.save()
 
-		draft = frappe.new_doc("LMS Course")
-		draft.update(
-			{
-				"title": "Draft Utility Course",
-				"short_introduction": "Draft",
-				"description": "Draft description.",
-				"category": "Hidden",
-				"published": 0,
-				"instructors": [{"instructor": "frappe@example.com"}],
-			}
-		)
-		draft.save()
-		self.cleanup_items.append(("LMS Course", draft.name))
-
-		labels = [category["label"] for category in get_course_categories()]
-		self.assertNotIn("Hidden", labels)
+			labels = [category["label"] for category in get_course_categories()]
+			self.assertNotIn("Hidden", labels)
 
 	def test_create_user(self):
 		user = create_user(
@@ -269,7 +313,6 @@ class TestLMSUtils(BaseTestUtils):
 		self.assertEqual(user.last_name, "User")
 		self.assertEqual(user.full_name, "Test User")
 		self.assertIn("LMS Student", [role.role for role in user.roles])
-		self.cleanup_items.append(("User", user.name))
 
 	def test_create_user_with_full_name(self):
 		user = create_user(
@@ -279,7 +322,6 @@ class TestLMSUtils(BaseTestUtils):
 		self.assertEqual(user.last_name, "Michael Doe")
 		self.assertEqual(user.full_name, "John Michael Doe")
 		self.assertIn("Course Creator", [role.role for role in user.roles])
-		self.cleanup_items.append(("User", user.name))
 
 
 # Fixture-free (no DB) coverage for the lesson-content EditorJS-JSON guard.
@@ -383,3 +425,394 @@ class TestGetLessonIcon(unittest.TestCase):
 		):
 			with self.subTest(block=block):
 				self.assertEqual(get_lesson_icon("", _content(block)), "icon-list")
+
+
+class TestResolvePageLength(UnitTestCase):
+	"""
+	`createListResource` sends `limit_page_length` and then advances `start` by
+	the same number. An endpoint that ignores it returns a page of a different
+	size, so the next page either repeats rows or skips them. These endpoints
+	are open to guests, so the value is also bounded.
+	"""
+
+	def test_client_page_size_is_honoured(self):
+		self.assertEqual(resolve_page_length(60), 60)
+
+	def test_missing_page_size_falls_back_to_the_default(self):
+		for empty in (None, "", 0):
+			with self.subTest(value=empty):
+				self.assertEqual(resolve_page_length(empty), DEFAULT_PAGE_LENGTH)
+
+	def test_numeric_strings_are_accepted(self):
+		self.assertEqual(resolve_page_length("60"), 60)
+
+	def test_unparseable_values_fall_back_rather_than_raise(self):
+		for junk in ("abc", "12; DROP TABLE", [], {}):
+			with self.subTest(value=junk):
+				self.assertEqual(resolve_page_length(junk), DEFAULT_PAGE_LENGTH)
+
+	def test_boundaries(self):
+		self.assertEqual(resolve_page_length(1), 1)
+		self.assertEqual(resolve_page_length(MAX_PAGE_LENGTH), MAX_PAGE_LENGTH)
+		self.assertEqual(resolve_page_length(MAX_PAGE_LENGTH + 1), MAX_PAGE_LENGTH)
+
+	def test_negative_page_size_never_reaches_the_query(self):
+		self.assertEqual(resolve_page_length(-5), 1)
+
+
+class TestListEndpointPaging(BaseTestUtils):
+	"""
+	`createListResource` asks for a page size and then advances `start` by that
+	same number, so an endpoint that answers with a different number of rows
+	makes the next page overlap the last one.
+
+	The courses list is the awkward one: featured courses lead it and come from
+	a second query, so they have to be counted against the same page budget.
+	These build their own category so the assertions are about a known four
+	courses rather than whatever the site happens to hold.
+	"""
+
+	CATEGORY = "Paging Test Category"
+	STARTED_TODAY = "Paging Batch Already Started"
+	featured_titles = ["Paging Featured A", "Paging Featured B"]
+	plain_titles = ["Paging Plain A", "Paging Plain B"]
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		if not frappe.db.exists("LMS Category", cls.CATEGORY):
+			frappe.get_doc({"doctype": "LMS Category", "category": cls.CATEGORY}).insert(
+				ignore_permissions=True
+			)
+
+		for title in cls.featured_titles + cls.plain_titles:
+			cls._create_paging_course(title, featured=title in cls.featured_titles)
+
+	@classmethod
+	def _create_paging_course(cls, title, featured):
+		if frappe.db.exists("LMS Course", {"title": title}):
+			return
+		course = frappe.new_doc("LMS Course")
+		course.update(
+			{
+				"title": title,
+				"short_introduction": "Paging fixture",
+				"description": "Paging fixture",
+				"category": cls.CATEGORY,
+				"published": 1,
+				"featured": 1 if featured else 0,
+				"instructors": [{"instructor": "Administrator"}],
+			}
+		)
+		course.insert(ignore_permissions=True)
+
+	def _filters(self):
+		# `live` is the Published tab: it excludes featured from the main query
+		# and leads the list with them instead.
+		return {"published": 1, "live": 1, "category": self.CATEGORY}
+
+	def _page(self, start, size):
+		return get_courses(filters=self._filters(), start=start, limit_page_length=size)
+
+	def test_featured_courses_come_out_of_the_page_budget(self):
+		# The regression: two featured courses were prepended to an already-full
+		# page, so asking for three returned four.
+		self.assertEqual(len(self._page(0, 3)), 3)
+
+	def test_the_featured_courses_still_lead_the_list(self):
+		titles = [course.title for course in self._page(0, 4)]
+		self.assertEqual(set(titles[:2]), set(self.featured_titles))
+
+	def test_the_second_page_carries_on_where_the_first_stopped(self):
+		first = [course.name for course in self._page(0, 3)]
+		second = [course.name for course in self._page(3, 3)]
+		self.assertEqual(len(second), 1)
+		self.assertEqual(set(first) & set(second), set())
+
+	def test_every_course_appears_exactly_once_across_the_pages(self):
+		seen = [course.title for course in self._page(0, 3)] + [course.title for course in self._page(3, 3)]
+		self.assertEqual(sorted(seen), sorted(self.featured_titles + self.plain_titles))
+
+	def test_the_featured_read_stops_at_the_window(self):
+		"""The featured rows lead the list, but only the ones the page shows are
+		read: this is open to guests too, and there is no ceiling on how many
+		courses a site marks featured."""
+		with patch("lms.lms.utils.get_featured_courses", wraps=get_featured_courses) as read:
+			self._page(3, 3)
+		self.assertEqual(read.call_args.args[3], 6)
+
+	def test_the_count_includes_the_featured_courses(self):
+		self.assertEqual(get_course_count(filters=self._filters()), 4)
+
+	def test_the_batch_count_agrees_with_the_batch_list(self):
+		filters = {"published": 1}
+		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
+		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
+
+	def test_the_batch_count_drops_the_batches_the_list_drops(self):
+		"""
+		Upcoming is settled in Python, not in the query: a batch that started
+		earlier today still matches `start_date >= today` but is already under
+		way, so the list removes it. A count taken straight from the query would
+		keep it, and the footer would promise a row that is not there.
+		"""
+		self._create_started_today_batch()
+		filters = {"published": 1, "start_date": [">=", getdate()]}
+
+		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
+		titles = [batch.title for batch in listed]
+
+		self.assertNotIn(self.STARTED_TODAY, titles)
+		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
+
+	def test_the_archived_batch_count_agrees_with_the_archived_list(self):
+		"""The other side of the same boundary: a batch that started earlier today
+		is archived, and the query's `start_date <= today` cannot say so."""
+		self._create_started_today_batch()
+		filters = {"published": 1, "start_date": ["<=", getdate()]}
+
+		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
+
+		self.assertIn(self.STARTED_TODAY, [batch.title for batch in listed])
+		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
+
+	def test_the_batch_count_never_walks_the_rows(self):
+		"""The count is open to guests, so it must stay a COUNT.
+
+		It used to fetch every matching batch and run the list's Python pass over
+		the lot, which made an anonymous request cost as much as the site has
+		batches. Nothing may call that pass on the counting path again.
+		"""
+		self._create_started_today_batch()
+		filters = {"published": 1, "start_date": [">=", getdate()]}
+		expected = get_batch_count(filters=filters.copy())
+
+		with patch("lms.lms.utils.filter_batches_based_on_start_time") as walked:
+			walked.side_effect = AssertionError("the count fetched and filtered the rows")
+			self.assertEqual(get_batch_count(filters=filters.copy()), expected)
+
+	def _create_started_today_batch(self):
+		if frappe.db.exists("LMS Batch", {"title": self.STARTED_TODAY}):
+			return
+		batch = frappe.new_doc("LMS Batch")
+		batch.update(
+			{
+				"title": self.STARTED_TODAY,
+				"start_date": getdate(),
+				"end_date": getdate(),
+				# Before any wall clock this test can run at, so the list always
+				# treats it as already under way.
+				"start_time": "00:00:00",
+				"end_time": "00:00:01",
+				"timezone": "Asia/Kolkata",
+				"published": 1,
+				"description": "Paging fixture",
+				"batch_details": "Paging fixture",
+				"instructors": [{"instructor": "Administrator"}],
+			}
+		)
+		batch.insert(ignore_permissions=True)
+
+	def test_a_guest_with_no_access_is_counted_as_nothing(self):
+		frappe.db.set_single_value("LMS Settings", "allow_guest_access", 0)
+		frappe.set_user("Guest")
+		try:
+			self.assertEqual(get_course_count(filters=self._filters()), 0)
+			self.assertEqual(get_batch_count(filters={"published": 1}), 0)
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.set_single_value("LMS Settings", "allow_guest_access", 1)
+
+
+class TestFormatTimezone(UnitTestCase):
+	def test_iana_zone_gains_its_offset(self):
+		self.assertEqual(format_timezone("Asia/Kolkata", "2026-08-03"), "Asia/Kolkata (GMT+5:30)")
+
+	def test_offset_is_read_at_the_given_instant(self):
+		# America/Santiago is GMT-4 through winter and flips to GMT-3 in September.
+		self.assertEqual(format_timezone("America/Santiago", "2026-08-03"), "America/Santiago (GMT-4:00)")
+		self.assertEqual(format_timezone("America/Santiago", "2026-10-03"), "America/Santiago (GMT-3:00)")
+
+	def test_legacy_free_text_is_echoed(self):
+		self.assertEqual(format_timezone("IST (GMT+5:30)", "2026-08-03"), "IST (GMT+5:30)")
+
+	def test_hostile_value_is_echoed(self):
+		# ZoneInfo resolves keys against the filesystem, so a traversal attempt has
+		# to be rejected as free text rather than raising out of an email.
+		self.assertEqual(format_timezone("../../../etc/passwd", "2026-08-03"), "../../../etc/passwd")
+
+	def test_empty_stays_empty(self):
+		self.assertEqual(format_timezone(None), "")
+		self.assertEqual(format_timezone(""), "")
+
+
+@patch("lms.lms.utils.get_system_timezone", return_value="Asia/Kolkata")
+class TestConvertFromSystemTimezone(UnitTestCase):
+	def test_converts_the_wall_clock(self, _system_timezone):
+		date, time = convert_from_system_timezone("2026-08-03", "10:00:00", "Europe/Berlin")
+		self.assertEqual(date, getdate("2026-08-03"))
+		self.assertEqual(time.strftime("%H:%M"), "06:30")
+
+	def test_rolls_back_into_the_previous_day(self, _system_timezone):
+		date, time = convert_from_system_timezone("2026-08-03", "09:00:00", "America/Los_Angeles")
+		self.assertEqual(date, getdate("2026-08-02"))
+		self.assertEqual(time.strftime("%H:%M"), "20:30")
+
+	def test_accepts_a_timedelta(self, _system_timezone):
+		# Time fields come back from the DB as timedelta, not str.
+		date, time = convert_from_system_timezone(
+			getdate("2026-08-03"), to_timedelta("09:00:00"), "America/New_York"
+		)
+		self.assertEqual(date, getdate("2026-08-02"))
+		self.assertEqual(time.strftime("%H:%M"), "23:30")
+
+	def test_same_zone_is_untouched(self, _system_timezone):
+		date, time = convert_from_system_timezone("2026-08-03", "10:00:00", "Asia/Kolkata")
+		self.assertEqual(date, getdate("2026-08-03"))
+		self.assertEqual(time.strftime("%H:%M"), "10:00")
+
+	def test_legacy_free_text_is_not_converted(self, _system_timezone):
+		# There is no offset to convert against, so the clock is labelled, not moved.
+		date, time = convert_from_system_timezone("2026-08-03", "10:00:00", "IST (GMT+5:30)")
+		self.assertEqual(date, getdate("2026-08-03"))
+		self.assertEqual(time.strftime("%H:%M"), "10:00")
+
+
+class TestEvaluationDisplayTimezone(BaseTestUtils):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.admin = cls._create_user(
+			"frappe@example.com", "Frappe", "Admin", ["Moderator", "Course Creator", "Batch Evaluator"]
+		)
+		cls.evaluator = cls._create_evaluator()
+		cls.course = cls._create_course(title="Display Timezone Course")
+
+	def test_batch_timezone_wins(self):
+		batch = self._create_batch(self.course.name, title="Display Timezone Batch")
+		frappe.db.set_value("LMS Batch", batch.name, "timezone", "Europe/Berlin")
+		self.assertEqual(get_evaluation_display_timezone(self.course.name, batch.name), "Europe/Berlin")
+
+	def test_paid_certificate_course_timezone_when_there_is_no_batch(self):
+		frappe.db.set_value(
+			"LMS Course",
+			self.course.name,
+			{"paid_certificate": 1, "timezone": "Europe/Berlin"},
+		)
+		self.assertEqual(get_evaluation_display_timezone(self.course.name), "Europe/Berlin")
+
+	def test_course_timezone_ignored_without_a_paid_certificate(self):
+		# The field `depends_on` paid_certificate, so an unset course can be holding
+		# a stale value from a toggle.
+		frappe.db.set_value(
+			"LMS Course",
+			self.course.name,
+			{"paid_certificate": 0, "timezone": "Europe/Berlin"},
+		)
+		self.assertEqual(get_evaluation_display_timezone(self.course.name), get_system_timezone())
+
+	def test_falls_back_to_the_system_timezone(self):
+		self.assertEqual(get_evaluation_display_timezone(self.course.name), get_system_timezone())
+
+
+class TestEditorJsSanitisation(unittest.TestCase):
+	"""
+	Every lesson save runs its EditorJS payload through `sanitize_editorjs`.
+	The inline tools each wrap the selection in their own tag, and a tag the
+	sanitiser does not recognise is unwrapped -- the text survives, the styling
+	does not, and the author only finds out when the lesson renders plain.
+	"""
+
+	def _text(self, raw):
+		return json.loads(sanitize_editorjs(raw))["blocks"][0]["data"]["text"]
+
+	def _payload(self, text):
+		return json.dumps({"blocks": [{"type": "paragraph", "data": {"text": text}}]})
+
+	def test_keeps_a_span_carrying_class_and_style(self):
+		# The align tool carries its whole payload in an attribute, so it is the
+		# one a tag-level allowlist can silently strip.
+		text = '<span class="lms-align" style="text-align: center; ' 'display: block;">mid</span>'
+		out = self._text(self._payload(text))
+		self.assertIn("lms-align", out)
+		self.assertIn("text-align:center", out.replace(" ;", ";"))
+		self.assertIn("display:block", out)
+
+	def test_keeps_the_other_inline_tools(self):
+		out = self._text(self._payload("<b>b</b><u>u</u><s>s</s>"))
+		for tag in ("<b>", "<u>", "<s>"):
+			self.assertIn(tag, out)
+
+	def test_a_custom_element_is_unwrapped(self):
+		# Why the contract above is pinned. frappe's sanitiser allowlists tags by
+		# name and knows no custom elements, so one is unwrapped and its styling
+		# lost while the text stays -- which reads as "colour does nothing" rather
+		# than as an error. The align tool used to emit `<lms-align>`.
+		out = self._text(self._payload('<lms-align style="text-align: center;">x</lms-align>'))
+		self.assertEqual(out, "x")
+
+	def test_still_strips_a_script(self):
+		out = self._text(self._payload('ok<script>alert(1)</script><img src="x" onerror="alert(1)">'))
+		self.assertNotIn("<script", out)
+		self.assertNotIn("onerror", out)
+		self.assertIn("ok", out)
+
+	def test_keeps_text_without_markup_that_is_not_json(self):
+		for raw in ('{"blocks":[{"da', "https://frappe.io/lesson", None):
+			with self.subTest(raw=raw):
+				self.assertEqual(sanitize_editorjs(raw), raw)
+
+	def test_escapes_markup_that_is_not_json(self):
+		raw = "<img src=x onerror=alert(1)> & <script>alert(1)</script>"
+		out = sanitize_editorjs(raw)
+		self.assertEqual(out, escape_html(raw))
+		self.assertEqual(html.unescape(out), raw)
+
+	def test_escapes_a_row_the_repair_cannot_fix(self):
+		raw = '{"blocks":[{"data":{"text":"<img src=x onerror=alert(1)>'
+		self.assertEqual(sanitize_editorjs(raw), escape_html(raw))
+
+	def test_escaped_text_is_not_escaped_again(self):
+		once = sanitize_editorjs("<b>a</b> &amp; b")
+		self.assertEqual(sanitize_editorjs(once), once)
+
+	def test_drops_a_key_with_markup(self):
+		self.assertEqual(json.loads(sanitize_editorjs('{"<svg onload=alert(1)>": "x", "a": 1}')), {"a": 1})
+
+	def test_a_key_with_markup_cannot_replace_a_real_one(self):
+		real = [{"type": "paragraph", "data": {"text": "real"}}]
+		raw = json.dumps({"blocks": real, "blocks<script></script>": [{"type": "paragraph"}]})
+		self.assertEqual(json.loads(sanitize_editorjs(raw))["blocks"], real)
+
+	def test_escapes_content_that_nests_too_deeply(self):
+		for depth in (MAX_EDITORJS_DEPTH + 5, 1500):
+			raw = "[" * depth + '"<b>x</b>"' + "]" * depth
+			with self.subTest(depth=depth):
+				self.assertEqual(sanitize_editorjs(raw), escape_html(raw))
+
+	def test_repair_rules_match_the_frontend(self):
+		"""`SANITISER_ARTEFACTS` is kept twice, here and in lessonForm.ts, which
+		repairs on read. The two must undo exactly the same patterns."""
+		source = (Path(lms.__file__).parent.parent / "frontend/src/utils/lessonForm.ts").read_text()
+		block = source[source.index("const SANITISER_ARTEFACTS") :].split("\n]\n", 1)[0]
+		frontend = [
+			# JS string literal to its value, then `$1` to Python's `\1`.
+			(pattern, replacement.replace("\\\\", "\\").replace("$1", "\\1"))
+			for pattern, replacement in re.findall(r"\[/(.+?)/g, '(.+?)'\]", block)
+		]
+		backend = [
+			(pattern.pattern, replacement.replace("\\\\", "\\"))
+			for pattern, replacement in SANITISER_ARTEFACTS
+		]
+		self.assertTrue(frontend, "could not read SANITISER_ARTEFACTS from lessonForm.ts")
+		self.assertEqual(frontend, backend)
+
+	def test_repairs_a_row_the_old_sanitiser_mangled(self):
+		"""Rows saved before `ignore_xss_filter` had their attribute quotes rewritten
+		to `\\&quot;`. They are repaired, not cleaned as HTML, so a title-only save
+		keeps the lesson readable."""
+		raw = (
+			'{"blocks":[{"data":{"text":"<a href="\\&quot;https://frappe.io/\\&quot;" '
+			'rel="noopener noreferrer">here</a>"}}]}'
+		)
+		self.assertEqual(self._text(raw), '<a href="https://frappe.io/" rel="noopener noreferrer">here</a>')

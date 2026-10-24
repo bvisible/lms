@@ -29,3 +29,7 @@ frappe-ui
 # //// only reason the final hunk shows up — take upstream's byte at the merge, it is free.
 # CLAUDE.md  # 2026-05-07 unshipped to document commit-the-build pipeline
 frappe-semgrep-rules
+test-results
+playwright-report
+blob-report
+playwright/.auth

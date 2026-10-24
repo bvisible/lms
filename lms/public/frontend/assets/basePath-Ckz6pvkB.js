@@ -1,0 +1,1 @@
+function e(){return window.lms_path||`lms`}function t(t=``){let n=e();return t?`/${n}/${t.startsWith(`/`)?t.slice(1):t}`:n}export{t as n,e as t};

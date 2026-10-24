@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 
+from lms.lms import telemetry
 from lms.lms.utils import (
 	complete_enrollment,
 	get_lms_route,
@@ -98,6 +99,7 @@ def get_payment_link(
 
 	if total_amount <= 0:
 		frappe.db.set_value("LMS Payment", payment.name, "payment_received", 1)
+		telemetry.payment_received(payment.name)
 		complete_enrollment(payment.name, doctype, docname)
 		return redirect_to
 
@@ -117,8 +119,8 @@ def get_payment_link(
 
 	# The controller creates the order itself when no `order_id` is supplied
 	# (see RazorpaySettings.get_payment_url). Pre-creating one here made the
-	# gateway skip that branch and left two Integration Requests per attempt —
-	# one in paise without an `order_id`, one in rupees with it — which
+	# gateway skip that branch and left two Integration Requests per attempt
+	# (one in paise without an `order_id`, one in rupees with it), which
 	# update_payment_record's "creation desc, limit 1" lookup can resolve to the
 	# wrong row.
 	return controller.get_payment_url(**payment_details)

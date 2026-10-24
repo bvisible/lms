@@ -87,6 +87,7 @@ setup_wizard_complete = "lms.demo.demo_data.create_demo_data"
 after_migrate = [
 	"lms.sqlite.build_index_in_background",
 	"lms.lms.doctype.lms_payment.lms_payment.add_unique_payment_id_constraint",
+	"lms.lms.docperm_shadow.warn_about_shadowed_permlevels",
 	# //// Neoffice — three entries added to upstream's after_migrate (36c69d63, d3b10e3f,
 	# //// 5213816b). They create the custom fields our code reads: the LMS Enrollment access
 	# //// dates, Item.lms_course / lms_access_months, and the chosen-offer marker carried by
@@ -111,16 +112,53 @@ after_migrate = [
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
+	"LMS Course": "lms.lms.permissions.course_query_conditions",
+	"Course Chapter": "lms.lms.permissions.chapter_query_conditions",
+	"LMS Course Progress": "lms.lms.permissions.course_record_query_conditions",
+	"LMS Video Watch Duration": "lms.lms.permissions.course_record_query_conditions",
+	"LMS Course Review": "lms.lms.permissions.course_record_query_conditions",
+	"LMS Enrollment": "lms.lms.permissions.enrollment_query_conditions",
+	"LMS Lesson Note": "lms.lms.permissions.lesson_note_query_conditions",
+	"LMS Coupon": "lms.lms.permissions.coupon_query_conditions",
 	"LMS Certificate": "lms.lms.doctype.lms_certificate.lms_certificate.get_permission_query_conditions",
+	"LMS Live Class": "lms.lms.doctype.lms_live_class.lms_live_class.get_permission_query_conditions",
+	"LMS Batch": "lms.lms.doctype.lms_batch.lms_batch.get_permission_query_conditions",
+	"LMS Program": "lms.lms.doctype.lms_program.lms_program.get_permission_query_conditions",
+	"Course Lesson": "lms.lms.doctype.course_lesson.course_lesson.get_permission_query_conditions",
+	"LMS Certificate Evaluation": "lms.lms.doctype.lms_certificate_evaluation.lms_certificate_evaluation.get_permission_query_conditions",
+	"LMS Batch Enrollment": "lms.lms.doctype.lms_batch_enrollment.lms_batch_enrollment.get_permission_query_conditions",
+	"LMS Quiz": "lms.lms.permissions.quiz_query_conditions",
+	"LMS Assignment": "lms.lms.permissions.assignment_query_conditions",
+	"LMS Programming Exercise": "lms.lms.permissions.programming_exercise_query_conditions",
+	"LMS Quiz Submission": "lms.lms.permissions.quiz_submission_query_conditions",
+	"LMS Assignment Submission": "lms.lms.permissions.assignment_submission_query_conditions",
+	"LMS Programming Exercise Submission": "lms.lms.permissions.programming_exercise_submission_query_conditions",
 }
 
 has_permission = {
+	"LMS Course": "lms.lms.permissions.course_has_permission",
+	"Course Chapter": "lms.lms.permissions.chapter_has_permission",
+	"LMS Course Progress": "lms.lms.permissions.course_record_has_permission",
+	"LMS Video Watch Duration": "lms.lms.permissions.course_record_has_permission",
+	"LMS Course Review": "lms.lms.permissions.course_record_has_permission",
+	"LMS Enrollment": "lms.lms.permissions.enrollment_has_permission",
+	"LMS Lesson Note": "lms.lms.permissions.lesson_note_has_permission",
+	"LMS Coupon": "lms.lms.permissions.coupon_has_permission",
 	"LMS Live Class": "lms.lms.doctype.lms_live_class.lms_live_class.has_permission",
 	"LMS Batch": "lms.lms.doctype.lms_batch.lms_batch.has_permission",
 	"LMS Program": "lms.lms.doctype.lms_program.lms_program.has_permission",
 	"LMS Certificate": "lms.lms.doctype.lms_certificate.lms_certificate.has_permission",
 	"Course Lesson": "lms.lms.doctype.course_lesson.course_lesson.has_permission",
+	"LMS Certificate Evaluation": "lms.lms.doctype.lms_certificate_evaluation.lms_certificate_evaluation.has_permission",
+	"LMS Batch Enrollment": "lms.lms.doctype.lms_batch_enrollment.lms_batch_enrollment.has_permission",
 	"File": "lms.lms.permissions.file_has_permission",
+	"LMS Quiz": "lms.lms.permissions.assessment_has_permission",
+	"LMS Assignment": "lms.lms.permissions.assessment_has_permission",
+	"LMS Programming Exercise": "lms.lms.permissions.assessment_has_permission",
+	"LMS Question": "lms.lms.permissions.has_authored_content_permission",
+	"LMS Quiz Submission": "lms.lms.permissions.assessment_submission_has_permission",
+	"LMS Assignment Submission": "lms.lms.permissions.assessment_submission_has_permission",
+	"LMS Programming Exercise Submission": "lms.lms.permissions.assessment_submission_has_permission",
 }
 
 # DocType Class
@@ -135,6 +173,8 @@ override_doctype_class = {
 # ---------------
 # Hook on document methods and events
 
+CHILD_ROW_MOVE_GATE = "lms.lms.permissions.refuse_moving_child_rows_out_of_content_the_user_cannot_write"
+
 doc_events = {
 	"*": {
 		"on_change": [
@@ -146,10 +186,52 @@ doc_events = {
 		"validate": "lms.lms.utils.validate_discussion_reply",
 	},
 	"Notification Log": {"on_change": "lms.lms.utils.publish_notifications"},
+	# One rule, two entry points: a child row whose stored parent is not the one it is
+	# being saved under answers to the parent it is leaving.
+	#
+	# On the child, because has_child_permission is only ever shown the parent named on
+	# the row being saved, so a row moved out of somebody else's quiz is checked against
+	# the destination alone. A has_permission entry for a child would never be called --
+	# frappe.has_permission returns has_child_permission for an istable doctype before
+	# any controller hook for the child is reached.
+	#
+	# On the parent, because doc_events on a child do NOT fire when its parent saves its
+	# own children, and Document.update_child_table db_updates every submitted row by
+	# name with no ownership check. A save of the thief's own quiz naming a foreign row
+	# is checked for `write` on the destination only, and reaches the child gate never.
+	"LMS Quiz": {"validate": CHILD_ROW_MOVE_GATE, "after_insert": "lms.lms.telemetry.quiz_created"},
+	"LMS Programming Exercise": {"validate": CHILD_ROW_MOVE_GATE},
+	"LMS Assignment": {
+		"validate": CHILD_ROW_MOVE_GATE,
+		"after_insert": "lms.lms.telemetry.assignment_created",
+	},
+	"LMS Question": {"validate": CHILD_ROW_MOVE_GATE},
+	"LMS Quiz Question": {"validate": CHILD_ROW_MOVE_GATE},
+	"LMS Test Case": {"validate": CHILD_ROW_MOVE_GATE},
+	"LMS Content Author": {"validate": CHILD_ROW_MOVE_GATE},
+	# LMS Program carries `authors` too -- composed into its own has_permission hook
+	# rather than registered on the shared gate -- so the same two doors reach its
+	# child tables.
+	"LMS Program": {"validate": CHILD_ROW_MOVE_GATE},
+	"LMS Program Course": {"validate": CHILD_ROW_MOVE_GATE},
+	"LMS Program Member": {"validate": CHILD_ROW_MOVE_GATE},
 	"User": {
 		"validate": "lms.lms.user.validate_username_duplicates",
 		"before_insert": "lms.lms.user.add_lms_student_role",
 	},
+	# Product events for Pulse: one per step a site takes (see lms.lms.telemetry).
+	"Course Chapter": {"after_insert": "lms.lms.telemetry.chapter_created"},
+	"Course Lesson": {"after_insert": "lms.lms.telemetry.lesson_created"},
+	"LMS Batch": {"on_update": "lms.lms.telemetry.batch_saved"},
+	"LMS Live Class": {"after_insert": "lms.lms.telemetry.live_class_created"},
+	"LMS Enrollment": {"after_insert": "lms.lms.telemetry.enrolled_in_course"},
+	"LMS Batch Enrollment": {"after_insert": "lms.lms.telemetry.enrolled_in_batch"},
+	"LMS Certificate": {"after_insert": "lms.lms.telemetry.certificate_issued"},
+	# //// Neoffice — two doctypes appear on both sides, so their entries are merged by hand
+	# //// (a second "LMS Course" / "LMS Settings" key would silently replace the first in the
+	# //// dict literal): "LMS Course" keeps our validate AND upstream's telemetry on_update;
+	# //// "LMS Settings" runs both on_update handlers (ours syncs the website menu, upstream's
+	# //// reports the payment gateway to Pulse). Re-check this when upstream adds a hook there.
 	# //// Neoffice — everything from here to the end of doc_events is ours (36c69d63,
 	# //// b2addb4a, d3b10e3f, 5213816b, ac912227, 7a226d63). Upstream's doc_events stops at
 	# //// "User": it has no notion of a course being sold as an ERPNext Item, so nothing
@@ -195,6 +277,7 @@ doc_events = {
 	# cours payant que personne ne peut acheter doit le dire.
 	"LMS Course": {
 		"validate": "lms.lms.neoffice_commerce.keep_the_course_price_honest",
+		"on_update": "lms.lms.telemetry.course_saved",
 	},
 	# Neoffice: une ligne de panier marquée garde le prix de l'offre choisie. Le
 	# contrôleur la retarifierait sinon depuis la liste de prix de l'article, et
@@ -206,7 +289,10 @@ doc_events = {
 	# On met ET on retire : décocher la case et laisser l'entrée mènerait le
 	# visiteur à une page qui n'existe plus.
 	"LMS Settings": {
-		"on_update": "lms.lms.neoffice_commerce.sync_courses_link",
+		"on_update": [
+			"lms.lms.neoffice_commerce.sync_courses_link",
+			"lms.lms.telemetry.payment_gateway_saved",
+		],
 		# Neoffice: régler une passerelle ici rouvrirait le tunnel de paiement du
 		# module, qui ignore le panier, TWINT, le terminal et la facturation.
 		"validate": "lms.lms.neoffice_commerce.warn_about_the_second_tunnel",
@@ -218,6 +304,7 @@ doc_events = {
 scheduler_events = {
 	"all": [
 		"lms.sqlite.build_index_in_background",
+		"lms.lms.doctype.lms_live_class.lms_live_class.retry_pending_invites",
 	],
 	"hourly": [
 		"lms.lms.doctype.lms_certificate_request.lms_certificate_request.schedule_evals",
@@ -246,7 +333,8 @@ fixtures = ["Custom Field", "Function", "Industry", "LMS Category"]
 # ------------------------------
 #
 override_whitelisted_methods = {
-	# "frappe.desk.search.get_names_for_mentions": "lms.lms.utils.get_names_for_mentions",
+	# Finishes Google Calendar sign-in started from an evaluator's Slots tab.
+	"frappe.integrations.doctype.google_calendar.google_calendar.google_callback": "lms.lms.api.google_calendar_callback",
 }
 #
 # each overriding function accepts a `data` argument;
@@ -330,10 +418,6 @@ extend_bootinfo = [
 ## subclass of lms.plugins.PageExtension
 # lms_lesson_page_extension = None
 
-# lms_lesson_page_extensions = [
-# 	"lms.plugins.LiveCodeExtension"
-# ]
-
 has_website_permission = {
 	"LMS Certificate Evaluation": "lms.lms.doctype.lms_certificate_evaluation.lms_certificate_evaluation.has_website_permission",
 	"LMS Certificate": "lms.lms.doctype.lms_certificate.lms_certificate.has_website_permission",
@@ -341,11 +425,8 @@ has_website_permission = {
 
 ## Markdown Macros for Lessons
 lms_markdown_macro_renderers = {
-	"Exercise": "lms.plugins.exercise_renderer",
-	"Quiz": "lms.plugins.quiz_renderer",
 	"YouTubeVideo": "lms.plugins.youtube_video_renderer",
 	"Video": "lms.plugins.video_renderer",
-	"Assignment": "lms.plugins.assignment_renderer",
 	"Embed": "lms.plugins.embed_renderer",
 	"Audio": "lms.plugins.audio_renderer",
 	"PDF": "lms.plugins.pdf_renderer",
@@ -380,8 +461,14 @@ require_type_annotated_api_methods = True
 
 # === Raven membership provider ===
 # Hook contract + admin setup: ../raven-membership-provider.md
-# TODO: that page is an interim capture — publish it at docs.frappe.io/learning
+# TODO: that page is an interim capture. Publish it at docs.frappe.io/learning
 # (specs/extensibility.md: "A hook isn't shipped until the docs exist") and delete it.
 # LMS contributes its rule types + evaluator to the standalone `raven_integration`
 # app via the `raven_membership_providers` hook. See lms/raven_provider.py.
 raven_membership_providers = ["lms.raven_provider.get_provider"]
+
+# Settings > Integrations > Raven sits inside the Settings modal, which is open to
+# any Moderator, so the endpoints behind it have to be too. raven_integration gates
+# on System Manager plus whatever this hook names, and grants the named roles the
+# permissions its own doctypes need on install/migrate.
+raven_integration_manager_roles = ["Moderator"]

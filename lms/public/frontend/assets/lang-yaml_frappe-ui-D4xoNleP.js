@@ -1,0 +1,1 @@
+throw Error(`Could not resolve "@codemirror/lang-yaml" imported by "frappe-ui". Is it installed?`);

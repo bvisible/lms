@@ -55,6 +55,7 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 	overlay.setAttribute('role', 'dialog')
 	overlay.setAttribute('aria-modal', 'true')
 	overlay.setAttribute('aria-label', translate('Enlarge the video'))
+	// token-exempt-start: the enlarged-film pop-up is black and white in both themes, like any lightbox
 	overlay.style.cssText =
 		'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:rgb(0 0 0 / 78%);cursor:zoom-out;'
 
@@ -91,6 +92,7 @@ export function openViewer(source: HTMLVideoElement): HTMLElement | null {
 		'border:0;border-radius:999px;cursor:pointer;'
 	close.addEventListener('mouseenter', () => (close.style.background = 'rgb(255 255 255 / 28%)'))
 	close.addEventListener('mouseleave', () => (close.style.background = 'rgb(255 255 255 / 14%)'))
+	// token-exempt-end
 
 	// The lesson page counts a film as watched when the `ended` event of ITS film fires, and reads its currentTime when it saves the watch time.
 	// What is watched in the pop-up is therefore told to the film of the page, or enlarging the film would stop the lesson from being validated.

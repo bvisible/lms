@@ -1,62 +1,45 @@
 <template>
-	<div class="grid grid-cols-1 md:grid-cols-[70%,30%] flex-1 min-h-0">
+	<div
+		class="grid grid-cols-1 flex-1 min-h-0"
+		:class="{ 'md:grid-cols-[70%,30%]': outlineVisible }"
+	>
 		<div class="flex flex-col overflow-hidden">
 			<div class="overflow-y-auto h-full">
 				<SkeletonLoader
 					v-if="outline.loading && !outline.data"
 					variant="editor-content"
 				/>
-				<div
-					v-else-if="!selected"
-					class="flex flex-col items-center justify-center h-full text-ink-gray-5"
-				>
-					<span class="lucide-book-open size-8" />
-					<div>
-						{{ __('Select a lesson on the right to start editing.') }}
-					</div>
-				</div>
-				<LessonForm
-					v-else-if="mode === 'edit'"
-					ref="lessonFormRef"
-					:key="`edit-${selected.number}`"
+				<CourseEditorEmptyState
+					v-else-if="!selected && outline.data"
 					:courseName="props.course.data.name"
-					:chapterNumber="selected.chapterNumber"
-					:lessonNumber="selected.lessonNumber"
-					@saved="onLessonSaved"
+					:chapters="outline.data"
+					:isMobile="isMobile"
+					@create-chapter="openChapterForm"
+					@add-lesson="onAddLesson"
 				/>
-				<Lesson
-					v-else
-					ref="lessonViewRef"
-					:key="`preview-${selected.number}`"
+				<!-- Nothing while the outline is missing after a failed fetch: a
+				     lesson can't be resolved, and the empty state would lie. -->
+				<LessonForm
+					v-else-if="selected"
+					ref="lessonFormRef"
+					:key="`edit-${selected.formKey}`"
 					:courseName="props.course.data.name"
 					:chapterNumber="selected.chapterNumber"
 					:lessonNumber="selected.lessonNumber"
-					:embedded="true"
-					@select-lesson="onSelectLesson"
-					@lesson-completed="onLessonCompleted"
-					@progress-updated="onProgressUpdated"
+					:draftChapter="selected.draftChapter || ''"
+					@saved="onLessonSaved"
+					@created="onLessonCreated"
 				/>
 			</div>
 		</div>
 
-		<aside class="border-s overflow-y-auto">
+		<aside v-if="!isMobile && outlineVisible" class="border-s overflow-y-auto">
 			<SkeletonLoader
 				v-if="outline.loading && !outline.data"
 				variant="editor-sidebar"
 			/>
-			<StudentLessonSidebar
-				v-else-if="mode === 'preview' && props.course?.data"
-				:courseName="props.course.data.name"
-				:courseTitle="props.course.data.title"
-				:progress="progressPercent"
-				:selectedLessonNumber="selected?.number"
-				:completedLesson="completedLesson"
-				:inlineSelect="true"
-				@select-lesson="onSelectLesson"
-			/>
 			<CourseOutline
 				v-else-if="props.course?.data"
-				ref="courseOutlineRef"
 				:courseName="props.course.data.name"
 				:title="__('Chapters')"
 				:allowEdit="true"
@@ -66,8 +49,36 @@
 				@select-lesson="onSelectLesson"
 				@lesson-deleted="onLessonDeleted"
 				@chapter-deleted="onChapterDeleted"
+				@add-lesson="onAddLesson"
 			/>
 		</aside>
+
+		<BottomSheet v-if="isMobile" v-model="showChapters">
+			<template #header>
+				<div class="text-p-lg-semibold text-ink-gray-9">
+					{{ __('Chapters') }}
+				</div>
+				<Button :label="__('Add chapter')" @click="openAddChapter">
+					<template #icon>
+						<span class="lucide-plus size-4" />
+					</template>
+				</Button>
+			</template>
+			<CourseOutline
+				v-if="props.course?.data"
+				:courseName="props.course.data.name"
+				:title="__('Chapters')"
+				:allowEdit="true"
+				:hideHeader="true"
+				:inlineSelect="true"
+				:selectedLessonNumber="selected?.number"
+				@select-lesson="onSelectLesson"
+				@lesson-deleted="onLessonDeleted"
+				@chapter-deleted="onChapterDeleted"
+				@add-lesson="onAddLesson"
+			/>
+		</BottomSheet>
+
 		<VideoStatistics
 			v-model="showStats"
 			:lessonName="statsLessonName"
@@ -77,40 +88,39 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createResource } from 'frappe-ui'
+import { Button, createResource } from 'frappe-ui'
 import { useSidebar } from '@/stores/sidebar'
-import { provideStudentView } from '@/composables/useStudentView'
+import { useScreenSize } from '@/utils/composables'
 import CourseOutline from '@/components/CourseOutline.vue'
-import StudentLessonSidebar from '@/components/StudentLessonSidebar.vue'
+import CourseEditorEmptyState from '@/components/CourseEditorEmptyState.vue'
+import { openFormRoute } from '@/composables/useFormRoute'
+import { setFormSource } from '@/composables/formTracking'
+import { useTelemetry } from '@framework/ui/telemetry/index'
+import BottomSheet from '@/components/BottomSheet.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import LessonForm from '@/pages/LessonForm.vue'
-import Lesson from '@/pages/Lesson.vue'
 import VideoStatistics from '@/components/Modals/VideoStatistics.vue'
 import {
-	findLessonNameByNumber,
-	lessonExistsByNumber,
-	isSelectionStale,
+	SELECTION_PARAMS,
 	isLessonInChapter,
+	resolveTarget,
+	selectionQuery,
+	targetFromQuery,
 } from '@/utils/courseOutline'
 
 const props = defineProps({
 	course: { type: Object, required: true },
 })
 
-const selected = defineModel('selected', { default: null })
-const mode = defineModel('mode', { default: 'edit' })
+// Read-only for the parent: the open lesson is derived below.
+const selectedModel = defineModel('selected', { default: null })
 const route = useRoute()
 const router = useRouter()
-
-// Student View swaps in the real Lesson.vue but the components below it still
-// injected the real `$user`, so instructor affordances (grading, instructor
-// notes, zen mode) stayed visible. Shadow `$user` for this subtree while the
-// preview is on. The provide is unconditional; the value tracks `mode`, so
-// leaving preview restores the real flags without a remount.
-const realUser = inject('$user')
-provideStudentView(realUser, () => mode.value === 'preview')
+const { isMobile } = useScreenSize()
+const { capture } = useTelemetry()
+const showChapters = ref(false)
 
 // Collapse the app sidebar while the lesson editor is open to give the
 // editing surface room, then restore it on leaving the tab. Mirrors the
@@ -123,36 +133,10 @@ onBeforeUnmount(() => {
 	sidebarStore.isSidebarCollapsed = false
 })
 
-// Keep ?editLesson + ?lessonMode in sync with what's selected so a refresh,
-// tab-switch round-trip, or shared URL lands on the same lesson in the same
-// mode. Guard against route-watcher → selected-watcher loops by comparing
-// values before replacing.
-function syncSelectedToUrl(number) {
-	if (!number) return
-	const nextLessonMode = mode.value
-	if (
-		route.query.editLesson === number &&
-		route.query.lessonMode === nextLessonMode
-	)
-		return
-	router.replace({
-		query: { ...route.query, editLesson: number, lessonMode: nextLessonMode },
-		hash: route.hash || '#course editor',
-	})
-}
-
-function syncModeToUrl(newMode) {
-	if (!selected.value || !newMode) return
-	if (route.query.lessonMode === newMode) return
-	router.replace({
-		query: { ...route.query, lessonMode: newMode },
-		hash: route.hash || '#course editor',
-	})
-}
-
 const STORAGE_KEY = 'lms-course-editor-last-lesson'
 
 function getStoredLesson(courseName) {
+	if (!courseName) return null
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY)
 		if (!raw) return null
@@ -164,6 +148,7 @@ function getStoredLesson(courseName) {
 }
 
 function storeLesson(courseName, number) {
+	if (!courseName) return
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY)
 		const map = raw ? JSON.parse(raw) : {}
@@ -174,17 +159,55 @@ function storeLesson(courseName, number) {
 	}
 }
 
-function setSelectedFromNumber(number) {
-	const [chapterNumber, lessonNumber] = number.split('-')
-	if (!chapterNumber || !lessonNumber) return
-	selected.value = {
-		chapterNumber,
-		lessonNumber,
-		number,
-		name: findLessonNameByNumber(outline.data, number),
-		title: '',
+// What the editor is asked to open comes from the route or an action here.
+// The selection is resolved from it against the outline, again on every
+// outline change, so a target the outline doesn't have yet opens once it
+// does. One watcher below writes the result back to the URL and the model.
+let draftCount = 0
+const nextDraftToken = () => `draft-${++draftCount}`
+// A URL that names no lesson opens the course default: the stored lesson,
+// else the first.
+const targetFromRoute = () =>
+	targetFromQuery(route.query, nextDraftToken) ?? { kind: 'default' }
+const target = ref(targetFromRoute())
+
+const selected = computed(() =>
+	resolveTarget(
+		target.value,
+		outline.data,
+		target.value?.kind === 'default'
+			? getStoredLesson(props.course?.data?.name)
+			: null
+	)
+)
+
+// "Add Lesson" opens an empty form; LessonForm creates the lesson once it has a
+// title.
+// `source` says which control asked, for the lesson_created event.
+function onAddLesson({ chapter, source = 'outline' }) {
+	target.value = {
+		kind: 'draft',
+		chapter: chapter.name,
+		token: nextDraftToken(),
+		source,
 	}
-	syncSelectedToUrl(number)
+	showChapters.value = false
+}
+
+// The created lesson keeps the draft's token as its form key, so the form
+// isn't remounted and the title keeps its focus and caret. Until the outline
+// reload brings the lesson in it has no position: another author may have
+// added a lesson meanwhile, so a guessed number could name theirs.
+function onLessonCreated({ name, chapter }) {
+	const draft = target.value
+	if (draft?.kind !== 'draft' || draft.chapter !== chapter) return
+	capture('lesson_created', {
+		course: props.course.data.name,
+		chapter,
+		source: draft.source,
+	})
+	target.value = { kind: 'lesson', name, token: draft.token, chapter }
+	outline.reload()
 }
 
 // Reflect an autosaved lesson title/preview-flag in the shared outline
@@ -207,8 +230,8 @@ function onLessonSaved({ name, title, include_in_preview, isNew }) {
 }
 
 // The outline reports a specific lesson/chapter delete. If the lesson open in the
-// editor is the one removed, tell the form before the stale-selection watcher
-// unmounts it, so its teardown flush doesn't set_value the now-deleted document.
+// editor is the one removed, tell the form before clearing the target unmounts
+// it, so its teardown flush doesn't set_value the now-deleted document.
 // Keyed by docname (not a generic "selection went stale" signal, which is also
 // true on a course switch or transient outline) and applied synchronously here,
 // so it can't be mis-bound to whichever reload happens to land next.
@@ -216,29 +239,25 @@ function onLessonDeleted({ lesson }) {
 	if (lessonFormRef.value?.lessonName?.() === lesson) {
 		lessonFormRef.value?.markDeleted?.()
 	}
+	if (selected.value?.name === lesson) target.value = null
 }
 function onChapterDeleted({ chapter }) {
-	// Deleting a chapter takes its lessons too. Resolve membership against the
-	// still-current outline (the delete's reload hasn't applied yet).
-	const openLesson = lessonFormRef.value?.lessonName?.()
-	if (openLesson && isLessonInChapter(outline.data, chapter, openLesson)) {
-		lessonFormRef.value?.markDeleted?.()
-	}
+	// Deleting a chapter takes its lessons, and a draft in it must not create
+	// its lesson on unmount. Resolve membership against the still-current
+	// outline (the delete's reload hasn't applied yet).
+	const open = target.value
+	const inChapter =
+		open?.chapter === chapter ||
+		isLessonInChapter(outline.data, chapter, selected.value?.name)
+	if (!inChapter) return
+	lessonFormRef.value?.markDeleted?.()
+	target.value = null
 }
 
 function onSelectLesson({ chapterNumber, lessonNumber }) {
-	const number = `${chapterNumber}-${lessonNumber}`
-	selected.value = {
-		chapterNumber,
-		lessonNumber,
-		number,
-		name: findLessonNameByNumber(outline.data, number),
-		title: '',
-	}
-	if (props.course?.data?.name) {
-		storeLesson(props.course.data.name, number)
-	}
-	syncSelectedToUrl(number)
+	target.value = { kind: 'number', number: `${chapterNumber}-${lessonNumber}` }
+	// On mobile the outline lives in a sheet; dismiss it once a lesson is picked.
+	showChapters.value = false
 }
 
 const outline = createResource({
@@ -250,116 +269,109 @@ const outline = createResource({
 			progress: false,
 		}
 	},
-	// auto:false — the resource fires from the course-name watcher below once
+	// auto:false: the resource fires from the course-name watcher below once
 	// the parent's course.data resolves. Auto-firing on mount would call the
 	// endpoint with course=undefined when CourseEditor mounts before the
 	// parent's course resource has loaded.
 	auto: false,
 })
 
-// Drive initial selection from outline.data instead of the resource
-// onSuccess hook — that runs on every reload and skips cache hits, so a
-// deep-link landing on a cached outline never set `selected`.
-let initialPickDone = false
-function pickInitialLesson() {
-	if (initialPickDone) return
-	const chapters = outline.data
-	if (!chapters?.length) return
-	initialPickDone = true
-	const routeLesson = route.query.editLesson
-	if (routeLesson) {
-		setSelectedFromNumber(routeLesson)
-		return
-	}
-	if (selected.value) return
-	const courseName = props.course?.data?.name
-	const stored = courseName ? getStoredLesson(courseName) : null
-	if (lessonExistsByNumber(chapters, stored)) {
-		setSelectedFromNumber(stored)
-		return
-	}
-	const firstLesson = chapters.find((c) => c.lessons?.length)?.lessons?.[0]
-	if (firstLesson?.number) {
-		setSelectedFromNumber(firstLesson.number)
-	}
+// Our own URL writes come back through the route watcher; skip those, and
+// take anything else as a new target.
+const ownWrites = new Set()
+const selectionKey = (query) =>
+	JSON.stringify(SELECTION_PARAMS.map((key) => query[key] ?? null))
+
+function writeSelectionToUrl(next) {
+	if (!next) return
+	const key = selectionKey(next)
+	if (key === selectionKey(route.query)) return
+	ownWrites.add(key)
+	const query = Object.fromEntries(
+		Object.entries(route.query).filter(
+			([param]) => !SELECTION_PARAMS.includes(param)
+		)
+	)
+	router.replace({
+		query: { ...query, ...next },
+		hash: route.hash || '#editor',
+	})
 }
 
-watch(() => outline.data, pickInitialLesson, { immediate: true })
-
-// When the selected lesson disappears from the outline (e.g. it was just
-// deleted), drop back to the empty "choose a lesson" state instead of
-// editing a lesson that no longer exists.
 watch(
-	() => outline.data,
-	(chapters) => {
-		if (isSelectionStale(selected.value, chapters)) {
-			selected.value = null
-			if (route.query.editLesson) {
-				const { editLesson, ...rest } = route.query
-				router.replace({
-					query: rest,
-					hash: route.hash || '#course editor',
-				})
-			}
-		}
+	() => selectionKey(route.query),
+	(key) => {
+		if (!ownWrites.delete(key)) target.value = targetFromRoute()
 	}
+)
+
+// Pin a position or the course default to its lesson once resolved, remember
+// it, and write what is open back to the model and the URL.
+watch(
+	selected,
+	(selection) => {
+		selectedModel.value = selection
+		const current = target.value
+		if (selection?.name && selection.number) {
+			if (current?.kind === 'number' || current?.kind === 'default') {
+				target.value = { kind: 'lesson', name: selection.name }
+			}
+			storeLesson(props.course?.data?.name, selection.number)
+		}
+		writeSelectionToUrl(selectionQuery(target.value, selection))
+	},
+	{ immediate: true }
 )
 
 watch(
 	() => props.course?.data?.name,
-	(name) => {
+	(name, previous) => {
+		// A target belongs to its course: re-read it from the route on a switch,
+		// and drop the old outline so the default can't resolve against it.
+		if (previous && name !== previous) {
+			outline.reset()
+			target.value = targetFromRoute()
+		}
 		if (name) outline.fetch()
 	},
 	{ immediate: true }
 )
 
-// React to a deep-link change while the editor tab is already open.
-// Trust the query — a non-existent number means "new lesson", which
-// LessonForm renders in create mode. Mode is its own param so clicking
-// a lesson in preview keeps the user in preview.
+// ?lessonMode is a dead param: student view used to be a mode of this editor
+// and is now the lesson route. Send an old `preview` link to that route once
+// a lesson number is resolvable, and strip any other value so it can't linger
+// in the query that writeSelectionToUrl copies forward. One-shot: a redirect
+// unmounts us, and the strip must not re-fire on its own replace.
+let legacyLessonModeHandled = false
 watch(
-	() => route.query.editLesson,
-	(number) => {
-		if (!number) return
-		setSelectedFromNumber(number)
-	}
-)
-
-watch(
-	() => route.query.lessonMode,
-	(next) => {
-		if (next === 'edit' || next === 'preview') mode.value = next
+	[
+		() => route.query.lessonMode,
+		() => selected.value?.number,
+		() => props.course?.data?.name,
+	],
+	([lessonMode, selectedNumber, courseName]) => {
+		if (legacyLessonModeHandled || !lessonMode) return
+		if (lessonMode !== 'preview') {
+			legacyLessonModeHandled = true
+			const { lessonMode: _dropped, ...query } = route.query
+			router.replace({ query, hash: route.hash || '#editor' })
+			return
+		}
+		const number = route.query.editLesson || selectedNumber
+		if (!courseName || !number) return
+		const [chapterNumber, lessonNumber] = String(number).split('-')
+		if (!chapterNumber || !lessonNumber) return
+		legacyLessonModeHandled = true
+		router.replace({
+			name: 'Lesson',
+			params: { courseName, chapterNumber, lessonNumber },
+			query: { studentView: 1 },
+		})
 	},
 	{ immediate: true }
 )
 
-watch(mode, (next) => {
-	syncModeToUrl(next)
-})
-
-// Live progress posted up from the embedded Lesson preview after a
-// save_progress success or a realtime `update_lesson_progress` event.
-// Prefer it over the stale `course.data.membership.progress` snapshot,
-// which is fetched once and never refreshed in this view.
-const liveProgress = ref(null)
-const progressPercent = computed(() => {
-	const p = liveProgress.value ?? props.course?.data?.membership?.progress
-	return p ? Math.ceil(p) : 0
-})
-
 const lessonFormRef = ref(null)
-const lessonViewRef = ref(null)
-
-// Lesson name that the embedded preview just marked complete — passed to
-// StudentLessonSidebar so its green tick flips immediately instead of
-// only after a refetch of the outline.
-const completedLesson = ref(null)
-function onLessonCompleted(name) {
-	completedLesson.value = name
-}
-function onProgressUpdated(value) {
-	if (typeof value === 'number') liveProgress.value = value
-}
 
 function saveSelectedLesson() {
 	lessonFormRef.value?.saveLesson?.()
@@ -367,11 +379,9 @@ function saveSelectedLesson() {
 
 const isDirty = computed(() => Boolean(lessonFormRef.value?.isDirty))
 
-// Preview-mode header controls, surfaced up to CourseDetail's top bar so
-// the moderator gets the same Prev / Next / Zen affordances students do.
-// hasPrev/hasNext are derived from the outline (already loaded) instead of
-// the embedded Lesson child — otherwise the buttons flicker out on every
-// navigation while the child remounts and refetches.
+// The phone's lesson stepper. Derived from the outline, which is already
+// loaded, rather than from the LessonForm child. Otherwise the buttons
+// flicker out on every hop while the child remounts and refetches.
 const flatLessonNumbers = computed(() =>
 	(outline.data ?? []).flatMap((c) => c.lessons?.map((l) => l.number) ?? [])
 )
@@ -386,48 +396,69 @@ const hasNext = computed(
 		selectedIndex.value >= 0 &&
 		selectedIndex.value < flatLessonNumbers.value.length - 1
 )
-const canGoZen = computed(() => Boolean(lessonViewRef.value?.canGoZen?.()))
-function previewPrev() {
-	lessonViewRef.value?.switchLesson?.('prev')
-}
-function previewNext() {
-	lessonViewRef.value?.switchLesson?.('next')
-}
-function previewZen() {
-	lessonViewRef.value?.goFullScreen?.()
-}
-// The active lesson component differs by mode: the editor form when editing,
-// the embedded lesson view when previewing. Both expose lessonHasVideo/name/
-// title, so the Video Statistics affordance works the same in either mode.
-const activeLessonRef = computed(() =>
-	mode.value === 'edit' ? lessonFormRef.value : lessonViewRef.value
+const lessonTotal = computed(() => flatLessonNumbers.value.length)
+const lessonIndex = computed(() =>
+	selectedIndex.value >= 0 ? selectedIndex.value + 1 : 0
 )
+
+function selectByNumber(number) {
+	const [chapterNumber, lessonNumber] = number.split('-')
+	onSelectLesson({ chapterNumber, lessonNumber })
+}
+function goPrev() {
+	if (hasPrev.value)
+		selectByNumber(flatLessonNumbers.value[selectedIndex.value - 1])
+}
+function goNext() {
+	if (hasNext.value)
+		selectByNumber(flatLessonNumbers.value[selectedIndex.value + 1])
+}
+function openChapters() {
+	showChapters.value = true
+}
+
 const lessonHasVideo = computed(() =>
-	Boolean(activeLessonRef.value?.lessonHasVideo?.())
+	Boolean(lessonFormRef.value?.lessonHasVideo?.())
 )
 const showStats = ref(false)
-const statsLessonName = computed(() => activeLessonRef.value?.lessonName?.())
-const statsLessonTitle = computed(() => activeLessonRef.value?.lessonTitle?.())
+const statsLessonName = computed(() => lessonFormRef.value?.lessonName?.())
+const statsLessonTitle = computed(() => lessonFormRef.value?.lessonTitle?.())
 function openVideoStats() {
 	showStats.value = true
 }
 
-const courseOutlineRef = ref(null)
-function openAddChapter() {
-	courseOutlineRef.value?.openChapterModal?.(null)
+// A course without chapters has nothing to list, so the editor is one empty
+// state full-width rather than that plus a bare chapters panel. The panel
+// stays while the outline loads, so a course with chapters doesn't flash.
+const outlineVisible = computed(() => !outline.data || outline.data.length > 0)
+
+// Opened from here rather than through the outline: on a phone the outline
+// lives in the chapters sheet, which isn't mounted while it is closed. The
+// form reports `source` with its chapter_created event.
+function openChapterForm(source = 'course_editor') {
+	setFormSource(source)
+	openFormRoute(router, {
+		name: 'ChapterForm',
+		params: { courseName: props.course.data.name, chapterName: 'new' },
+		hash: route.hash,
+		query: { ...route.query },
+	})
 }
+const openAddChapter = () => openChapterForm('course_editor')
 
 defineExpose({
 	saveSelectedLesson,
 	isDirty,
-	hasPrev,
-	hasNext,
-	canGoZen,
 	lessonHasVideo,
-	previewPrev,
-	previewNext,
-	previewZen,
 	openVideoStats,
 	openAddChapter,
+	outlineVisible,
+	lessonIndex,
+	lessonTotal,
+	hasPrev,
+	hasNext,
+	goPrev,
+	goNext,
+	openChapters,
 })
 </script>

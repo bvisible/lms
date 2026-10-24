@@ -12,7 +12,7 @@
 			<span>{{ __('Open in the Neoffice of:') }}</span>
 			<select
 				v-model="chosen"
-				class="rounded-md border border-outline-gray-3 bg-surface-white px-2 py-1 text-sm text-ink-gray-8"
+				class="rounded-5 border border-outline-gray-3 bg-surface-elevation-1 px-2 py-1 text-sm text-ink-gray-8"
 			>
 				<option v-for="option in options" :key="option.instance" :value="option.instance">
 					{{ option.label }} ({{ option.host }})
@@ -21,10 +21,9 @@
 		</label>
 		<a
 			v-if="url"
-			:href="url"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="inline-flex items-center gap-2 rounded-md border border-outline-gray-3 px-3 py-1.5 text-sm font-medium text-ink-gray-8 hover:bg-surface-gray-2"
+			v-external
+			:href="safeUrl(url)"
+			class="inline-flex items-center gap-2 rounded-5 border border-outline-gray-3 px-3 py-1.5 text-sm font-medium text-ink-gray-8 hover:bg-surface-gray-2"
 		>
 			<span>{{ label }}</span>
 			<span aria-hidden="true">↗</span>
@@ -34,10 +33,9 @@
 	<p v-else class="neo-instance-link my-4">
 		<a
 			v-if="url"
-			:href="url"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="inline-flex items-center gap-2 rounded-md border border-outline-gray-3 px-3 py-1.5 text-sm font-medium text-ink-gray-8 hover:bg-surface-gray-2"
+			v-external
+			:href="safeUrl(url)"
+			class="inline-flex items-center gap-2 rounded-5 border border-outline-gray-3 px-3 py-1.5 text-sm font-medium text-ink-gray-8 hover:bg-surface-gray-2"
 		>
 			<span>{{ label }}</span>
 			<span aria-hidden="true">↗</span>
@@ -74,6 +72,7 @@ const remember = (instance) => {
 import { call } from 'frappe-ui'
 import { computed } from 'vue'
 import { buildFiduciaryUrl, buildInstanceUrl, pickFiduciaryOption } from '@/utils/instanceLink'
+import { safeUrl } from '@/utils/safeUrl'
 
 const props = defineProps({
 	path: { type: String, required: true },

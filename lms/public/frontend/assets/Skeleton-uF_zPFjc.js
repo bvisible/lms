@@ -1,0 +1,1 @@
+import{M as e,q as t,x as n}from"./vue.runtime.esm-bundler-CI86Q_Gg.js";import{u as r}from"./Button-CT1gkL7j.js";e();var i={},a={class:`fui-skeleton animate-pulse bg-surface-gray-3`,"aria-hidden":`true`};function o(e,r){return t(),n(`div`,a)}var s=r(i,[[`render`,o]]);export{s as t};

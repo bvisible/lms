@@ -5,7 +5,7 @@
 	     and only when an answer was given (see Quiz.vue). -->
 	<template v-if="user.data">
 		<div
-			class="my-4 flex items-center justify-between gap-3 rounded-lg border bg-surface-elevation-1 p-4"
+			class="my-4 flex items-center justify-between gap-3 rounded-6 border bg-surface-elevation-1 p-4"
 		>
 			<div class="flex min-w-0 items-center gap-3">
 				<span class="lucide-help-circle size-5 shrink-0 text-ink-gray-6" />
@@ -32,11 +32,11 @@
 				@keydown.esc.stop.prevent="requestClose"
 			>
 				<div
-					class="absolute inset-0 hidden bg-black/40 sm:block"
+					class="absolute inset-0 hidden bg-black-overlay-500 sm:block"
 					@click="requestClose"
 				/>
 				<div
-					class="relative flex h-full w-full flex-col bg-surface-elevation-1 sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-xl sm:shadow-2xl"
+					class="relative flex h-full w-full flex-col bg-surface-elevation-1 sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-7 sm:shadow-2xl"
 				>
 					<div class="flex items-center justify-between gap-3 border-b px-4 py-3">
 						<div class="min-w-0 truncate font-medium text-ink-gray-9">
@@ -57,7 +57,7 @@
 					</div>
 					<div
 						v-if="confirmLeave"
-						class="absolute inset-0 z-10 flex items-center justify-center bg-surface-elevation-1 p-6 sm:rounded-xl"
+						class="absolute inset-0 z-10 flex items-center justify-center bg-surface-elevation-1 p-6 sm:rounded-7"
 					>
 						<div class="max-w-sm space-y-4 text-center">
 							<div class="text-lg font-semibold text-ink-gray-9">
@@ -84,7 +84,7 @@
 			</div>
 		</Teleport>
 	</template>
-	<div v-else class="border rounded-md text-center py-20">
+	<div v-else class="border rounded-5 text-center py-20">
 		<div>
 			{{ __('Please login to access the quiz.') }}
 		</div>

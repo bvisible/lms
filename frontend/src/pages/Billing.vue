@@ -1,20 +1,10 @@
 <template>
-	<div class="">
-		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-base px-3 py-2.5 sm:px-5"
-		>
-			<Breadcrumbs
-				class="h-7"
-				:items="[{ label: __('Billing Details'), route: { name: 'Billing' } }]"
-			/>
-		</header>
-		<div
-			v-if="access.data?.access && orderSummary.data"
-			class="pt-5 pb-10 mx-5"
-		>
+	<PageHeader :breadcrumbs="breadcrumbs" />
+	<PageBody :title="__('Billing Details')">
+		<div v-if="access.data?.access && orderSummary.data" class="px-5 pb-10">
 			<div class="flex flex-col lg:flex-row justify-between">
 				<div class="flex flex-col lg:order-last mb-10 lg:mt-10 lg:w-1/4">
-					<div class="h-fit bg-surface-gray-2 rounded-md p-5 space-y-4">
+					<div class="h-fit bg-surface-gray-2 rounded-5 p-5 space-y-4">
 						<div class="space-y-1">
 							<div class="text-ink-gray-5 uppercase text-xs">
 								{{ __('Payment for ') }} {{ type }}:
@@ -59,7 +49,7 @@
 						</div>
 					</div>
 
-					<div class="bg-surface-gray-2 rounded-md p-4 space-y-2 my-5">
+					<div class="bg-surface-gray-2 rounded-5 p-4 space-y-2 my-5">
 						<span class="text-ink-gray-5 uppercase text-xs">
 							{{ __('Enter a Coupon Code') }}:
 						</span>
@@ -68,11 +58,10 @@
 								v-model="appliedCoupon"
 								:disabled="orderSummary.data.discount_amount > 0"
 								:aria-label="__('Coupon Code')"
-								@input="appliedCoupon = $event.target.value.toUpperCase()"
 								@keydown.enter="applyCouponCode"
 								placeholder="COUPON2025"
 								autocomplete="off"
-								class="flex-1 [&_input]:bg-surface-base"
+								class="flex-1 [&_input]:bg-surface-base [&_input]:uppercase"
 							/>
 							<Button
 								v-if="!orderSummary.data.discount_amount"
@@ -95,7 +84,7 @@
 					</div>
 
 					<p
-						class="bg-surface-amber-2 text-ink-amber-5 text-sm leading-5 p-2 rounded-md"
+						class="bg-surface-amber-2 text-ink-amber-4 text-sm leading-5 p-2 rounded-5"
 					>
 						{{
 							__(
@@ -133,7 +122,16 @@
 								v-model="billingDetails.city"
 								:required="!!fieldMeta.city?.reqd"
 							/>
+							<Combobox
+								v-if="billingDetails.country == 'India'"
+								:label="__('State/Province')"
+								v-model="billingDetails.state"
+								:options="INDIAN_STATE_OPTIONS"
+								:placeholder="__('Select a state')"
+								:required="!!fieldMeta.state?.reqd"
+							/>
 							<FormControl
+								v-else
 								:label="__('State/Province')"
 								v-model="billingDetails.state"
 								:required="!!fieldMeta.state?.reqd"
@@ -190,21 +188,21 @@
 								"
 								type="checkbox"
 								class="leading-6"
+								:required="true"
 								v-model="billingDetails.member_consent"
+								:error="
+									showConsentWarning
+										? __(
+												'Please provide your consent to proceed with the payment'
+										  )
+										: undefined
+								"
 							/>
-							<div
-								v-if="showConsentWarning"
-								class="mt-1 text-xs text-ink-red-6"
-							>
-								{{
-									__('Please provide your consent to proceed with the payment')
-								}}
-							</div>
 						</div>
 						<Button
 							variant="solid"
 							size="md"
-							class="ms-auto"
+							class="ms-auto text-p-base-medium"
 							@click="generatePaymentLink()"
 						>
 							{{
@@ -228,30 +226,39 @@
 		</div>
 		<div v-else-if="!user.data?.name">
 			<NotPermitted
-				text="Please login to access this page."
+				:text="__('Please login to access this page.')"
 				:buttonLink="`/login?redirect-to=${getLmsRoute(
 					`billing/${type}/${name}`
 				)}`"
 			/>
 		</div>
-	</div>
+	</PageBody>
 </template>
 <script setup>
 import {
 	Button,
+	Combobox,
 	createResource,
 	FormControl,
-	Breadcrumbs,
 	usePageMeta,
 	toast,
-	call,
 } from 'frappe-ui'
 import { reactive, inject, onMounted, computed, ref, watch } from 'vue'
+import PageHeader from '@/components/Layouts/PageHeader.vue'
+import PageBody from '@/components/Layouts/PageBody.vue'
 import { sessionStore } from '../stores/session'
 import Link from '@/components/Controls/Link.vue'
 import NotPermitted from '@/components/NotPermitted.vue'
-import { useTelemetry } from 'frappe-ui/frappe'
+import { useTelemetry } from '@framework/ui/telemetry/index'
 import { getLmsRoute } from '@/utils/basePath'
+import {
+	INDIAN_STATE_OPTIONS,
+	canonicalIndianState,
+} from '@/utils/indianStates'
+
+const breadcrumbs = [
+	{ label: __('Billing Details'), route: { name: 'Billing' } },
+]
 
 const user = inject('$user')
 const { brand } = sessionStore()
@@ -295,7 +302,7 @@ const orderSummary = createResource({
 			doctype: props.type == 'batch' ? 'LMS Batch' : 'LMS Course',
 			docname: props.name,
 			country: billingDetails.country,
-			coupon: appliedCoupon.value,
+			coupon: couponCode(),
 		}
 	},
 	onError(err) {
@@ -304,6 +311,7 @@ const orderSummary = createResource({
 })
 
 const appliedCoupon = ref(null)
+const couponCode = () => appliedCoupon.value?.trim().toUpperCase() || null
 const billingDetails = reactive({})
 const fieldMeta = reactive({})
 
@@ -323,6 +331,16 @@ const setBillingDetails = (data) => {
 	billingDetails.source = data?.source || getDefault('source')
 	billingDetails.gstin = data?.gstin || getDefault('gstin')
 	billingDetails.pan = data?.pan || getDefault('pan')
+	normalizeState()
+}
+
+// Addresses saved before the dropdown existed hold free text ("GUJARAT"), which
+// matches no option and would look unselected. Anything unrecognised is left
+// alone so validation can report it.
+const normalizeState = () => {
+	if (billingDetails.country != 'India') return
+	const canonical = canonicalIndianState(billingDetails.state)
+	if (canonical) billingDetails.state = canonical
 }
 
 const paymentLink = createResource({
@@ -333,7 +351,7 @@ const paymentLink = createResource({
 			docname: props.name,
 			address: billingDetails,
 			payment_for_certificate: props.type == 'certificate',
-			coupon_code: appliedCoupon.value,
+			coupon_code: couponCode(),
 			country: billingDetails.country,
 		}
 		return data
@@ -365,14 +383,14 @@ const generatePaymentLink = () => {
 				window.location.href = data
 			},
 			onError(err) {
-				toast.error(err.messages?.[0] || err)
+				showError(err)
 			},
 		}
 	)
 }
 
 function applyCouponCode() {
-	if (!appliedCoupon.value) {
+	if (!couponCode()) {
 		toast.error(__('Please enter a coupon code'))
 		return
 	}
@@ -412,54 +430,26 @@ const validateAddress = () => {
 	if (billingDetails.gstin && !billingDetails.pan)
 		return 'Please enter a valid pan number.'
 
-	if (billingDetails.country == 'India' && !billingDetails.state)
-		return 'Please enter a valid state with correct spelling and the first letter capitalized.'
+	if (billingDetails.country != 'India') return
 
-	const states = [
-		'Andhra Pradesh',
-		'Arunachal Pradesh',
-		'Assam',
-		'Bihar',
-		'Chhattisgarh',
-		'Delhi',
-		'Goa',
-		'Gujarat',
-		'Haryana',
-		'Himachal Pradesh',
-		'Jammu and Kashmir',
-		'Jharkhand',
-		'Karnataka',
-		'Kerala',
-		'Madhya Pradesh',
-		'Maharashtra',
-		'Manipur',
-		'Meghalaya',
-		'Mizoram',
-		'Nagaland',
-		'Odisha',
-		'Punjab',
-		'Rajasthan',
-		'Sikkim',
-		'Tamil Nadu',
-		'Telangana',
-		'Tripura',
-		'Uttar Pradesh',
-		'Uttarakhand',
-		'West Bengal',
-	]
-	if (
-		billingDetails.country == 'India' &&
-		!states.includes(billingDetails.state)
-	)
-		return 'Please enter a valid state with correct spelling and the first letter capitalized.'
+	if (!billingDetails.state) return __('Please select your state.')
+
+	// The dropdown only ever yields canonical names; this catches an older
+	// free-text address that no spelling of ours can resolve.
+	const canonical = canonicalIndianState(billingDetails.state)
+	if (!canonical) return __('Please select your state from the list.')
+	billingDetails.state = canonical
 }
 
+// A validation failure arrives as an Error; handing that to toast.error renders
+// an empty toast, which is why a rejected checkout looked like a dead button.
 const showError = (err) => {
-	toast.error(err.messages?.[0] || err)
+	toast.error(err.messages?.[0] || err.message || err)
 }
 
 const changeCurrency = (country) => {
 	billingDetails.country = country
+	normalizeState()
 	orderSummary.reload()
 }
 

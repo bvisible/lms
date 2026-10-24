@@ -10,12 +10,27 @@ inside an opening tag). The checker (`bvisible/neoffice-ci` → `scripts/fork_ma
 reads this file and treats a not-commentable path named here as marked.
 
 ```bash
-python3 fork_markers.py check --base 8e3b5d8eb4d3f26dbf14c0bf4d6522702d20ffbc --head HEAD
+python3 fork_markers.py check --base c51661b164acd7df87e54a6d8d47a4e67985ff68 --head HEAD
 ```
 
 ## lms
 
 ### The true base (do not trust the branch name)
+
+> **2026-10-24 — the base moved to the upstream tag `v2.67.1`** (`c51661b164acd7df87e54a6d8d47a4e67985ff68`,
+> branch `main`, the line that still accepts frappe v15: `[tool.bench.frappe-dependencies]` is
+> `>=15.121.0,<17.0.0`; `develop` now requires frappe 17). The checker is run with
+> `--base c51661b1`. The table and the proof below describe the previous merge (`8e3b5d8e`, 2026-07-29)
+> and are kept as history. What the 2026-10-24 merge changed in our code:
+> `CourseDetail.vue` — the learner view button on every tab now opens upstream's `Lesson` route in
+> `studentView` mode (upstream dropped the editor's preview mode); `LessonContent.vue` — YouTube goes
+> through upstream's Plyr player (it already uses `youtube-nocookie`, and the watch tracker only sees Plyr),
+> so `youtubeEmbed.ts` is gone; `Quiz.vue` — our quiz window texts and `Check Answer` re-applied on
+> upstream's new layout, the `quiz.reload()` workaround dropped (upstream's quiz resource is
+> instance-local); `utils.py` — upstream's `can_view_course` replaces our `course_is_visible` on the
+> outline (the catalogue and lesson paths keep ours); `hooks.py` — `LMS Course` and `LMS Settings` appear
+> on both sides of `doc_events` and are merged into one entry each; `build-frontend.yml` — builds
+> beside a pinned `frappe/ui` checkout, which the SPA now links as `@framework/ui`.
 
 | Fact | Value |
 |---|---|

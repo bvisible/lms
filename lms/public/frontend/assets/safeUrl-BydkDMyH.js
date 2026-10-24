@@ -1,0 +1,1 @@
+var e=/^(https?:|\/(?![/\\])|#|mailto:)/i,t=/[\u0000-\u0020]/g,n=n=>{if(n)return e.test(n.replace(t,``))?n:void 0};export{n as t};

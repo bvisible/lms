@@ -1,0 +1,1 @@
+import{t as e}from"./purify.es-BF8Qe8F-.js";var t=e(),n=e=>e?t.sanitize(e,{FORBID_TAGS:[`form`,`input`,`button`,`textarea`,`select`,`option`,`label`,`fieldset`],FORBID_ATTR:[`formaction`,`formmethod`,`formenctype`]}):``,r=e=>{for(let t of Object.keys(e)){let r=e[t];typeof r==`string`&&(e[t]=n(r))}};export{r as n,n as t};

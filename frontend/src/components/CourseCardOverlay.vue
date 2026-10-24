@@ -1,5 +1,5 @@
 <template>
-	<div class="border-2 rounded-md min-w-80 max-w-sm">
+	<div class="border-2 rounded-5 min-w-80 max-w-sm">
 		<VideoPreview
 			:video-link="course.data?.video_link"
 			:fallback-image="course.data?.image"
@@ -10,8 +10,15 @@
 			</div>
 			<div v-if="!readOnlyMode">
 				<div v-if="course.data?.membership" class="space-y-2 mb-8">
-					<router-link
-						:to="{
+					<ProgressBar :progress="progress" :label="__('Course progress')" />
+					<div v-if="lessonCounts.total" class="text-p-sm text-ink-gray-7">
+						{{ lessonsCompletedLabel }}
+					</div>
+					<Button
+						variant="solid"
+						size="md"
+						class="w-full"
+						:route="{
 							name: 'Lesson',
 							params: {
 								courseName: course.data?.name,
@@ -24,22 +31,20 @@
 							},
 						}"
 					>
-						<Button variant="solid" size="md" class="w-full">
-							<template #prefix>
-								<span class="lucide-book-text size-4" />
-							</template>
-							<span>
-								{{ __('Continue Learning') }}
-							</span>
-						</Button>
-					</router-link>
+						<template #prefix>
+							<span class="lucide-book-text size-4" />
+						</template>
+						<span>
+							{{ progress ? __('Continue Learning') : __('Start Learning') }}
+						</span>
+					</Button>
 					<CertificationLinks :courseName="course.data.name" class="w-full" />
 				</div>
 				<!-- //// Neoffice — d6d8abd2 « le bouton d'achat d'un cours part vers le panier ».
 				//// Upstream sends a paid course to its own Billing route. When an Item sells the
 				//// course we send the visitor to the shop product page instead, so the cart,
 				//// TWINT, Stripe, the invoice and the accounting entries all come with it.
-				//// At the merge: keep BOTH branches, and keep ours FIRST — upstream's router-link
+				//// At the merge: keep BOTH branches, and keep ours FIRST — upstream's Button
 				//// below is the fallback, and the two are made exclusive by their order. -->
 				<!-- Neoffice: when an Item sells this course, buying goes through the
 				     shop cart — TWINT / Stripe / invoice / accounting all come with
@@ -47,7 +52,7 @@
 				     live at once would mean two tunnels for one course. -->
 				<a
 					v-else-if="course.data?.paid_course && !isAdmin && shopRoute.data"
-					:href="shopRoute.data"
+					:href="safeUrl(shopRoute.data)"
 				>
 					<Button variant="solid" size="md" class="w-full mb-8">
 						<template #prefix>
@@ -58,9 +63,12 @@
 						</span>
 					</Button>
 				</a>
-				<router-link
+				<Button
 					v-else-if="course.data?.paid_course && !isAdmin"
-					:to="{
+					variant="solid"
+					size="md"
+					class="w-full mb-8 text-p-base-medium"
+					:route="{
 						name: 'Billing',
 						params: {
 							type: 'course',
@@ -68,15 +76,13 @@
 						},
 					}"
 				>
-					<Button variant="solid" size="md" class="w-full mb-8">
-						<template #prefix>
-							<span class="lucide-credit-card size-4" />
-						</template>
-						<span>
-							{{ __('Buy this course') }}
-						</span>
-					</Button>
-				</router-link>
+					<template #prefix>
+						<span class="lucide-credit-card size-4" />
+					</template>
+					<span>
+						{{ __('Buy this course') }}
+					</span>
+				</Button>
 				<Badge
 					v-else-if="course.data?.disable_self_learning && !isAdmin"
 					theme="blue"
@@ -170,22 +176,22 @@
 //// when the course resource resolves (see below).
 import { computed, inject, watch } from 'vue'
 import { Badge, Button, call, createResource, toast } from 'frappe-ui'
+import type { FrappeResourceError } from 'frappe-ui'
+import { resourceErrorMessage } from '@/utils/resource'
 import { useRouter } from 'vue-router'
 import CertificationLinks from '@/components/CertificationLinks.vue'
+import ProgressBar from '@/components/ProgressBar.vue'
 import VideoPreview from '@/components/VideoPreview.vue'
-import { useTelemetry } from 'frappe-ui/frappe'
-import type {
-	CourseDetails,
-	CourseInstructorInfo,
-	Resource,
-	SessionUser,
-} from '@/types'
+import { openExternal } from '@/utils/openExternal'
+//// Neoffice — for the shop link below: upstream's urlAttributeSafety test covers every bound :href.
+import { safeUrl } from '@/utils/safeUrl'
+import type { CourseDetails, Resource, SessionUser } from '@/types'
+import { isInstructorOf } from '@/utils/instructors'
 
 const router = useRouter()
 const user = inject<SessionUser>('$user')!
 const readOnlyMode = (window as Window & { read_only_mode?: boolean })
 	.read_only_mode
-const { capture } = useTelemetry()
 
 const props = withDefaults(
 	defineProps<{
@@ -220,7 +226,6 @@ function enrollStudent() {
 		},
 	})
 		.then(() => {
-			capture('enrolled_in_course', { course: courseName })
 			toast.success(__('You have been enrolled in this course'))
 			setTimeout(() => {
 				router.push({
@@ -233,22 +238,15 @@ function enrollStudent() {
 				})
 			}, 1000)
 		})
-		.catch((err: { messages?: string[] } | string) => {
-			const msg = typeof err === 'string' ? err : err.messages?.[0] ?? 'Error'
+		.catch((err: FrappeResourceError) => {
+			const msg = resourceErrorMessage(err, 'Error')
 			toast.warning(__(msg))
 			console.error(err)
 		})
 }
 
-const is_instructor = (): boolean => {
-	let user_is_instructor = false
-	props.course.data?.instructors.forEach((instructor: CourseInstructorInfo) => {
-		if (!user_is_instructor && instructor.name == user.data?.name) {
-			user_is_instructor = true
-		}
-	})
-	return user_is_instructor
-}
+const is_instructor = (): boolean =>
+	isInstructorOf(props.course.data?.instructors, user.data?.username)
 
 //// Neoffice — d6d8abd2: fetch the shop route as soon as the course name lands.
 //// `immediate` covers the mount where it is already there.
@@ -289,6 +287,42 @@ const hasCourseStats = computed<boolean>(() =>
 	)
 )
 
+const progress = computed<number>(
+	() => props.course.data?.membership?.progress ?? 0
+)
+
+// The stored progress lags lesson edits, so count the outline's completed flags.
+const outline = createResource({
+	url: 'lms.lms.utils.get_course_outline',
+	cache: ['course_outline_student', props.course.data?.name, 'progress'],
+	makeParams() {
+		return { course: props.course.data?.name, progress: true }
+	},
+}) as Resource<{ lessons?: { is_complete?: boolean }[] }[] | null>
+
+watch(
+	() => props.course.data?.membership && props.course.data.name,
+	(name) => {
+		if (name) outline.reload()
+	},
+	{ immediate: true }
+)
+
+const lessonCounts = computed(() => {
+	const lessons = (outline.data || []).flatMap((c) => c.lessons || [])
+	return {
+		total: lessons.length,
+		completed: lessons.filter((l) => l.is_complete).length,
+	}
+})
+
+const lessonsCompletedLabel = computed<string>(() =>
+	__('{0} of {1} lessons completed').format(
+		lessonCounts.value.completed,
+		lessonCounts.value.total
+	)
+)
+
 const canGetCertificate = computed<boolean>(() => {
 	return Boolean(
 		props.course.data?.enable_certification &&
@@ -304,11 +338,10 @@ const certificate = createResource({
 		}
 	},
 	onSuccess(data: { name: string; template: string }) {
-		window.open(
+		openExternal(
 			`/api/method/frappe.utils.print_format.download_pdf?doctype=LMS+Certificate&name=${
 				data.name
-			}&format=${encodeURIComponent(data.template)}`,
-			'_blank'
+			}&format=${encodeURIComponent(data.template)}&no_letterhead=1`
 		)
 	},
 }) as Resource<{ name: string; template: string } | null>

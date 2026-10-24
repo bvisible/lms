@@ -1,0 +1,1 @@
+var e=(e,t)=>typeof t==`string`&&t!==``&&(e??[]).some(e=>e.username===t);export{e as t};

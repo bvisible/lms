@@ -1,0 +1,1 @@
+function e(e,t=`Profile`){return e?{name:t,params:{username:e}}:null}export{e as t};
