@@ -1,8 +1,17 @@
 # Copyright (c) 2026, Frappe and Contributors
 # See license.txt
 
+# //// Neoffice — unittest is used by the skipIf below.
+import unittest
+
 import frappe
-from frappe.core.doctype.user.user import change_password
+
+# //// Neoffice — `change_password` is a whitelisted method of the User controller in frappe v16 only: on v15 the
+# //// import failed and took the whole test run down with it. The one test that calls it is skipped there.
+try:
+	from frappe.core.doctype.user.user import change_password
+except ImportError:
+	change_password = None
 
 from lms.install import give_user_list_permission
 from lms.lms.api import add_member, delete_member, update_member
@@ -58,6 +67,7 @@ class TestModeratorUserAccess(BaseTestUtils):
 		give_user_list_permission()
 		self.assertEqual(self._moderator_perm(), {"read": 1, "write": 0, "create": 0, "delete": 0})
 
+	@unittest.skipIf(change_password is None, "User.change_password is a frappe v16 method")  # //// Neoffice — see above
 	def test_a_moderator_cannot_change_a_system_managers_password(self):
 		frappe.set_user(self.moderator.name)
 		with self.assertRaises(frappe.PermissionError):

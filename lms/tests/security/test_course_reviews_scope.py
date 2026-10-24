@@ -7,7 +7,12 @@ get_batch_courses, get_related_courses and get_course_details."""
 import json
 
 import frappe
-from frappe.tests import change_settings
+
+# //// Neoffice — frappe v15 keeps `change_settings` in frappe.tests.utils; only v16 re-exports it from frappe.tests.
+try:
+	from frappe.tests import change_settings
+except ImportError:
+	from frappe.tests.utils import change_settings
 
 from lms.lms.test_helpers import BaseTestUtils
 from lms.lms.utils import get_average_rating, get_reviews
