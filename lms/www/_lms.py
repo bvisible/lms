@@ -22,6 +22,17 @@ def get_context():
 	context.boot = get_boot()
 
 	app_path = frappe.form_dict.get("app_path")
+
+	# //// Neoffice — a visitor with no account gets "page not found" on the SPA's home and list of
+	# //// courses when the site shows no course (switch off in LMS Settings, or nothing published):
+	# //// upstream serves an empty catalogue to anyone, and a site that sells no training does not
+	# //// announce one (maintenance#1860). The same rule as /our-courses; a signed-in user is never
+	# //// refused. At the merge: keep this block above the return of get_context.
+	from lms.lms.neoffice_commerce import guest_gets_page_not_found
+
+	if guest_gets_page_not_found(app_path):
+		raise frappe.DoesNotExistError
+
 	favicon = frappe.db.get_single_value("Website Settings", "favicon") or "/assets/lms/frontend/favicon.png"
 	title = frappe.db.get_single_value("Website Settings", "app_name") or "Frappe Learning"
 

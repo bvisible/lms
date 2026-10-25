@@ -270,3 +270,89 @@ frappe.ui.form.on("LMS Settings", {
 		}, __("Videos"));
 	},
 });
+
+// The status line under « Show the courses on the website » (maintenance#1860): is the public
+// courses page online, hidden or off, why, and where it is. The same block as the jobs page in
+// HR's settings. It reads the switch as it stands on the screen and the number of published
+// courses the server counted when the form opened; it holds no state of its own.
+frappe.ui.form.on("LMS Settings", {
+	refresh(frm) {
+		nb_render_courses_page(frm);
+	},
+	neo_show_on_website(frm) {
+		nb_render_courses_page(frm);
+	},
+});
+
+function nb_courses_page_sentence(enabled, published) {
+	// The words name the page, never a bare « Online » or « Hidden » that another app's catalogue
+	// would translate its own way. Tones are the design system's status tones.
+	if (!enabled) {
+		return [
+			__("Page switched off"),
+			"muted",
+			__(
+				"The page is switched off: its address answers “page not found” to visitors, and the site's menu has no entry. Signed-in learners still reach their courses.",
+			),
+		];
+	}
+	if (published) {
+		const count =
+			published === 1
+				? __("{0} published course", [published])
+				: __("{0} published courses", [published]);
+		return [__("Page online"), "success", __("The page is online: {0}.", [count])];
+	}
+	return [
+		__("Page hidden"),
+		"warn",
+		__(
+			"The page is switched on but hidden: no course is published. It appears with the first published course.",
+		),
+	];
+}
+
+function nb_render_courses_page(frm) {
+	const field = frm.get_field("neo_page_status");
+	const state = (frm.doc.__onload || {}).courses_page;
+	if (!field || !state) return;
+	nb_courses_page_style();
+
+	const enabled = !!frm.doc.neo_show_on_website;
+	const [label, tone, text] = nb_courses_page_sentence(enabled, state.published);
+	const online = enabled && state.published > 0;
+	const link = online
+		? `<a class="nb-state__url" href="${encodeURI(state.url)}" target="_blank" rel="noopener">${frappe.utils.escape_html(
+				state.url.replace(/^https?:\/\//, ""),
+		  )}</a>`
+		: "";
+	// A change not saved yet is not in force: say so rather than announce a page that is not there.
+	const unsaved = frm.is_dirty()
+		? `<p class="nb-state__text text-muted">${__("Not saved yet: the page changes when you save.")}</p>`
+		: "";
+	field.$wrapper.html(`
+		<div class="nb-state">
+			<div class="nb-state__head">
+				<span class="nb-pill nb-pill--${tone}"><span class="nb-pill__dot"></span>${label}</span>
+				${link}
+			</div>
+			<p class="nb-state__text">${text}</p>
+			${unsaved}
+		</div>`);
+}
+
+function nb_courses_page_style() {
+	if (document.getElementById("nb-state-style")) return;
+	$(`<style id="nb-state-style">
+		.nb-state{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border:1px solid var(--border-color);border-radius:var(--border-radius-lg, 12px);margin-bottom:8px}
+		.nb-state__head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+		.nb-state__url{font-size:13px;color:var(--text-muted);text-decoration:underline;text-underline-offset:3px}
+		.nb-state__text{margin:0;max-width:68ch;color:var(--text-color);line-height:1.5}
+		.nb-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:12.5px;font-weight:500;white-space:nowrap}
+		.nb-pill__dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+		.nb-pill--success{background:#E6F4EA;color:#15803D}.nb-pill--warn{background:#FDF3DC;color:#A16207}
+		.nb-pill--muted{background:var(--sand-100, var(--bg-light-gray));color:var(--t3, var(--text-muted))}
+		[data-theme="dark"] .nb-pill--success{background:rgba(21,128,61,.18);color:#86EFAC}
+		[data-theme="dark"] .nb-pill--warn{background:rgba(161,98,7,.2);color:#FCD34D}
+	</style>`).appendTo(document.head);
+}

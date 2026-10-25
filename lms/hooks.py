@@ -278,7 +278,13 @@ doc_events = {
 	# cours payant que personne ne peut acheter doit le dire.
 	"LMS Course": {
 		"validate": "lms.lms.neoffice_commerce.keep_the_course_price_honest",
-		"on_update": "lms.lms.telemetry.course_saved",
+		# Neoffice: publishing or withdrawing a course moves the « Our courses » menu entry, and
+		# deleting one puts it right once the course is gone (maintenance#1860).
+		"on_update": [
+			"lms.lms.telemetry.course_saved",
+			"lms.lms.neoffice_commerce.course_saved",
+		],
+		"on_trash": "lms.lms.neoffice_commerce.course_trashed",
 	},
 	# Neoffice: une ligne de panier marquée garde le prix de l'offre choisie. Le
 	# contrôleur la retarifierait sinon depuis la liste de prix de l'article, et
@@ -294,6 +300,8 @@ doc_events = {
 			"lms.lms.neoffice_commerce.sync_courses_link",
 			"lms.lms.telemetry.payment_gateway_saved",
 		],
+		# Neoffice: the status line under the switch « Show the courses on the website » (maintenance#1860).
+		"onload": "lms.lms.neoffice_commerce.settings_onload",
 		# Neoffice: régler une passerelle ici rouvrirait le tunnel de paiement du
 		# module, qui ignore le panier, TWINT, le terminal et la facturation.
 		"validate": "lms.lms.neoffice_commerce.warn_about_the_second_tunnel",
@@ -320,6 +328,9 @@ scheduler_events = {
 		"lms.lms.doctype.lms_live_class.lms_live_class.send_live_class_reminder",
 		"lms.lms.doctype.lms_course.lms_course.send_notification_for_published_courses",
 		"lms.lms.doctype.course_lesson.course_lesson.rename_settled_untitled_lessons",
+		# //// Neoffice — the « Our courses » menu entry follows the published courses; this catches
+		# //// what a hook cannot see (a course published by a bulk update) (maintenance#1860).
+		"lms.lms.neoffice_commerce.sync_courses_menu",
 	],
 }
 

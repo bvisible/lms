@@ -138,7 +138,16 @@ SETTINGS_FIELDS = {
             "label": "Show the courses on the website",
             "insert_after": "neo_website_section",
             "default": "1",
-            "description": "Adds « Our courses » to the site menu and opens /nos-formations. Off, the page and the menu entry disappear.",
+            "description": "Adds « Our courses » to the site menu and opens /our-courses. Off, the page and the menu entry disappear.",
+        },
+        # The status line under the switch (maintenance#1860): online or off, why a page that is
+        # switched on can still be hidden, and its address. The same block as the jobs page of
+        # HR's settings. It reads the switch above and holds no state of its own.
+        {
+            "fieldname": "neo_page_status",
+            "fieldtype": "HTML",
+            "label": "Status of the page",
+            "insert_after": "neo_show_on_website",
         },
         # ------------------------------------------------------------------
         # Les vidéos. La configuration existait — dans `site_config.json`,
@@ -153,7 +162,7 @@ SETTINGS_FIELDS = {
             "fieldname": "neo_video_section",
             "fieldtype": "Section Break",
             "label": "Videos (Infomaniak VOD)",
-            "insert_after": "neo_show_on_website",
+            "insert_after": "neo_page_status",
             # Ouverte. Repliée, elle cachait la seule réponse à « où se règlent
             # les vidéos ? » derrière un chevron que personne n'ouvre.
             "collapsible": 0,
@@ -234,6 +243,7 @@ def setup_custom_fields():
     create_custom_fields(ITEM_FIELDS, ignore_validate=True)
     create_custom_fields(SETTINGS_FIELDS, ignore_validate=True)
     _move_the_catalogue_section()
+    _put_the_video_section_after_the_page_status()
     _hide_the_inert_switches()
     _fold_the_lms_checkout_away()
     _tell_the_truth_about_signup()
@@ -242,6 +252,10 @@ def setup_custom_fields():
     if frappe.db.exists("DocType", "LMS Course Offer"):
         create_custom_fields(COURSE_FIELDS, ignore_validate=True)
     _put_the_section_back_where_it_belongs()
+    # The menu entry is put where the page is on every migrate: the page moved to /our-courses
+    # (maintenance#1860), and a site that already had the entry keeps one that leads to the old
+    # address until this runs. Quiet, and it never raises.
+    sync_courses_menu()
 
 
 # Trois cases de l'onglet « Général » qui n'ont rien à y faire — vérifié le
@@ -497,6 +511,21 @@ def _move_the_catalogue_section():
         "insert_after",
         "neo_website_section",
     )
+    frappe.clear_cache(doctype="LMS Settings")
+
+
+def _put_the_video_section_after_the_page_status():
+    """The status line sits right under the switch, and the video section follows it.
+
+    Both fields were anchored on the switch: `create_custom_fields` leaves the anchor of a field
+    that already exists alone, and two fields on one anchor have no order of their own.
+    """
+    name = frappe.db.get_value("Custom Field", {"dt": "LMS Settings", "fieldname": "neo_video_section"}, "name")
+    if not name or frappe.db.get_value("Custom Field", name, "insert_after") == "neo_page_status":
+        return
+    if not frappe.db.exists("Custom Field", {"dt": "LMS Settings", "fieldname": "neo_page_status"}):
+        return
+    frappe.db.set_value("Custom Field", name, "insert_after", "neo_page_status")
     frappe.clear_cache(doctype="LMS Settings")
 
 
@@ -1027,22 +1056,80 @@ def get_shop_route(course: str) -> str | None:
 # ---------------------------------------------------------------------------
 
 
-def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
-    """Poser l'entrée « Nos formations » dans le menu du site, une fois.
+# The public courses page and its address. Every address is English (maintenance#1860); the former
+# address stays a permanent redirect (lms/www/nos_formations.py).
+COURSES_URL = "/our-courses"
+LEGACY_COURSES_URL = "/nos-formations"
 
-    🔴 La page existait et **rien ne pointait dessus**. Une page que personne ne
-    peut atteindre n'existe pas du point de vue d'un client, et le menu du site
-    est l'endroit où il regarde. Exactement la panne qu'avait déjà connue la
-    boutique — dont l'entrée avait disparu lors d'une refonte — et celle que
-    `neoffice_theme.booking.shop.ensure_shop_link` corrige pour « Réserver ».
+# The two addresses of the SPA that list the courses: its home (it leads to the list) and the list.
+# A deeper address (one course, one batch, one lesson) is a deliberate link, not browsing.
+CATALOGUE_ENTRANCES = ("", "courses")
 
-    Idempotent sur l'URL, pas sur le libellé : une entrée que le propriétaire a
-    renommée reste cette entrée, et en ajouter une seconde reviendrait à
-    discuter avec le site de ce que son propre menu raconte.
 
-    Délibérément une commande qu'on lance plutôt qu'un hook : une maison qui ne
-    vend aucun cours n'a pas à voir pousser « Nos formations » dans son menu, et
-    un menu est une chose que le propriétaire du site arrange.
+def courses_page_state() -> dict:
+    """What the site says of its public courses page: switched on or off, shown or hidden, and why.
+
+    Two conditions, and the second counts as much as the first: the switch must be on AND at least
+    one course must be published. A catalogue page with nothing in it announces a trade the house
+    does not practise. This is the one place the rule lives: the page, the menu, the guard of the
+    SPA and the settings form all read it.
+    """
+    switched_on = bool(cint(frappe.db.get_single_value("LMS Settings", "neo_show_on_website", cache=False)))
+    published = frappe.db.count("LMS Course", {"published": 1})
+    return {
+        "enabled": switched_on,
+        "open": switched_on and bool(published),
+        "published": published,
+        "url": frappe.utils.get_url(COURSES_URL),
+    }
+
+
+def showing_courses() -> bool:
+    """Does the site show its courses to the public?"""
+    return courses_page_state()["open"]
+
+
+def settings_onload(doc, method=None):
+    """The state of the page, for the status line of the settings form."""
+    doc.set_onload("courses_page", courses_page_state())
+
+
+def guest_gets_page_not_found(app_path: str | None) -> bool:
+    """Is a visitor with no account turned away from the SPA's list of courses?
+
+    Yes when the site shows no course (switch off, or nothing published) and the visitor would
+    otherwise be shown the list. The same answer as the public page, /our-courses, and as every
+    page a switch closes on this site.
+
+    Only for a guest, and only for the SPA's home and its list of courses:
+    - a signed-in user is never refused: the same SPA serves the first course being created, the
+      learners, the app bar icon and the « Training » entry of the instances;
+    - a deeper address (one course, one batch, one lesson) is a deliberate link, and a site whose
+      courses are for its own learners keeps them (the SPA asks a guest to sign in);
+    - with `allow_guest_access` off the SPA already sends a guest to the sign-in page, and a 404
+      would take that away from a learner who follows an invitation while signed out.
+    """
+    if frappe.session.user != "Guest":
+        return False
+    if (app_path or "").strip("/") not in CATALOGUE_ENTRANCES:
+        return False
+    if not frappe.db.get_single_value("LMS Settings", "allow_guest_access", cache=False):
+        return False
+    return not showing_courses()
+
+
+def ensure_courses_link(label: str = None, url: str = COURSES_URL) -> str:
+    """Put the « Our courses » entry in the site menu, once.
+
+    The page existed and nothing led to it. A page nobody can reach does not exist for a customer,
+    and the site menu is where they look (the shop had the same fault, and
+    `neoffice_theme.booking.shop.ensure_shop_link` mends it for « Book »).
+
+    Idempotent on the address, not on the label: an entry the owner renamed stays that entry, and
+    adding a second one would argue with the site about what its own menu says.
+
+    A command to run rather than a hook: a house that sells no course has no business seeing
+    « Our courses » grow in its menu, and a menu is something the site owner arranges.
     """
     settings = frappe.get_doc("Website Settings")
     rows = settings.get("top_bar_items") or []
@@ -1051,11 +1138,10 @@ def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
         if (row.url or "").rstrip("/") == url.rstrip("/"):
             return row.label
 
-    # ⚠️ Le libellé d'un menu est une **donnée**, pas un `df.label` : la barre du
-    # site l'affiche tel quel, sans le traduire. Il doit donc être stocké DÉJÀ
-    # traduit — et dans la langue du SITE, pas dans celle de la session qui
-    # lance la commande, qui n'en a souvent aucune. Sans le `lang`, l'entrée
-    # s'appelait « Our courses » au milieu d'un menu français. Mesuré.
+    # The label of a menu is data, not a `df.label`: the site bar prints it as stored, without
+    # translating it. It is stored already translated, in the language of the SITE and not of the
+    # session that runs the command, which often has none (measured: without `lang` the entry was
+    # called « Our courses » in the middle of a French menu).
     label = label or _("Our courses", lang=frappe.db.get_default("lang") or "fr")
     settings.append("top_bar_items", {"label": label, "url": url})
     settings.flags.ignore_permissions = True
@@ -1063,33 +1149,87 @@ def ensure_courses_link(label: str = None, url: str = "/nos-formations") -> str:
     return label
 
 
-def sync_courses_link(doc=None, method=None, url: str = "/nos-formations") -> None:
-    """Le menu suit l'interrupteur — on met, on retire.
+def _move_the_legacy_entry(url: str) -> None:
+    """The entry that led to /nos-formations leads to the page's new address.
 
-    🔑 `ensure_courses_link` ne fait qu'ajouter : c'est une commande qu'on lance
-    une fois. Ici c'est l'inverse — un réglage qu'on bascule, et le menu doit
-    suivre **dans les deux sens**. Décocher la case et laisser l'entrée mènerait
-    le visiteur à une page qui n'existe plus.
-
-    Posé sur `LMS Settings.on_update` : le geste et sa conséquence au même
-    endroit, sans rien à relancer à la main.
+    A redirect would carry the visitor, but a menu that aims at the page itself is better. If the
+    new entry is already there too, the stale one goes.
     """
-    from lms.www.nos_formations import showing_courses
-
-    montrer = showing_courses()
     settings = frappe.get_doc("Website Settings")
     rows = settings.get("top_bar_items") or []
-    presente = [r for r in rows if (r.url or "").rstrip("/") == url.rstrip("/")]
+    stale = [r for r in rows if (r.url or "").rstrip("/") == LEGACY_COURSES_URL]
+    if not stale:
+        return
+    has_new = any((r.url or "").rstrip("/") == url.rstrip("/") for r in rows)
+    for row in stale:
+        if has_new:
+            settings.remove(row)
+        else:
+            row.url = url
+            has_new = True
+    settings.flags.ignore_permissions = True
+    settings.save(ignore_permissions=True)
 
-    if montrer and not presente:
+
+def sync_courses_link(doc=None, method=None, url: str = COURSES_URL) -> None:
+    """The menu follows the page: the entry is put when the page is shown, removed when it is not.
+
+    `ensure_courses_link` only adds: it is a command to run once. Here it is the other way round,
+    a state that changes and a menu that must follow in both directions. Unticking the switch and
+    leaving the entry would lead the visitor to a page that is gone, and publishing the first
+    course would leave a page nobody can find.
+
+    Called when LMS Settings is saved, when a course is published or withdrawn, every day, and on
+    every migrate (see `sync_courses_menu`, the form of it that hooks use).
+    """
+    if url == COURSES_URL:
+        _move_the_legacy_entry(url)
+
+    show = showing_courses()
+    settings = frappe.get_doc("Website Settings")
+    rows = settings.get("top_bar_items") or []
+    present = [r for r in rows if (r.url or "").rstrip("/") == url.rstrip("/")]
+
+    if show and not present:
         ensure_courses_link(url=url)
         return
 
-    if not montrer and presente:
-        for r in presente:
+    if not show and present:
+        for r in present:
             settings.remove(r)
         settings.flags.ignore_permissions = True
         settings.save(ignore_permissions=True)
+
+
+def sync_courses_menu(*args, **kwargs):
+    """`sync_courses_link` for a hook, a background job or the daily run: it says nothing and never raises.
+
+    Saving a header or a footer announces « Website cache cleared » to whoever is on the screen,
+    which suits someone editing a menu by hand and not a course being published. A failure is
+    logged, not raised: publishing a course must not fail because the menu could not be written.
+    """
+    muted = frappe.flags.mute_messages
+    frappe.flags.mute_messages = True
+    try:
+        sync_courses_link()
+    except Exception:
+        frappe.log_error("Courses page: menu entry not synced", frappe.get_traceback())
+    finally:
+        frappe.flags.mute_messages = muted
+
+
+def course_saved(doc, method=None):
+    """Publishing or withdrawing a course (or creating one that is already published) moves the menu."""
+    if doc.has_value_changed("published"):
+        sync_courses_menu()
+
+
+def course_trashed(doc, method=None):
+    """The menu is put right once the course is gone: here it is still counted."""
+    if doc.published:
+        frappe.enqueue(
+            "lms.lms.neoffice_commerce.sync_courses_menu", queue="short", enqueue_after_commit=True
+        )
 
 
 # ---------------------------------------------------------------------------

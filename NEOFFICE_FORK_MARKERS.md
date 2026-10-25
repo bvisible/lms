@@ -113,7 +113,7 @@ which is what keeps the merge surface at zero:
 | `LMS Enrollment` | `neoffice_access_section`, `subscription`, `access_from`, `access_valid_till`, `last_grant_invoice` | `lms.lms.neoffice_video.setup_custom_fields` |
 | `Item` | `lms_section`, `lms_course`, `lms_access_months` | `lms.lms.neoffice_commerce.setup_custom_fields` |
 | `LMS Course` | `neo_shop_section`, `neo_item`, `neo_offers` | idem |
-| `LMS Settings` | `neo_website_section`, `neo_show_on_website`, `neo_video_section`, `neo_vod_channel`, `neo_vod_account`, `neo_vod_token`, `neo_sell_via_shop` | idem |
+| `LMS Settings` | `neo_website_section`, `neo_show_on_website`, `neo_page_status`, `neo_video_section`, `neo_vod_channel`, `neo_vod_account`, `neo_vod_token`, `neo_sell_via_shop` | idem |
 | `Quotation Item`, `Sales Order Item`, `Sales Invoice Item` | `lms_offer`, `lms_months` | `lms.lms.neoffice_commerce.setup_cart_fields` |
 
 ### Merge forecast — the 15 source files touched on BOTH sides since BASE
