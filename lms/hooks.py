@@ -280,6 +280,7 @@ doc_events = {
 		"validate": "lms.lms.neoffice_commerce.keep_the_course_price_honest",
 		# Neoffice: publishing or withdrawing a course moves the « Our courses » menu entry, and
 		# deleting one puts it right once the course is gone (maintenance#1860).
+		# //// Neoffice — course_saved now also syncs the "Our courses" menu entry on every course save (0ae090e19 "feat(courses): the public courses page has an English address, the SPA list closes to a guest on a site with no course, the menu follows the publication (maintenance#1860)")
 		"on_update": [
 			"lms.lms.telemetry.course_saved",
 			"lms.lms.neoffice_commerce.course_saved",
@@ -301,6 +302,7 @@ doc_events = {
 			"lms.lms.telemetry.payment_gateway_saved",
 		],
 		# Neoffice: the status line under the switch « Show the courses on the website » (maintenance#1860).
+		# //// Neoffice — new onload hook feeds the switch's status line (online/hidden/off and why) (0ae090e19 "feat(courses): the public courses page has an English address, the SPA list closes to a guest on a site with no course, the menu follows the publication (maintenance#1860)")
 		"onload": "lms.lms.neoffice_commerce.settings_onload",
 		# Neoffice: régler une passerelle ici rouvrirait le tunnel de paiement du
 		# module, qui ignore le panier, TWINT, le terminal et la facturation.
