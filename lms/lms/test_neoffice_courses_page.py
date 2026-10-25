@@ -235,6 +235,30 @@ class TestTheMenuFollowsThePage(CoursesPageTestCase):
 		self.assertNotIn(LEGACY, _menu_urls())
 		self.assertNotIn(URL, _menu_urls())
 
+	def test_an_entry_that_leads_to_a_page_of_the_owner_is_not_moved(self):
+		# a customer's own « Nos formations » page (Web Page) with its entry in their menu: not ours to move
+		page = frappe.get_doc(
+			{
+				"doctype": "Web Page",
+				"title": "Nos formations owner page test",
+				"route": "nos-formations",
+				"published": 0,
+				"content_type": "Rich Text",
+				"main_section": "<p>Their page</p>",
+			}
+		).insert(ignore_permissions=True)
+		self.assertEqual(page.route, "nos-formations")
+		settings = frappe.get_doc("Website Settings")
+		settings.append("top_bar_items", {"label": "Nos formations", "url": LEGACY})
+		settings.flags.ignore_permissions = True
+		settings.save(ignore_permissions=True)
+
+		with patch.object(commerce, "showing_courses", return_value=True):
+			commerce.sync_courses_link()
+		urls = _menu_urls()
+		self.assertIn(LEGACY, urls, "their entry stays where it was")
+		self.assertEqual(urls.count(URL), 1, "ours is added beside it")
+
 	def test_both_entries_at_once_leave_the_new_one_only(self):
 		settings = frappe.get_doc("Website Settings")
 		settings.append("top_bar_items", {"label": "Nos formations", "url": LEGACY})

@@ -1155,12 +1155,28 @@ def ensure_courses_link(label: str = None, url: str = COURSES_URL) -> str:
     return label
 
 
+def _a_page_of_the_site_has_the_route(route: str) -> bool:
+    """Does a page the site's owner made (Builder, Web Page) answer at this address?
+
+    Then the address is theirs and not ours: a customer's own « Nos formations » page, with its own
+    entry in their menu, is no entry of ours to move.
+    """
+    routes = [route.strip("/"), "/" + route.strip("/")]
+    for doctype in ("Builder Page", "Web Page"):
+        if frappe.db.exists("DocType", doctype) and frappe.db.exists(doctype, {"route": ["in", routes]}):
+            return True
+    return False
+
+
 def _move_the_legacy_entry(url: str) -> None:
     """The entry that led to /nos-formations leads to the page's new address.
 
     A redirect would carry the visitor, but a menu that aims at the page itself is better. If the
-    new entry is already there too, the stale one goes.
+    new entry is already there too, the stale one goes. An entry that leads to a page the site's
+    owner made at that address is theirs and stays (see `_a_page_of_the_site_has_the_route`).
     """
+    if _a_page_of_the_site_has_the_route(LEGACY_COURSES_URL):
+        return
     settings = frappe.get_doc("Website Settings")
     rows = settings.get("top_bar_items") or []
     stale = [r for r in rows if (r.url or "").rstrip("/") == LEGACY_COURSES_URL]
