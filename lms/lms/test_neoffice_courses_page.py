@@ -77,7 +77,7 @@ class TestTheRule(CoursesPageTestCase):
 	def test_the_settings_form_receives_the_state_when_it_opens(self):
 		_set_switch(1)
 		doc = frappe.get_single("LMS Settings")
-		doc.run_onload()
+		doc.run_method("onload")
 		state = doc.get("__onload").get("courses_page")
 		self.assertIn("published", state)
 		self.assertIn("enabled", state)
@@ -158,9 +158,10 @@ class TestThePublicPage(CoursesPageTestCase):
 
 	def test_the_template_leads_to_the_new_address_only(self):
 		html = (Path(our_courses.__file__).parent / "our-courses.html").read_text()
-		self.assertNotIn(LEGACY, html)
-		self.assertNotIn("categorie", html)
-		self.assertIn(f'href="{URL}?category=', html)
+		page = html.split("#}", 1)[1]  # the header comment names the former address on purpose
+		self.assertNotIn(LEGACY, page)
+		self.assertNotIn("?categorie=", page)
+		self.assertIn(f'href="{URL}?category=', page)
 
 
 class TestTheFormerAddress(CoursesPageTestCase):
@@ -333,9 +334,22 @@ class TestTheSwitchOfAnExistingSite(CoursesPageTestCase):
 		)
 
 	def test_a_switch_the_owner_set_is_left_alone(self):
-		_set_switch(0)
+		# saved from the form, a Single keeps a row for every field, "0" included
+		doc = frappe.get_single("LMS Settings")
+		doc.neo_show_on_website = 0
+		doc.save(ignore_permissions=True)
 		with _published(5):
 			commerce._switch_on_where_there_are_courses()
+		self.assertEqual(
+			cint(frappe.db.get_single_value("LMS Settings", "neo_show_on_website", cache=False)), 0
+		)
+
+	def test_the_migration_does_not_switch_the_page_back_on_each_time(self):
+		self.forget_the_switch()
+		with _published(2):
+			commerce._switch_on_where_there_are_courses()
+			_set_switch(0)  # the owner switches it off
+			commerce._switch_on_where_there_are_courses()  # the next migrate
 		self.assertEqual(
 			cint(frappe.db.get_single_value("LMS Settings", "neo_show_on_website", cache=False)), 0
 		)

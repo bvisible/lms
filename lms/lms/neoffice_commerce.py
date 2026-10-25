@@ -530,19 +530,25 @@ def _put_the_video_section_after_the_page_status():
 
 
 def _switch_on_where_there_are_courses():
-    """Une instance qui montrait déjà ses formations doit continuer.
+    """A site that already showed its courses must keep showing them.
 
-    🔴 **Le `default` d'un Custom Field ne s'applique PAS à un Single qui existe
-    déjà.** `LMS Settings` est un Single créé de longue date : la case est
-    arrivée à zéro malgré `"default": "1"`, la page a répondu 404 et l'entrée du
-    menu a disparu — sur une instance où les formations marchaient la minute
-    d'avant. Mesuré sur osiris.
+    The `default` of a Custom Field is NOT applied to a Single that already exists: `LMS Settings`
+    is old, the box arrived at zero despite `"default": "1"`, the page answered 404 and the menu
+    entry vanished on a site where the courses worked a minute earlier (measured on osiris).
 
-    On ne pose donc la valeur qu'une fois, et seulement là où il y a quelque
-    chose à montrer : un site sans cours publié reste éteint, ce qui est le bon
-    défaut pour tous les autres.
+    So the value is set once, and only where there is something to show: a site with no published
+    course stays off, which is the right default for all the others. Once the row exists the
+    owner's choice stands, off included.
+
+    The row is looked up in the table itself: `frappe.db.exists("Singles", ...)` answers None for
+    a row that is there (`tabSingles` has no `name` column), so the owner's "off" was undone by
+    every migrate as soon as one course was published (found by the migration test,
+    maintenance#1860).
     """
-    if frappe.db.exists("Singles", {"doctype": "LMS Settings", "field": "neo_show_on_website"}):
+    if frappe.db.sql(
+        "select 1 from `tabSingles` where doctype = %s and field = %s",
+        ("LMS Settings", "neo_show_on_website"),
+    ):
         return
     if not frappe.db.count("LMS Course", {"published": 1}):
         return
