@@ -24,6 +24,10 @@ export default function translationPlugin(app) {
 }
 
 function translate(message) {
+	//// Neoffice — read the ref here, so every render and every computed that translates depends on it and runs again
+	//// when the dictionary lands. Without it a cold visit kept the labels of the first render in English (« Courses »,
+	//// « New Course » under a page already titled « Cours »), neoffice-maintenance#1250. Harmless outside a render.
+	void translationsReady.value
 	let translatedMessages = window.translatedMessages || {}
 	let translatedMessage = translatedMessages[message] || message
 
