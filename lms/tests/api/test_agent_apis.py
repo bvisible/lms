@@ -120,6 +120,10 @@ class TestAgentApis(BaseTestUtils):
 	def test_students_are_added_to_a_batch_together(self):
 		missing = f"nobody-{self.hash}@example.com"
 		self._as(self.moderator)
+		# //// Neoffice — start from an empty log: on v15, each valid enrolment's frappe.get_cached_value of the
+		# default outgoing Email Account (none on the CI site) pops the LAST message of the request without having
+		# added one, so the earlier tests' messages vanished and the comparison below failed on them, not on the API
+		frappe.clear_messages()
 		before = list(frappe.local.message_log)
 		result = add_students_to_batch(self.batch, json.dumps(self.students[:2] + [missing]))
 		self.assertEqual(result["added"], self.students[:2])
