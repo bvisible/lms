@@ -24,7 +24,9 @@ from lms.lms.api import (
 	upsert_chapter,
 )
 from lms.lms.doctype.lms_batch.lms_batch import get_batch_timetable
-from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
+
+# //// Neoffice — skip_on_frappe_v15 is no longer used in this file (#1843)
+from lms.lms.test_helpers import BaseTestUtils
 from lms.lms.utils import get_program_details
 
 
@@ -113,7 +115,8 @@ class TestAgentApis(BaseTestUtils):
 			delete_lesson(lesson, other.name)
 		self.assertTrue(frappe.db.exists("Course Lesson", lesson))
 
-	@skip_on_frappe_v15("on v15 a member that does not exist is added instead of reported in `errors`; cause not found yet (maintenance issue), skipped until it is")  # //// Neoffice
+	# //// Neoffice — runs on v15 again: add_students_to_batch refuses a missing user itself (frappe v15 skips the Link
+	# check of a field with fetch_from dependants), neoffice-maintenance#1843
 	def test_students_are_added_to_a_batch_together(self):
 		missing = f"nobody-{self.hash}@example.com"
 		self._as(self.moderator)

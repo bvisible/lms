@@ -59,8 +59,27 @@ def get_shadowed_permlevel_rows() -> dict[str, list[tuple[str, int]]]:
 		order_by="parent asc, permlevel asc, role asc",
 	)
 
+	# //// Neoffice — a shipped (role, permlevel) row that the Custom DocPerm set carries
+	# again is NOT inert: set_custom_permissions applies the custom copy. Upstream listed every
+	# shipped permlevel > 0 row of a customised doctype, so after the reconcile patches had
+	# copied them (lms/patches/v2_0/reconcile_custom_docperm_permlevels.py) the alert still
+	# fired on every migrate, for ever, and its own "stops reporting once the rows apply again"
+	# was never true (neoffice-maintenance#1963, #1843). Same coverage rule as the patch's
+	# add_missing_custom_docperm: a custom row for that (role, permlevel) exists. Remove when
+	# upstream filters the covered rows.
+	carried = {
+		(row.parent, row.role, row.permlevel)
+		for row in frappe.get_all(
+			"Custom DocPerm",
+			filters={"parent": ("in", shadowed_doctypes), "permlevel": (">", 0)},
+			fields=["parent", "role", "permlevel"],
+		)
+	}
+
 	shadowed: dict[str, list[tuple[str, int]]] = {}
 	for row in inert_rows:
+		if (row.parent, row.role, row.permlevel) in carried:  # //// Neoffice — see above
+			continue
 		shadowed.setdefault(row.parent, []).append((row.role, row.permlevel))
 	return shadowed
 

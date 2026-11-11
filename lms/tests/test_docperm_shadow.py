@@ -55,7 +55,8 @@ class TestDocPermShadow(IntegrationTestCase):
 		self.touched_doctypes.add(doctype)
 		return row.role, permlevel
 
-	def add_custom_docperm(self, doctype: str, role: str) -> None:
+	# //// Neoffice — permlevel added for the carried-row tests below (neoffice-maintenance#1963)
+	def add_custom_docperm(self, doctype: str, role: str, permlevel: int = 0) -> None:
 		"""What frappe writes the moment an admin saves a row in Role Permissions Manager."""
 		perm = frappe.new_doc("Custom DocPerm")
 		perm.update(
@@ -64,6 +65,7 @@ class TestDocPermShadow(IntegrationTestCase):
 				"parenttype": "DocType",
 				"parentfield": "permissions",
 				"role": role,
+				"permlevel": permlevel,  # //// Neoffice — the carried-row tests below need a permlevel
 				"read": 1,
 			}
 		)
@@ -101,6 +103,43 @@ class TestDocPermShadow(IntegrationTestCase):
 
 		self.assertIn("LMS Course", shadowed)
 		self.assertEqual(shadowed["LMS Course"], [(role, permlevel)])
+
+	# //// Neoffice — the alert fired on every migrate even once the reconcile patches had
+	# carried the shipped permlevel rows into the Custom DocPerm set (neoffice-maintenance#1963)
+	def test_a_shipped_permlevel_row_the_custom_set_carries_is_not_reported(self):
+		role, permlevel = self.ship_permlevel_row("LMS Course")
+		self.add_custom_docperm("LMS Course", "Moderator")
+		self.add_custom_docperm("LMS Course", role, permlevel)
+
+		self.assertNotIn("LMS Course", get_shadowed_permlevel_rows())
+
+	def test_only_the_shipped_permlevel_rows_the_custom_set_lacks_are_reported(self):
+		carried_role, permlevel = self.ship_permlevel_row("LMS Course")
+		self.add_custom_docperm("LMS Course", carried_role, permlevel)
+		missing = frappe.db.get_value(
+			"DocPerm",
+			{"parent": "LMS Course", "parenttype": "DocType", "permlevel": 0, "role": ("!=", carried_role)},
+			["name", "role"],
+			as_dict=True,
+		)
+		self.assertIsNotNone(missing, "LMS Course ships a single role: nothing to leave uncarried")
+		self.moved_permlevels.append((missing.name, 0))
+		frappe.db.set_value("DocPerm", missing.name, "permlevel", permlevel)
+
+		self.assertEqual(get_shadowed_permlevel_rows().get("LMS Course"), [(missing.role, permlevel)])
+
+	def test_the_alert_stays_quiet_once_the_custom_set_carries_every_row(self):
+		role, permlevel = self.ship_permlevel_row("LMS Course")
+		self.add_custom_docperm("LMS Course", "Moderator")
+		self.add_custom_docperm("LMS Course", role, permlevel)
+		latest_before = self.get_latest_alerts(pluck="name")
+
+		stdout = io.StringIO()
+		with redirect_stdout(stdout):
+			warn_about_shadowed_permlevels()
+
+		self.assertEqual(self.get_latest_alerts(pluck="name"), latest_before)
+		self.assertEqual(stdout.getvalue(), "")
 
 	def test_a_custom_docperm_without_a_shipped_permlevel_row_is_not_reported(self):
 		self.add_custom_docperm("LMS Batch", "Moderator")

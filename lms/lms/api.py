@@ -3250,6 +3250,15 @@ def add_students_to_batch(batch: str, members: list | str) -> dict:
 		messages = len(frappe.local.message_log)
 		frappe.db.savepoint("add_student_to_batch")
 		try:
+			# //// Neoffice — frappe v15 does not refuse a Link to a missing document when the field has
+			# fetch_from dependants (Document.get_invalid_links: get_value(..., as_dict=True) returns None and the
+			# check is skipped; v16 falls back to an empty dict and refuses it). member feeds member_name,
+			# member_username and member_image, so on v15 a user who does not exist was "added" to the batch.
+			# Refuse it here, as v16 does (neoffice-maintenance#1843). Remove when the fleet runs frappe v16.
+			if not frappe.db.exists("User", member):
+				frappe.throw(
+					_("Could not find {0}").format(f"{_('Member')}: {member}"), frappe.LinkValidationError
+				)
 			frappe.get_doc({"doctype": "LMS Batch Enrollment", "batch": batch, "member": member}).insert()
 		except Exception as e:
 			frappe.db.rollback(save_point="add_student_to_batch")
