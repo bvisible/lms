@@ -85,7 +85,6 @@ after_sync = "lms.install.after_sync"
 before_uninstall = "lms.install.before_uninstall"
 setup_wizard_complete = "lms.demo.demo_data.create_demo_data"
 after_migrate = [
-	"lms.sqlite.build_index_in_background",
 	"lms.lms.doctype.lms_payment.lms_payment.add_unique_payment_id_constraint",
 	"lms.lms.docperm_shadow.warn_about_shadowed_permlevels",
 	# //// Neoffice — three entries added to upstream's after_migrate (36c69d63, d3b10e3f,
@@ -314,7 +313,6 @@ doc_events = {
 # ---------------
 scheduler_events = {
 	"all": [
-		"lms.sqlite.build_index_in_background",
 		"lms.lms.doctype.lms_live_class.lms_live_class.retry_pending_invites",
 	],
 	"hourly": [
@@ -322,6 +320,7 @@ scheduler_events = {
 		"lms.lms.doctype.lms_course.lms_course.update_course_statistics",
 		"lms.lms.doctype.lms_certificate_request.lms_certificate_request.mark_eval_as_completed",
 		"lms.lms.doctype.lms_live_class.lms_live_class.update_attendance",
+		"lms.lms.day1_email.send_day1_email",
 	],
 	"daily": [
 		"lms.job.doctype.job_opportunity.job_opportunity.update_job_openings",
@@ -330,6 +329,7 @@ scheduler_events = {
 		"lms.lms.doctype.lms_live_class.lms_live_class.send_live_class_reminder",
 		"lms.lms.doctype.lms_course.lms_course.send_notification_for_published_courses",
 		"lms.lms.doctype.course_lesson.course_lesson.rename_settled_untitled_lessons",
+		"lms.lms.doctype.course_evaluator.course_evaluator.clear_expired_time_off",
 		# //// Neoffice — the « Our courses » menu entry follows the published courses; this catches
 		# //// what a hook cannot see (a course published by a bulk update) (maintenance#1860).
 		"lms.lms.neoffice_commerce.sync_courses_menu",
@@ -341,7 +341,7 @@ fixtures = ["Custom Field", "Function", "Industry", "LMS Category"]
 # Testing
 # -------
 
-# before_tests = "lms.install.before_tests"
+before_tests = "lms.lms.test_helpers.enforce_role_gates"
 
 # Overriding Methods
 # ------------------------------

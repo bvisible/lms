@@ -7,7 +7,7 @@ from contextlib import redirect_stdout
 import frappe
 from frappe.client import get as client_get
 from frappe.permissions import rights
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint
 
 from lms.lms.docperm_shadow import get_shadowed_permlevel_rows, warn_about_shadowed_permlevels
@@ -19,7 +19,7 @@ ASSIGNMENT_PERMLEVEL_ROLES = ("System Manager", "Moderator", "Course Creator", "
 TEST_MODERATOR_EMAIL = "reconcile-permlevels-test-moderator@example.com"
 
 
-class TestReconcileCustomDocPermPermlevels(IntegrationTestCase):
+class TestReconcileCustomDocPermPermlevels(FrappeTestCase):
 	"""lms.patches.v2_0.reconcile_custom_docperm_permlevels.reconcile() re-adds, to the
 	Custom DocPerm set of each doctype it is handed, the shipped permlevel > 0 DocPerm
 	rows that set has shadowed (frappe.model.meta.Meta.set_custom_permissions replaces a
@@ -42,7 +42,7 @@ class TestReconcileCustomDocPermPermlevels(IntegrationTestCase):
 		self.custom_perm_baseline = set(frappe.get_all("Custom DocPerm", pluck="name"))
 
 	def tearDown(self):
-		# IntegrationTestCase rolls the transaction back once per class, not per test, so
+		# FrappeTestCase rolls the transaction back once per class, not per test, so
 		# a row written here is still there when the next test reads it. Restore the
 		# shared rows by hand, newest first.
 		frappe.set_user("Administrator")
@@ -346,3 +346,30 @@ class TestReconcileCustomDocPermPermlevels(IntegrationTestCase):
 		count_after_alert = frappe.db.count("Custom DocPerm", {"parent": ASSIGNMENT_DOCTYPE})
 
 		self.assertEqual(count_after_alert, count_before_alert)
+
+	def test_program_staff_keep_the_member_rows_on_a_customised_site(self):
+		"""LMS Program ships its member fields at permlevel 1. A site that customised the
+		doctype's permissions before that would hide the members from its own staff; the
+		patch line naming LMS Program carries the shipped read and write rows across."""
+		doctype = "LMS Program"
+		shipped = frappe.get_all(
+			"DocPerm",
+			filters={"parent": doctype, "parenttype": "DocType", "permlevel": 1},
+			fields=["role", "read", "write"],
+		)
+		self.assertTrue(shipped, f"{doctype} ships no permlevel 1 rows; run migrate on this site")
+		self.arrange_pre_upgrade_custom_docperm_shadow(doctype)
+
+		reconcile([doctype])
+		frappe.clear_cache(doctype=doctype)
+
+		for row in shipped:
+			with self.subTest(role=row.role):
+				custom = frappe.db.get_value(
+					"Custom DocPerm",
+					{"parent": doctype, "role": row.role, "permlevel": 1},
+					["read", "write"],
+					as_dict=True,
+				)
+				self.assertIsNotNone(custom)
+				self.assertEqual((custom.read, custom.write), (row.read, row.write))

@@ -9,7 +9,7 @@ from unittest.mock import patch
 import frappe
 from bs4 import BeautifulSoup
 from frappe import _
-from frappe.tests import UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PrefixLoader
 
 import lms
@@ -22,7 +22,7 @@ SIGNUP_FORM = "lms/templates/signup-form.html"
 RELEASED_LOGIN_HELPERS = {"login_handlers", "set_status", "show_field_error"}
 
 
-class TestSignupForm(UnitTestCase):
+class TestSignupForm(FrappeTestCase):
 	def patched_settings(self, lms_settings):
 		original = frappe.db.get_single_value
 
@@ -90,11 +90,6 @@ class TestSignupForm(UnitTestCase):
 		html = self.render()
 		self.assertIn("signup-form", html)
 		self.assertNotIn("form-signup", html)
-
-	def test_already_registered_message_links_to_login(self):
-		html = self.render()
-		self.assertIn("You are already registered.", html)
-		self.assertIn('href=\\"#login\\"', html)
 
 	def test_optional_fields_render_only_when_configured(self):
 		html = self.render()

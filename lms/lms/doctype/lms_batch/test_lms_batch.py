@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import add_days, nowdate
 
-from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
+from lms.lms.test_helpers import BaseTestUtils
 
 
 def _new_batch(instructors):
@@ -78,9 +78,10 @@ class TestLMSBatch(BaseTestUtils):
 		with self.assertRaisesRegex(frappe.ValidationError, "end date cannot be before"):
 			batch.save()
 
-	@skip_on_frappe_v15("a timetable row with only a date fails on v15 with 'Start time cannot be outside the batch duration' (how an unset Time field is read back); upstream runs it on v16 only")  # //// Neoffice
 	def test_batch_dates_sent_as_strings_are_checked_against_the_timetable(self):
-		batch = self._reloaded_batch(timetable=[{"date": add_days(nowdate(), 5)}])
+		# Times inside the batch's own, since frappe v15 fills an empty Time with the current time.
+		row = {"date": add_days(nowdate(), 5), "start_time": "09:30:00", "end_time": "10:30:00"}
+		batch = self._reloaded_batch(timetable=[row])
 
 		batch.update({"start_date": add_days(nowdate(), 1), "end_date": add_days(nowdate(), 9)})
 		batch.save()

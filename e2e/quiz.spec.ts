@@ -150,7 +150,12 @@ test.describe("Quiz", () => {
 			// that carries no accessible name of its own.
 			await page.locator('input[type="checkbox"]').first().click();
 			await button(page, "Delete").click();
-			await expect(page.getByText(questionText)).toHaveCount(0);
+			// The search box still holds the question text, so the empty state
+			// names the search rather than claiming the bank is empty — the
+			// question text stays on the page inside that sentence.
+			await expect(
+				page.getByText(`Nothing matches "${questionText}"`)
+			).toBeVisible();
 		});
 	});
 
@@ -159,9 +164,16 @@ test.describe("Quiz", () => {
 			await page.goto(`/lms/quiz/${quizName}`);
 			await closeOnboardingModal(page);
 
-			await expect(page.getByText("Cypress Test Quiz").first()).toBeVisible();
-			await expect(page.getByText("1 question")).toBeVisible();
-			await expect(page.getByText("Passing score: 60%")).toBeVisible();
+			await expect(page.getByText(quizTitle).first()).toBeVisible();
+
+			// The start screen's stats grid pairs each <dt> label with its <dd>.
+			const stat = (label: string) =>
+				page
+					.locator("dl > div")
+					.filter({ has: page.getByText(label, { exact: true }) })
+					.locator("dd");
+			await expect(stat("Questions")).toHaveText("1");
+			await expect(stat("Pass mark")).toHaveText("60%");
 		});
 
 		test("starts the quiz and shows the question with answer choices", async ({
@@ -207,10 +219,11 @@ test.describe("Quiz", () => {
 			await button(page, "Submit").click();
 			await submitQuiz;
 
-			// Result panel appears after submission
-			await expect(page.getByText(/score|correct|result/i)).toBeVisible({
+			// The result leads with a Passed or Failed badge, then the marks.
+			await expect(page.getByTestId("quiz-verdict")).toBeVisible({
 				timeout: 10000,
 			});
+			await expect(page.getByText(/of \d+ marks/)).toBeVisible();
 		});
 	});
 });

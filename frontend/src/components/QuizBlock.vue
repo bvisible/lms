@@ -95,7 +95,7 @@
 		</Button>
 	</div>
 </template>
-<script setup>
+<script setup lang="ts">
 //// Neoffice — added imports for the quiz window (nextTick, onBeforeUnmount, onMounted) and its confirm-leave check (71dc7a163).
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Button, createResource } from 'frappe-ui'
@@ -105,14 +105,14 @@ import {
 	needsLeaveConfirmation,
 	registerLessonQuiz,
 } from '@/utils/lessonQuizzes'
+import type { SessionUser } from '@/types'
 
-const user = inject('$user')
-const props = defineProps({
-	quiz: {
-		type: String,
-		required: true,
-	},
-})
+const user = inject<SessionUser>('$user')!
+
+//// Neoffice — `props` is named: the quiz window below reads `props.quiz`.
+const props = defineProps<{
+	quiz: string
+}>()
 
 //// Neoffice ▼▼▼ — the quiz runs in a window instead of inline in the lesson (71dc7a163): isOpen/confirmLeave/overlay/quizRef
 //// hold the window and its close-confirmation state, openQuiz/closeQuiz/requestClose drive it (closing never submits, only
@@ -120,8 +120,8 @@ const props = defineProps({
 //// the top of the lesson.
 const isOpen = ref(false)
 const confirmLeave = ref(false)
-const overlay = ref(null)
-const quizRef = ref(null)
+const overlay = ref<HTMLElement | null>(null)
+const quizRef = ref<{ inProgress?: boolean; hasAnswers?: boolean } | null>(null)
 
 const titleResource = createResource({
 	url: 'frappe.client.get_value',
@@ -135,24 +135,24 @@ const titleResource = createResource({
 })
 const quizTitle = computed(() => titleResource.data?.title || __('Quiz'))
 
-const lockPageScroll = (locked) => {
+const lockPageScroll = (locked: boolean): void => {
 	document.body.style.overflow = locked ? 'hidden' : ''
 }
 
-const openQuiz = async () => {
+const openQuiz = async (): Promise<void> => {
 	isOpen.value = true
 	lockPageScroll(true)
 	await nextTick()
 	overlay.value?.focus()
 }
 
-const closeQuiz = () => {
+const closeQuiz = (): void => {
 	isOpen.value = false
 	confirmLeave.value = false
 	lockPageScroll(false)
 }
 
-const requestClose = () => {
+const requestClose = (): void => {
 	if (
 		needsLeaveConfirmation({
 			inProgress: quizRef.value?.inProgress,
@@ -165,7 +165,7 @@ const requestClose = () => {
 	closeQuiz()
 }
 
-let unregister = () => {}
+let unregister = (): void => {}
 onMounted(() => {
 	if (user.data) unregister = registerLessonQuiz({ name: props.quiz, open: openQuiz })
 })
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
 })
 //// Neoffice ▲▲▲
 
-const redirectToLogin = () => {
+const redirectToLogin = (): void => {
 	window.location.href = `/login`
 }
 </script>

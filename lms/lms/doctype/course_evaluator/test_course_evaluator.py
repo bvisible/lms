@@ -4,7 +4,7 @@
 from unittest.mock import patch
 
 import frappe
-from frappe.tests import UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, format_time, getdate, to_timedelta
 
 from lms.lms.api import save_role
@@ -203,6 +203,7 @@ class TestTodaysSlots(BaseTestUtils):
 			"Student",
 			["LMS Student"],
 		)
+		self._create_enrollment(student.name, self.course.name)
 		frappe.set_user(student.name)
 
 		slots = self._todays_slots(get_schedule(self.course.name))
@@ -222,7 +223,7 @@ class TestTodaysSlots(BaseTestUtils):
 
 
 @patch("lms.lms.utils.get_system_timezone", return_value="Asia/Kolkata")
-class TestSlotGrouping(UnitTestCase):
+class TestSlotGrouping(FrappeTestCase):
 	"""Grouping runs after conversion, so a schedule row's day is not the day the
 	learner sees it on."""
 

@@ -1,5 +1,9 @@
 <template>
-	<div v-if="youtubeEmbedId(youtube)" :key="youtubeEmbedId(youtube)">
+	<div
+		v-if="youtubeEmbedId(youtube)"
+		:key="youtubeEmbedId(youtube)"
+		class="not-prose my-5 overflow-hidden rounded-7 border border-outline-gray-2"
+	>
 		<div
 			class="video-player"
 			data-plyr-provider="youtube"
@@ -18,10 +22,14 @@
 			<div
 				v-if="youtubeEmbedId(getId(block))"
 				:key="youtubeEmbedId(getId(block))"
-				class="video-player"
-				data-plyr-provider="youtube"
-				:data-plyr-embed-id="youtubeEmbedId(getId(block))"
-			></div>
+				class="not-prose my-5 overflow-hidden rounded-7 border border-outline-gray-2"
+			>
+				<div
+					class="video-player"
+					data-plyr-provider="youtube"
+					:data-plyr-embed-id="youtubeEmbedId(getId(block))"
+				></div>
+			</div>
 		</div>
 		<div v-else-if="block.includes('{{ Quiz')">
 			<Quiz :quiz="getId(block)" />
@@ -47,11 +55,15 @@
 		</div>
 		<div v-else-if="block.includes('{{ Video')">
 			<!-- //// Neoffice — the film has the width of the text above it (the lesson column is centred and capped, see `.neo-lesson-column` in Lesson.vue),
-			     with 24px above and below (as the images of the lesson and the clips of the manual) and rounded corners (Daniel, 10 October 2026: « aligner les deux, film et texte »). The pop-up
-			     (lessonVideoViewer.ts) is what enlarges it. -->
+			     with 24px above and below (as the images of the lesson and the clips of the manual) and rounded corners (Daniel, 10 October 2026: "align the two, film and text"). The pop-up
+			     (lessonVideoViewer.ts) is what enlarges it. Upstream now wraps the film in a bordered box (`my-5 rounded-7 border`);
+			     this branch keeps the look validated on 10 October instead. -->
+			<!-- //// Neoffice — the `style` attribute below is that look. -->
 			<video
+				:ref="guardMacroVideo"
 				controls
 				width="100%"
+				class="block w-full"
 				controlsList="nodownload"
 				oncontextmenu="return false;"
 				style="display: block; width: 100%; margin: 24px 0; border-radius: 10px"
@@ -61,25 +73,41 @@
 		</div>
 		<div v-else-if="block.includes('{{ PDF')">
 			<PdfBlock v-if="inlinePdf" :file="getId(block)" />
-			<iframe
+			<div
 				v-else
-				:src="safeUrl(getId(block))"
-				:title="__('PDF document')"
-				width="100%"
-				height="700px"
-				class="mb-4"
-				type="application/pdf"
-			></iframe>
+				class="not-prose my-5 overflow-hidden rounded-7 border border-outline-gray-2"
+			>
+				<iframe
+					:src="safeUrl(getId(block))"
+					:title="__('PDF document')"
+					width="100%"
+					height="700px"
+					class="block"
+					type="application/pdf"
+				></iframe>
+			</div>
 		</div>
-		<div v-else-if="block.includes('{{ Audio')">
-			<audio width="100%" controls controlsList="nodownload">
+		<div
+			v-else-if="block.includes('{{ Audio')"
+			class="not-prose my-5 overflow-hidden rounded-7 border border-outline-gray-2"
+		>
+			<audio
+				width="100%"
+				class="block w-full"
+				controls
+				controlsList="nodownload"
+			>
 				<source :src="safeUrl(getId(block))" type="audio/mp3" />
 			</audio>
 		</div>
-		<div v-else-if="block.includes('{{ Embed')">
+		<div
+			v-else-if="block.includes('{{ Embed')"
+			class="not-prose my-5 overflow-hidden rounded-7 border border-outline-gray-2"
+		>
 			<iframe
 				width="100%"
 				height="400"
+				class="block"
 				:src="safeUrl(getId(block))"
 				:title="__('Embedded content')"
 				frameborder="0"
@@ -95,7 +123,8 @@
 		<Quiz :quiz="quizId" />
 	</div>
 </template>
-<script setup>
+<script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
 import Quiz from '@/components/QuizBlock.vue'
 //// Neoffice — 36c69d63: the player for subscription-gated Infomaniak videos.
 import SecureVideo from '@/components/SecureVideo.vue'
@@ -103,10 +132,12 @@ import SecureVideo from '@/components/SecureVideo.vue'
 import InstanceLink from '@/components/InstanceLink.vue'
 import { parseInstanceLink } from '@/utils/instanceLink'
 import PdfBlock from '@/components/PdfBlock.vue'
+// @ts-expect-error markdown-it ships no type declarations
 import MarkdownIt from 'markdown-it'
 import { extractYoutubeID, getMacroArg } from '@/utils/lessonMacros'
 import { usesWebkitPdfViewer } from '@/utils/pdfViewer'
 import { safeUrl } from '@/utils/safeUrl'
+import { guardVideoElementSkips } from '@/utils/videoSkipGuard'
 
 //// Neoffice — a789500f: upstream declares no emit here. The Infomaniak iframe is the
 //// only player whose end-of-video the parent cannot observe from the DOM, so it has to
@@ -122,47 +153,40 @@ const markdown = new MarkdownIt({
 
 // The directive sanitizes at the rich level, which is where the anchor-target
 // hook and the form-tag blocklist live. This only does the markdown pass.
-const renderMarkdown = (block) => markdown.render(block)
+const renderMarkdown = (block: string): string => markdown.render(block)
 
-const props = defineProps({
-	content: {
-		type: String,
-		required: true,
-	},
-	youtube: {
-		type: String,
-		required: false,
-	},
-	quizId: {
-		type: String,
-		required: false,
-	},
-	//// Neoffice — 36c69d63 / a789500f: two props upstream does not have. `lessonName`
-	//// because the server refuses to sign a media the lesson does not cite, and `videos`
-	//// (LMS Video Watch Duration rows) so playback resumes where the learner stopped.
-	lessonName: {
-		type: String,
-		required: false,
-	},
-	// [{ source, watch_time }] from LMS Video Watch Duration, for this member.
-	videos: {
-		type: Array,
-		required: false,
-		default: () => [],
-	},
-})
+//// Neoffice — 36c69d63 / a789500f: two props upstream does not have. `lessonName`
+//// because the server refuses to sign a media the lesson does not cite, and `videos`
+//// (LMS Video Watch Duration rows) so playback resumes where the learner stopped.
+const props = withDefaults(
+	defineProps<{
+		content: string
+		youtube?: string
+		quizId?: string
+		lessonName?: string
+		// [{ source, watch_time }] from LMS Video Watch Duration, for this member.
+		videos?: { source: string; watch_time: number | string }[]
+	}>(),
+	{ videos: () => [] }
+)
 
 //// Neoffice — a789500f: the resume position, read from the watch-duration rows.
 // The registry stores secure videos under `infomaniak:<media>`.
-const watchedSeconds = (media) => {
+const watchedSeconds = (media: string): number => {
 	const row = props.videos?.find((v) => v.source === `infomaniak:${media}`)
 	return row ? Number(row.watch_time) || 0 : 0
 }
 
-const getId = (block) => {
+const getId = (block: string): string => {
 	// Guard the match: a malformed `{{ PDF() }}` / unbalanced-quote macro yields
 	// null, and the old unguarded [1] threw and killed the whole lesson render.
 	return getMacroArg(block) ?? ''
+}
+
+const guardMacroVideo = (
+	el: Element | ComponentPublicInstance | null
+): void => {
+	if (el instanceof HTMLVideoElement) guardVideoElementSkips(el)
 }
 
 // Both authoring paths (the `youtube` field and the `{{ YouTubeVideo }}` macro)
@@ -171,5 +195,6 @@ const getId = (block) => {
 // enforce_video_completion saw "no video" and auto-completed on the dwell timer.
 // Falsy id => render nothing rather than a Plyr player with no video, which
 // would suppress the dwell timer and leave the lesson uncompletable.
-const youtubeEmbedId = (source) => (source ? extractYoutubeID(source) : '')
+const youtubeEmbedId = (source: string | undefined): string =>
+	source ? extractYoutubeID(source) : ''
 </script>

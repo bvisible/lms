@@ -1,12 +1,14 @@
 import json
+import re
 import unittest  # //// Neoffice — for skip_on_frappe_v15 below
+
 # //// Neoffice — contextmanager import is used by guards_enforced() below too (fcd22f0f "test(security): prove the only_for guards on any frappe, not just ours")
 from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
 from frappe.cache_manager import user_cache_keys
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, nowdate
 from frappe.utils.html_utils import sanitize_html
 
@@ -14,6 +16,43 @@ from lms.lms.course_import_export import get_assessment_map
 from lms.lms.doctype.lms_certificate.lms_certificate import get_default_certificate_template
 from lms.lms.doctype.lms_quiz.lms_quiz import submit_quiz
 from lms.lms.lesson_assessments import ASSESSMENT_BLOCK_KEYS
+
+
+def compact_styles(html: str) -> str:
+	"""Inline styles written the same way whichever sanitiser stored them.
+
+	nh3 (frappe v16) writes `color:red`, bleach (frappe v15) writes `color: red;`.
+	"""
+	return re.sub(
+		r'style="([^"]*)"',
+		lambda m: 'style="' + re.sub(r"\s*([:;])\s*", r"\1", m.group(1)).rstrip(";") + '"',
+		html,
+	)
+
+
+def enforce_role_gates():
+	"""Make `frappe.only_for` check roles for the whole test run.
+
+	frappe v15's `only_for` returns early whenever `flags.in_test` is set, so an
+	endpoint's role gate never fires under the test runner, though every request
+	is gated. The real check runs here with only that flag lowered around it, as
+	it does on v16. Runs as the before_tests hook.
+	"""
+	only_for = frappe.only_for
+	if getattr(only_for, "enforces_role_gates", False):
+		return
+
+	def checked_only_for(*args, **kwargs):
+		in_test = frappe.flags.in_test
+		frappe.flags.in_test = False
+		try:
+			return only_for(*args, **kwargs)
+		finally:
+			frappe.flags.in_test = in_test
+
+	checked_only_for.enforces_role_gates = True
+	frappe.only_for = checked_only_for
+
 
 # frappe keys cached documents as f"document_cache::{doctype}::{name}"
 # (frappe/model/document.py, get_document_cache_key).
@@ -81,10 +120,10 @@ def released_frappe_sanitizer():
 		yield
 
 
-# //// Neoffice — frappe v15's sanitize_html is bleach-based, v16's is nh3-based, and a few upstream tests pin
-# //// nh3's exact output (a trailing `;` in a style, `rel` gained by a link, a dropped tag instead of escaped text).
-# //// Upstream runs its tests on v16 only. On v15 those tests are skipped, each one named and with its reason:
-# //// a pass there would prove nothing and a fail is the library difference, not a regression of ours.
+# //// Neoffice — two upstream tests still fail on our frappe v15 stack for a reason that is not a regression of
+# //// ours (a PNG fixture the v15 Pillow refuses; `db.set_value(None)` on a datetime column). Upstream's version-15
+# //// line adapted the sanitiser and timetable tests (compact_styles, sanitize_markup), so those run again; these
+# //// two are skipped, each one named and with its reason.
 FRAPPE_MAJOR = int(frappe.__version__.split(".")[0])
 
 
@@ -92,7 +131,7 @@ def skip_on_frappe_v15(reason):
 	return unittest.skipIf(FRAPPE_MAJOR < 16, f"frappe v15: {reason}")
 
 
-class BaseTestUtils(IntegrationTestCase):
+class BaseTestUtils(FrappeTestCase):
 	"""
 	Base class with helper methods for creating test data.
 	Subclasses should call super().setUp() and super().tearDown().
@@ -116,6 +155,22 @@ class BaseTestUtils(IntegrationTestCase):
 		frappe.cache.delete_key(user_cache_keys)
 		frappe.set_user("Administrator")
 		super().tearDown()
+
+	@classmethod
+	def _require(cls, holds: bool, message: str):
+		"""A setUpClass precondition: raising there errors every test in the class."""
+		if not holds:
+			raise AssertionError(message)
+
+	@classmethod
+	def _require_no_moderators(cls, *users):
+		"""A fixed-key fixture returns the existing row untouched, so declared roles are
+		decoration until read. A Moderator's refusal would prove nothing."""
+		for user in users:
+			cls._require(
+				"Moderator" not in frappe.get_roles(user),
+				f"{user} holds Moderator, so a refusal for it proves nothing",
+			)
 
 	@classmethod
 	def _create_user(cls, email, first_name, last_name, roles, user_type="Website User"):

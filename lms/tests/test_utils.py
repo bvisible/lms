@@ -9,12 +9,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 import frappe
-from frappe.tests import UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import escape_html, get_system_timezone, getdate, to_timedelta
 
 import lms
 from lms.lms.doctype.lms_certificate.lms_certificate import is_certified
-from lms.lms.test_helpers import BaseTestUtils, skip_on_frappe_v15  # //// Neoffice — see test_helpers.py
+from lms.lms.test_helpers import BaseTestUtils, compact_styles
 from lms.lms.utils import (
 	DEFAULT_PAGE_LENGTH,
 	MAX_EDITORJS_DEPTH,
@@ -427,7 +427,7 @@ class TestGetLessonIcon(unittest.TestCase):
 				self.assertEqual(get_lesson_icon("", _content(block)), "icon-list")
 
 
-class TestResolvePageLength(UnitTestCase):
+class TestResolvePageLength(FrappeTestCase):
 	"""
 	`createListResource` sends `limit_page_length` and then advances `start` by
 	the same number. An endpoint that ignores it returns a page of a different
@@ -624,7 +624,7 @@ class TestListEndpointPaging(BaseTestUtils):
 			frappe.db.set_single_value("LMS Settings", "allow_guest_access", 1)
 
 
-class TestFormatTimezone(UnitTestCase):
+class TestFormatTimezone(FrappeTestCase):
 	def test_iana_zone_gains_its_offset(self):
 		self.assertEqual(format_timezone("Asia/Kolkata", "2026-08-03"), "Asia/Kolkata (GMT+5:30)")
 
@@ -647,7 +647,7 @@ class TestFormatTimezone(UnitTestCase):
 
 
 @patch("lms.lms.utils.get_system_timezone", return_value="Asia/Kolkata")
-class TestConvertFromSystemTimezone(UnitTestCase):
+class TestConvertFromSystemTimezone(FrappeTestCase):
 	def test_converts_the_wall_clock(self, _system_timezone):
 		date, time = convert_from_system_timezone("2026-08-03", "10:00:00", "Europe/Berlin")
 		self.assertEqual(date, getdate("2026-08-03"))
@@ -729,14 +729,13 @@ class TestEditorJsSanitisation(unittest.TestCase):
 	def _payload(self, text):
 		return json.dumps({"blocks": [{"type": "paragraph", "data": {"text": text}}]})
 
-	@skip_on_frappe_v15("bleach writes the style with a space after the colon")  # //// Neoffice
 	def test_keeps_a_span_carrying_class_and_style(self):
 		# The align tool carries its whole payload in an attribute, so it is the
 		# one a tag-level allowlist can silently strip.
 		text = '<span class="lms-align" style="text-align: center; ' 'display: block;">mid</span>'
-		out = self._text(self._payload(text))
+		out = compact_styles(self._text(self._payload(text)))
 		self.assertIn("lms-align", out)
-		self.assertIn("text-align:center", out.replace(" ;", ";"))
+		self.assertIn("text-align:center", out)
 		self.assertIn("display:block", out)
 
 	def test_keeps_the_other_inline_tools(self):
@@ -744,7 +743,6 @@ class TestEditorJsSanitisation(unittest.TestCase):
 		for tag in ("<b>", "<u>", "<s>"):
 			self.assertIn(tag, out)
 
-	@skip_on_frappe_v15("bleach escapes an unknown element as text, nh3 unwraps it")  # //// Neoffice
 	def test_a_custom_element_is_unwrapped(self):
 		# Why the contract above is pinned. frappe's sanitiser allowlists tags by
 		# name and knows no custom elements, so one is unwrapped and its styling
@@ -758,6 +756,13 @@ class TestEditorJsSanitisation(unittest.TestCase):
 		self.assertNotIn("<script", out)
 		self.assertNotIn("onerror", out)
 		self.assertIn("ok", out)
+
+	def test_a_script_is_dropped_with_its_content(self):
+		self.assertEqual(self._text(self._payload("ok<script>alert(1)</script>")), "ok")
+
+	def test_every_link_carries_noopener_noreferrer(self):
+		out = self._text(self._payload('<a href="https://frappe.io/" rel="nofollow">here</a>'))
+		self.assertEqual(out, '<a href="https://frappe.io/" rel="noopener noreferrer">here</a>')
 
 	def test_keeps_text_without_markup_that_is_not_json(self):
 		for raw in ('{"blocks":[{"da', "https://frappe.io/lesson", None):
@@ -818,3 +823,59 @@ class TestEditorJsSanitisation(unittest.TestCase):
 			'rel="noopener noreferrer">here</a>"}}]}'
 		)
 		self.assertEqual(self._text(raw), '<a href="https://frappe.io/" rel="noopener noreferrer">here</a>')
+
+
+class TestEditorJsEmbedSources(unittest.TestCase):
+	"""An embed block's `data.embed` becomes an iframe `src`, so only external http(s) URLs are kept."""
+
+	def _kept(self, embed, service="drive"):
+		block = {"type": "embed", "data": {"service": service, "source": "x", "embed": embed}}
+		raw = json.dumps({"blocks": [{"type": "paragraph", "data": {"text": "a"}}, block]})
+		return [b["type"] for b in json.loads(sanitize_editorjs(raw))["blocks"]] == ["paragraph", "embed"]
+
+	def test_drops_non_http_schemes(self):
+		for embed in (
+			"javascript:alert(document.domain)//x",
+			"JaVaScRiPt:alert(1)",
+			" javascript:alert(1)",
+			"java\tscript:alert(1)",
+			"javascript&colon;alert(1)",
+			"data:text/html,%3Cscript%3Ealert(1)%3C/script%3E",
+			"vbscript:msgbox(1)",
+			"https&#58;//evil.example",
+			"https:\t//evil.example",
+			"/files/page.html",
+			"//evil.example/x",
+			"https://[broken",
+			"",
+			None,
+		):
+			with self.subTest(embed=embed):
+				self.assertFalse(self._kept(embed))
+
+	def test_drops_a_frame_of_the_site_itself(self):
+		site = frappe.local.site
+		for embed in (
+			f"https://{site}/files/page.html",
+			f"http://{site.upper()}:8000/x",
+			f"https://u@{site}/x",
+		):
+			with self.subTest(embed=embed):
+				self.assertFalse(self._kept(embed))
+
+	def test_drops_a_backslash_that_hides_the_host(self):
+		self.assertFalse(self._kept(f"https://{frappe.local.site}\\@evil.example/x"))
+
+	def test_keeps_external_http_urls(self):
+		for embed in (
+			"https://drive.google.com/file/d/1A2B/preview",
+			"HTTPS://player.vimeo.com/video/1?h=ab",
+			"http://codepen.io/a/embed/b?height=300&theme-id=0",
+		):
+			with self.subTest(embed=embed):
+				self.assertTrue(self._kept(embed))
+
+	def test_keeps_a_bare_youtube_video_id(self):
+		self.assertTrue(self._kept("QhA4h6qD4wY", service="youtube"))
+		self.assertFalse(self._kept("QhA4h6qD4wY"))
+		self.assertFalse(self._kept("javascript:alert(1)", service="youtube"))

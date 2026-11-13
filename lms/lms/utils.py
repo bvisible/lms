@@ -1,8 +1,9 @@
 import hashlib
 import json
 import re
+import time
 from datetime import date, datetime
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from zoneinfo import ZoneInfo
 
 import frappe
@@ -23,14 +24,11 @@ from frappe.utils import (
 	fmt_money,
 	format_datetime,
 	get_datetime,
-	# //// Neoffice — d8908dad: `get_frappe_version` REMOVED from this import. Upstream still
-	# //// imports it from `frappe.utils`, where it only exists on frappe v16; on our v15 it
-	# //// lives in `frappe.pulse.utils`, so upstream's line makes the whole `lms.lms.utils`
-	# //// module fail to import. The two call sites below read `frappe.__version__` instead,
-	# //// which exists on both. At the merge: keep ours until the fleet runs frappe v16.
+	get_frappe_version,
 	get_fullname,
 	get_system_timezone,
 	get_time,
+	get_url,
 	getdate,
 	nowtime,
 	rounded,
@@ -39,9 +37,14 @@ from frappe.utils import (
 	validate_email_address,
 )
 from frappe.utils.dateutils import get_period_ending
-from frappe.utils.html_utils import sanitize_html
+from frappe.utils.html_utils import (
+	acceptable_elements,
+	mathml_elements,
+	sanitize_html,
+	svg_elements,
+)
 
-# //// Neoffice — les prix rendus au public portent leur devise (voir la fonction).
+# //// Neoffice — prices shown to the public carry their currency (see the function).
 # //// Neoffice — the price label helper lives in our neoffice_commerce module; it is imported lazily
 # //// where it is used (see montant_lisible() calls) so an import error in our code cannot take the
 # //// whole app down with it: lms.lms.utils is imported by hooks, www controllers and the API (#226).
@@ -74,7 +77,7 @@ def get_lms_route(path=""):
 
 
 # //// Neoffice — the courses are reached under their brand domain (lms.neoffice.ch), never under the technical name of the hub
-# //// (Daniel, 2026-10-13: "il ne doit avoir aucun lien sur Neoservice"). Upstream builds every absolute link of an e-mail with
+# //// (Daniel, 2026-10-13: "there must be no link to Neoservice"). Upstream builds every absolute link of an e-mail with
 # //// frappe.utils.get_url(), i.e. the `host_name` of the site, which on the hub is the desk host. When the site sets
 # //// `lms_canonical_host` (like the wiki's `wiki_canonical_host`), that host is used instead. Remove when upstream has such a setting.
 def get_lms_url(path=""):
@@ -120,9 +123,17 @@ def slugify(title: str, used_slugs: list = None):
 		count = count + 1
 
 
-def generate_slug(title: str, doctype: str):
-	result = frappe.get_all(doctype, fields=["name"])
-	slugs = {row["name"] for row in result}
+# A course and a batch answer at different routes, but both tag staff through
+# Course Instructor rows that several lookups key on `parent` alone, so the two
+# never take the same name.
+SLUGS_SHARED_WITH = {"LMS Course": "LMS Batch", "LMS Batch": "LMS Course"}
+
+
+def generate_slug(title: str, doctype: str, reserved: frozenset[str] = frozenset()):
+	slugs = set(reserved)
+	for source in (doctype, SLUGS_SHARED_WITH.get(doctype)):
+		if source:
+			slugs |= set(frappe.get_all(source, pluck="name"))
 	return slugify(title, used_slugs=slugs)
 
 
@@ -330,8 +341,21 @@ def rewrite_private_media(content: str, endpoint: str | None = None) -> str:
 	return re.sub(
 		r"/private/files/([^\"'\\]+)",
 		lambda m: endpoint + quote(m.group(0)),
-		content,
+		_readable_json(content),
 	)
+
+
+def _readable_json(content: str) -> str:
+	"""Editor.js content saved by Python's json.dumps stores non-Latin letters as \\uXXXX
+	escapes, which the URL pattern above cannot match, so a Cyrillic or Devanagari file
+	name would reach the browser as a raw /private/files/ URL. Re-serialise such content
+	with the letters themselves. Anything that is not a JSON document is left as it is."""
+	if "\\u" not in content or content.lstrip()[:1] not in ("{", "["):
+		return content
+	try:
+		return json.dumps(json.loads(content), ensure_ascii=False)
+	except ValueError:
+		return content
 
 
 def get_instructors(doctype: str, docname: str):
@@ -635,6 +659,9 @@ def validate_attachable_file(doc: Document, fieldname: str) -> None:
 		)
 
 
+MAX_MENTIONS_PER_REPLY = 10
+
+
 def handle_notifications(doc: Document, method: str):
 	topic = frappe.db.get_value(
 		"Discussion Topic",
@@ -706,8 +733,19 @@ def create_notification_log(doc: Document, topic: dict):
 	make_notification_logs(notification, users)
 
 
+def mentioned_users(html: str) -> list[str]:
+	"""The Users behind a reply's mentions. The editor stores usernames; replies
+	written before it did hold login emails, which resolve_user takes as well."""
+	users = []
+	for mention in extract_mentions(html):
+		user = resolve_user(mention)
+		if user and user not in users:
+			users.append(user)
+	return users
+
+
 def notify_mentions_on_portal(doc: Document, topic: dict):
-	mentions = extract_mentions(doc.reply)
+	mentions = get_mention_recipients(doc, topic)
 	if not mentions:
 		return
 
@@ -749,7 +787,7 @@ def notify_mentions_via_email(doc: Document, topic: dict):
 	if not outgoing_email_account or not frappe.conf.get("mail_login"):
 		return
 
-	mentions = extract_mentions(doc.reply)
+	mentions = get_mention_recipients(doc, topic)
 	if not mentions:
 		return
 
@@ -787,6 +825,33 @@ def notify_mentions_via_email(doc: Document, topic: dict):
 			header=[subject, "green"],
 			retry=3,
 		)
+
+
+def get_mention_recipients(doc: Document, topic: dict) -> list[str]:
+	mentions = mentioned_users(doc.reply)[:MAX_MENTIONS_PER_REPLY]
+	if not mentions:
+		return []
+	users = frappe.get_all(
+		"User", {"name": ("in", mentions), "enabled": 1, "allowed_in_mentions": 1}, pluck="name"
+	)
+	return [user for user in users if is_topic_participant(user, topic)]
+
+
+def is_topic_participant(user: str, topic: dict) -> bool:
+	from lms.lms.permissions import can_author_batch, can_author_course
+
+	if topic.reference_doctype == "Course Lesson":
+		course = frappe.db.get_value("Course Lesson", topic.reference_docname, "course")
+		return bool(
+			frappe.db.exists("LMS Enrollment", {"course": course, "member": user})
+			or can_author_course(course, user=user)
+		)
+	batch = topic.reference_docname
+	return bool(
+		frappe.db.exists("LMS Batch Enrollment", {"batch": batch, "member": user})
+		or has_evaluator_role(user)
+		or can_author_batch(batch, user=user)
+	)
 
 
 def get_lesson_count(course: str) -> int:
@@ -877,8 +942,7 @@ def count_chart_periods(from_date, to_date, timegrain: str) -> int:
 
 
 def get_chart_filters(doctype: str, chart: object, datefield: str, from_date: str, to_date: str):
-	# //// Neoffice — d8908dad: upstream calls `get_frappe_version()`; see the import above.
-	version = frappe.__version__
+	version = get_frappe_version()
 	if version.startswith("15.") or version.startswith("14."):
 		filters = [([chart.document_type, "docstatus", "<", 2, False])]
 		filters = filters + json.loads(chart.filters_json)
@@ -897,8 +961,7 @@ def get_chart_details(
 	doctype: str, datefield: str, value_field: str, chart: object, from_date: str, to_date: str
 ):
 	filters = get_chart_filters(doctype, chart, datefield, from_date, to_date)
-	# //// Neoffice — d8908dad: upstream calls `get_frappe_version()`; see the import above.
-	version = frappe.__version__
+	version = get_frappe_version()
 	if version.startswith("15.") or version.startswith("14."):
 		return frappe.db.get_all(
 			doctype,
@@ -1526,9 +1589,9 @@ def get_course_card_details(courses: list) -> list:
 			course.amount, course.currency = check_multicurrency(
 				course.course_price, course.currency, None, course.amount_usd
 			)
-			# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-			# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-			# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			# //// Neoffice — with the currency. `fmt_money` drops it when the global default
+			# //// `hide_currency_symbol` is "Yes" (our case): the public page showed only "90".
+			# //// See `montant_lisible`.
 			from lms.lms.neoffice_commerce import montant_lisible
 
 			course.price = montant_lisible(course.amount, course.currency)
@@ -1560,7 +1623,9 @@ def update_course_filters(filters: dict) -> tuple:
 
 	if filters.get("created"):
 		created_courses = frappe.get_all(
-			"Course Instructor", {"instructor": frappe.session.user}, pluck="parent"
+			"Course Instructor",
+			{"instructor": frappe.session.user, "parenttype": "LMS Course"},
+			pluck="parent",
 		)
 		filters.update({"name": ["in", created_courses]})
 		del filters["created"]
@@ -1685,9 +1750,9 @@ def get_course_details(course: str):
 		"""course_details.course_price, course_details.currency = check_multicurrency(
 				course_details.course_price, course_details.currency, None, course_details.amount_usd
 		)"""
-		# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-		# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-		# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		# //// Neoffice — with the currency. `fmt_money` drops it when the global default
+		# //// `hide_currency_symbol` is "Yes" (our case): the public page showed only "90".
+		# //// See `montant_lisible`.
 		from lms.lms.neoffice_commerce import montant_lisible
 
 		course_details.price = montant_lisible(course_details.course_price, course_details.currency)
@@ -1742,7 +1807,7 @@ def get_categorized_courses(courses: list) -> dict:
 	}
 
 
-# //// Neoffice — 74ad6ff0 « course outline 500 — fetch only once the course is loaded ».
+# //// Neoffice — 74ad6ff0 "course outline 500 — fetch only once the course is loaded".
 # //// `course` gains a `= None` default. Upstream's parameter is required, and the SPA
 # //// creates this resource before the course name is resolved, so the first paint of
 # //// every course page raised a TypeError and answered 500 in the browser console.
@@ -2199,6 +2264,17 @@ def get_neighbour_lesson(course: str, chapter: int, lesson: int) -> dict:
 	}
 
 
+def can_view_batch(batch: str) -> bool:
+	"""Who reads a batch: anyone once it is published, its students, and its staff."""
+	from lms.lms.permissions import can_author_batch
+
+	if frappe.db.get_value("LMS Batch", batch, "published"):
+		return True
+	if frappe.db.exists("LMS Batch Enrollment", {"batch": batch, "member": frappe.session.user}):
+		return True
+	return can_author_batch(batch)
+
+
 @frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @rate_limit(limit=500, seconds=60 * 60)
 def get_batch_details(batch: str):
@@ -2207,17 +2283,16 @@ def get_batch_details(batch: str):
 
 	from lms.lms.permissions import can_instruct_batch, evaluates_batch
 
+	if not can_view_batch(batch):
+		return {}
+
 	batch_students = frappe.get_all("LMS Batch Enrollment", {"batch": batch}, pluck="member")
 	# can_modify_batch only recognises the Course Instructor tag; can_manage, like
 	# can_author_batch, also recognises a Batch Course evaluator tag, which a Course
 	# Creator may hold instead. Only instructors schedule live classes.
 	instructs = can_instruct_batch(batch)
 	can_manage = instructs or evaluates_batch(batch)
-	is_batch_published = frappe.db.get_value("LMS Batch", batch, "published")
 	is_student_enrolled = frappe.session.user in batch_students
-
-	if not (is_batch_published or can_manage or is_student_enrolled):
-		return {}
 
 	batch_details = frappe.db.get_value(
 		"LMS Batch",
@@ -2285,9 +2360,9 @@ def get_batch_details(batch: str):
 		batch_details.amount, batch_details.currency = check_multicurrency(
 			batch_details.amount, batch_details.currency, None, batch_details.amount_usd
 		)
-		# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-		# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-		# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+		# //// Neoffice — with the currency. `fmt_money` drops it when the global default
+		# //// `hide_currency_symbol` is "Yes" (our case): the public page showed only "90".
+		# //// See `montant_lisible`.
 		from lms.lms.neoffice_commerce import montant_lisible
 
 		batch_details.price = montant_lisible(batch_details.amount, batch_details.currency)
@@ -2463,10 +2538,11 @@ def get_assignment(name: str) -> dict:
 	return enrich_schedule_payload(doc.as_dict())
 
 
+# nosemgrep: security.guest-whitelisted-method - pre-existing grant, unchanged by this branch; guests are served only when guest access is on. Flagged only because the body changed.
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=500, seconds=60 * 60)
 def get_batch_courses(batch: str) -> list:
-	if not guest_access_allowed():
+	if not guest_access_allowed() or not can_view_batch(batch):
 		return []
 
 	courses = []
@@ -2483,11 +2559,11 @@ def get_batch_courses(batch: str) -> list:
 
 @frappe.whitelist()
 def get_assessments(batch: str) -> list:
-	from lms.lms.permissions import can_author_batch
+	from lms.lms.permissions import can_author_batch, evaluator_role_reads_batch
 
 	member = frappe.session.user
 	is_enrolled = frappe.db.exists("LMS Batch Enrollment", {"batch": batch, "member": member})
-	is_admin = "Batch Evaluator" in frappe.get_roles(member) or can_author_batch(batch, user=member)
+	is_admin = evaluator_role_reads_batch(batch, user=member) or can_author_batch(batch, user=member)
 	if not is_enrolled and not is_admin:
 		frappe.throw(_("You are not authorized to view the assessments of this batch."))
 
@@ -2535,8 +2611,8 @@ def get_assignment_details(assessment: dict, member: str) -> dict:
 		assessment.status = "Not Attempted"
 		assessment.color = "red"
 
-	assessment.edit_url = f"/assignments/{assessment.assessment_name}"
-	submission_name = existing_submission if existing_submission else "new-submission"
+	assessment.edit_url = f"/assignments/edit/{assessment.assessment_name}"
+	submission_name = existing_submission if existing_submission else "new"
 	assessment.url = get_lms_route(f"assignment-submission/{assessment.assessment_name}/{submission_name}")
 
 	return assessment
@@ -2567,9 +2643,11 @@ def get_quiz_details(assessment: dict, member: str) -> dict:
 		assessment.color = "red"
 		assessment.completed = False
 
-	assessment.edit_url = f"/quizzes/{assessment.assessment_name}"
-	submission_name = existing_submission[0].name if len(existing_submission) else "new-submission"
-	assessment.url = f"/quiz-submission/{assessment.assessment_name}/{submission_name}"
+	assessment.edit_url = f"/quizzes/edit/{assessment.assessment_name}"
+	if len(existing_submission):
+		assessment.url = f"/quiz-submission/{existing_submission[0].name}"
+	else:
+		assessment.url = f"/quiz/{assessment.assessment_name}"
 
 	return assessment
 
@@ -2588,13 +2666,15 @@ def get_exercise_details(assessment: dict, member: str) -> dict:
 		assessment.completed = True
 		assessment.status = assessment.submission.status
 		assessment.edit_url = (
-			f"/exercises/{assessment.assessment_name}/submission/{assessment.submission.name}"
+			f"/programming-exercise-submission/{assessment.assessment_name}/{assessment.submission.name}"
 		)
 	else:
 		assessment.status = "Not Attempted"
 		assessment.color = "red"
 		assessment.completed = False
-		assessment.edit_url = f"/exercises/{assessment.assessment_name}/submission/new"
+		assessment.edit_url = f"/programming-exercise-submission/{assessment.assessment_name}/new"
+
+	return assessment
 
 
 @frappe.whitelist()
@@ -2602,8 +2682,9 @@ def get_batch_student_progress(member: str, batch: str) -> dict:
 	"""`member` is the student's enrollment in this batch, a username or a User name."""
 	from lms.lms.permissions import can_author_batch
 
-	if "Batch Evaluator" not in frappe.get_roles() and not can_author_batch(batch):
-		frappe.throw(_("You are not authorized to view the students of this batch."))
+	# Staff of this batch only: a role alone says nothing about which batch.
+	if not can_author_batch(batch):
+		frappe.throw(_("You are not authorized to view the students of this batch."), frappe.PermissionError)
 	if not isinstance(member, str):
 		frappe.throw(_("Member must be a string."))
 
@@ -2705,9 +2786,9 @@ def get_quiz_pass_stats(batch: str) -> list:
 @frappe.whitelist()
 def get_batch_chart_data(batch: str) -> list:
 	"""Get completion counts per course and assessment"""
-	from lms.lms.permissions import can_author_batch
+	from lms.lms.permissions import can_author_batch, evaluator_role_reads_batch
 
-	if "Batch Evaluator" not in frappe.get_roles() and not can_author_batch(batch):
+	if not evaluator_role_reads_batch(batch) and not can_author_batch(batch):
 		frappe.throw(_("You are not authorized to view the chart data of this batch."))
 	if not frappe.db.exists("LMS Batch", batch):
 		frappe.throw(_("The specified batch does not exist."))
@@ -2860,14 +2941,17 @@ def can_access_topic(doctype: str, docname: str) -> bool:
 		if not is_student and not can_modify_course(course):
 			return False
 	elif doctype == "LMS Batch":
-		from lms.lms.permissions import can_author_batch
+		from lms.lms.permissions import can_author_batch, evaluator_role_reads_batch
 
 		is_student = frappe.db.exists(
 			"LMS Batch Enrollment", {"batch": docname, "member": frappe.session.user}
 		)
-		is_admin = "Batch Evaluator" in frappe.get_roles() or can_author_batch(docname)
+		is_admin = evaluator_role_reads_batch(docname) or can_author_batch(docname)
 		if not is_student and not is_admin:
 			return False
+	else:
+		# Only lessons and batches carry discussions.
+		return False
 	return True
 
 
@@ -3093,7 +3177,8 @@ def calculate_discount_amount(base_amount: float, coupon: dict) -> float:
 
 @frappe.whitelist()
 def get_lesson_creation_details(course: str, chapter: int, lesson: int) -> dict:
-	frappe.only_for(["Moderator", "Course Creator"])
+	if not can_modify_course(course):
+		frappe.throw(_("You do not have permission to edit this course."), frappe.PermissionError)
 	chapter_name = frappe.db.get_value("Chapter Reference", {"parent": course, "idx": chapter}, "chapter")
 	lesson_name = frappe.db.get_value("Lesson Reference", {"parent": chapter_name, "idx": lesson}, "lesson")
 
@@ -3146,6 +3231,13 @@ def update_payment_record(doctype: str, docname: str):
 	serialize_callbacks_without_the_constraint()
 
 	if payment_already_recorded(data):
+		return
+
+	try:
+		if not is_payment_for_this_checkout(data, doctype, docname):
+			return
+	except RazorpayUnavailableError:
+		queue_payment_recheck(data, doctype, docname, frappe.flags.payment_recheck or 0)
 		return
 
 	try:
@@ -3220,6 +3312,144 @@ def payment_already_recorded(data: dict) -> bool:
 	# kept apart by the unique constraint on payment_id, which is what makes
 	# update_payment_details fail for whichever one loses.
 	return bool(frappe.db.exists("LMS Payment", {"payment_id": payment_id}))
+
+
+def is_payment_for_this_checkout(data: dict, doctype: str, docname: str) -> bool:
+	"""The callback payload is built from the Integration Request, which the
+	browser can amend, so only the LMS Payment row and the gateway's own record
+	are trusted here."""
+	payment = frappe.db.get_value(
+		"LMS Payment",
+		data.payment,
+		[
+			"name",
+			"member",
+			"payment_for_document_type",
+			"payment_for_document",
+			"currency",
+			"amount",
+			"amount_with_gst",
+		],
+		as_dict=True,
+	)
+
+	if (
+		not payment
+		or payment.member != frappe.session.user
+		or payment.payment_for_document_type != doctype
+		or payment.payment_for_document != docname
+	):
+		return refuse_payment(data, "The LMS Payment does not belong to this user and document.")
+
+	if not data.get("razorpay_payment_id") and data.get("payment_gateway") != "Razorpay":
+		return True
+
+	return verify_razorpay_payment(data, payment)
+
+
+def verify_razorpay_payment(data: dict, payment: dict) -> bool:
+	payment_id = data.get("razorpay_payment_id")
+	if not payment_id or not isinstance(payment_id, str):
+		return refuse_payment(data, "The callback carries no Razorpay payment id.")
+
+	try:
+		client = get_razorpay_client()
+		gateway_payment = frappe._dict(fetch_from_razorpay(client.payment.fetch, payment_id))
+		order = None
+		if gateway_payment.order_id:
+			order = frappe._dict(fetch_from_razorpay(client.order.fetch, gateway_payment.order_id))
+	except RazorpayUnavailableError:
+		raise
+	except Exception:
+		return refuse_payment(data, f"Razorpay lookup failed:\n{frappe.get_traceback()}")
+
+	mismatch = get_razorpay_mismatch(gateway_payment, order, payment)
+	if mismatch:
+		return refuse_payment(data, mismatch)
+
+	data.order_id = order.id
+	return True
+
+
+RAZORPAY_LOOKUP_ATTEMPTS = 3
+PAYMENT_RECHECKS = 3
+
+
+class RazorpayUnavailableError(Exception):
+	pass
+
+
+def queue_payment_recheck(data: dict, doctype: str, docname: str, recheck: int = 0):
+	"""The buyer has paid, so a lookup Razorpay could not answer is checked again
+	from a background job rather than refused."""
+	if recheck >= PAYMENT_RECHECKS:
+		refuse_payment(data, "Razorpay could not be reached to verify it. Complete it by hand.")
+		return
+	frappe.enqueue(
+		"lms.lms.utils.recheck_payment",
+		queue="long",
+		enqueue_after_commit=True,
+		data=dict(data),
+		doctype=doctype,
+		docname=docname,
+		recheck=recheck + 1,
+	)
+
+
+def recheck_payment(data: dict, doctype: str, docname: str, recheck: int):
+	time.sleep(60 * recheck)
+	frappe.flags.data = frappe._dict(data)
+	frappe.flags.payment_recheck = recheck
+	try:
+		update_payment_record(doctype, docname)
+	finally:
+		frappe.flags.data = None
+		frappe.flags.payment_recheck = None
+
+
+def fetch_from_razorpay(fetch, record_id: str) -> dict:
+	"""Retry the lookup while Razorpay is unreachable or failing on its side, so a
+	paid checkout is not refused over a blip. An unknown id is refused at once."""
+	from razorpay.errors import GatewayError, ServerError
+
+	for attempt in range(RAZORPAY_LOOKUP_ATTEMPTS):
+		try:
+			return fetch(record_id)
+		except (GatewayError, ServerError, requests.ConnectionError, requests.Timeout) as e:
+			if attempt == RAZORPAY_LOOKUP_ATTEMPTS - 1:
+				raise RazorpayUnavailableError(str(e)) from e
+			time.sleep(attempt + 1)
+
+
+def get_razorpay_client():
+	from payments.utils import get_payment_gateway_controller
+
+	controller = get_payment_gateway_controller("Razorpay")
+	controller.init_client()
+	return controller.client
+
+
+def get_razorpay_mismatch(gateway_payment: dict, order: dict | None, payment: dict) -> str | None:
+	if gateway_payment.status not in ("authorized", "captured"):
+		return f"Razorpay payment status is {gateway_payment.status}."
+
+	if not order or order.receipt != payment.name:
+		return f"Razorpay order {gateway_payment.order_id} was not created for LMS Payment {payment.name}."
+
+	if (gateway_payment.currency or "").upper() != (payment.currency or "").upper():
+		return f"Razorpay payment currency {gateway_payment.currency} does not match {payment.currency}."
+
+	expected = flt(get_payment_total(payment)) * 100
+	if abs(cint(gateway_payment.amount) - expected) >= 1:
+		return f"Razorpay payment amount {gateway_payment.amount} does not match {expected}."
+
+
+def refuse_payment(data: dict, reason: str) -> bool:
+	frappe.log_error(
+		title="Payment callback refused",
+		message=f"LMS Payment {data.get('payment')} for {frappe.session.user}: {reason}",
+	)
+	return False
 
 
 def complete_enrollment(payment_name: str, doctype: str, docname: str):
@@ -3371,7 +3601,7 @@ def enroll_in_course(course: str, payment_name: str):
 		enrollment.save(ignore_permissions=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def enroll_in_batch(batch: str, payment_name: str = None):
 	if not frappe.db.exists("LMS Batch", batch):
 		frappe.throw(_("The specified batch does not exist."))
@@ -3695,9 +3925,9 @@ def get_batch_card_details(batches: list) -> list:
 			batch.amount, batch.currency = check_multicurrency(
 				batch.amount, batch.currency, None, batch.amount_usd
 			)
-			# //// Neoffice — avec la devise. `fmt_money` la retire quand le défaut
-			# //// global `hide_currency_symbol` vaut « Yes » (le cas chez nous) : la
-			# //// fiche publique n'affichait plus que « 90 ». Voir `montant_lisible`.
+			# //// Neoffice — with the currency. `fmt_money` drops it when the global default
+			# //// `hide_currency_symbol` is "Yes" (our case): the public page showed only "90".
+			# //// See `montant_lisible`.
 			from lms.lms.neoffice_commerce import montant_lisible
 
 			batch.price = montant_lisible(batch.amount, batch.currency)
@@ -3760,6 +3990,9 @@ def validate_discussion_reply(doc: Document, method: str):
 
 	elif topic.reference_doctype == "LMS Batch":
 		validate_batch_access(topic.reference_docname)
+
+	else:
+		frappe.throw(_("Replies can only be posted under a lesson or a batch."), frappe.PermissionError)
 
 
 def validate_course_access(lesson: str):
@@ -3893,7 +4126,7 @@ def sanitize_editorjs(raw):
 	"""
 	try:
 		data, _repaired = load_editorjs(raw)
-		return dump_editorjs(sanitize_json(data))
+		return dump_editorjs(drop_unsafe_embeds(sanitize_json(data)))
 	except (TypeError, ValueError, RecursionError):
 		return escape_markup(raw)
 
@@ -3946,8 +4179,100 @@ def sanitize_json(node, depth=0):
 	if isinstance(node, list):
 		return [sanitize_json(v, depth + 1) for v in node]
 	if isinstance(node, str) and ("<" in node or ">" in node):
-		return sanitize_html(node, always_sanitize=True)
+		return sanitize_markup(node)
 	return node
+
+
+# The tags frappe's sanitize_html keeps. html.parser lowercases names, so these are too.
+SANITISER_TAGS = frozenset(
+	tag.lower()
+	for tag in (
+		*acceptable_elements,
+		*svg_elements,
+		*mathml_elements,
+		"html",
+		"head",
+		"meta",
+		"link",
+		"body",
+		"o:p",
+	)
+)
+DROPPED_WITH_CONTENT = ("script", "style")
+LINK_REL = "noopener noreferrer"
+
+
+def sanitize_markup(html: str) -> str:
+	"""frappe's sanitize_html, with one result on nh3 (develop) and bleach (v15).
+
+	bleach escapes an unknown tag into text the reader sees, where nh3 unwraps it,
+	and only nh3 gives every link rel="noopener noreferrer". Both passes return
+	their input untouched when there is nothing to change.
+	"""
+	return add_link_rel(sanitize_html(unwrap_unknown_tags(html), always_sanitize=True))
+
+
+def unwrap_unknown_tags(html: str) -> str:
+	"""Drop script and style with their content, and unwrap any other unknown tag, as nh3 does."""
+	soup = BeautifulSoup(html, "html.parser")
+	dropped = soup.find_all(DROPPED_WITH_CONTENT)
+	for element in dropped:
+		element.decompose()
+
+	unknown = [element for element in soup.find_all(True) if element.name not in SANITISER_TAGS]
+	if not dropped and not unknown:
+		return html
+
+	for element in unknown:
+		element.unwrap()
+	return soup.decode(formatter="html5")
+
+
+def add_link_rel(html: str) -> str:
+	if "<a" not in html:
+		return html
+
+	soup = BeautifulSoup(html, "html.parser")
+	links = [link for link in soup.find_all("a") if link.get("rel") != LINK_REL.split()]
+	if not links:
+		return html
+
+	for link in links:
+		link["rel"] = LINK_REL
+	return soup.decode(formatter="html5")
+
+
+# The embed tool writes `data.embed` into an iframe `src` as is.
+SAFE_EMBED_URL = re.compile(r"https?://[^\s\\\x00-\x1f\x7f]+", re.IGNORECASE)
+YOUTUBE_VIDEO_ID = re.compile(r"[A-Za-z0-9_-]+")
+
+
+def is_safe_embed(data):
+	url = data.get("embed")
+	if not isinstance(url, str):
+		return False
+	if data.get("service") == "youtube" and YOUTUBE_VIDEO_ID.fullmatch(url):
+		return True
+	if not SAFE_EMBED_URL.fullmatch(url):
+		return False
+	try:
+		host = urlsplit(url).hostname
+	except ValueError:
+		return False
+	return bool(host) and host not in {frappe.local.site, urlsplit(get_url()).hostname}
+
+
+def drop_unsafe_embeds(data):
+	"""Drop embed blocks whose iframe source is not an external http(s) URL."""
+	if not isinstance(data, dict) or not isinstance(data.get("blocks"), list):
+		return data
+	data["blocks"] = [
+		block
+		for block in data["blocks"]
+		if not (isinstance(block, dict) and block.get("type") == "embed")
+		or (isinstance(block.get("data"), dict) and is_safe_embed(block["data"]))
+	]
+	return data
 
 
 # Rows written before `content` carried `ignore_xss_filter` were mangled by nh3

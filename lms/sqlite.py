@@ -136,17 +136,6 @@ class LearningSearch(SQLiteSearch):
 		"Job Opportunity": JOB_FIELDS,
 	}
 
-	# //// Neoffice — the wrapper is gone. Upstream had `except Exception as e: frappe.throw(e)`,
-	# //// which passes an EXCEPTION OBJECT where frappe.throw wants a message: every failure came
-	# //// back as `ValidationError(BrokenPipeError(32, "Broken pipe"))`, the real type erased, and
-	# //// with it any way to tell a broken pipe from a missing table (neoffice-maintenance#170,
-	# //// 992 Error Log rows on the hub, up to 111 a day). And it runs in an RQ worker, where a
-	# //// throw has nobody to show a message to — it only re-raises. Catching bought nothing and
-	# //// cost the diagnosis; without it the real exception reaches the job handler, which logs it
-	# //// once, with its own type, and the scheduled build runs again in 15 minutes.
-	def build_index(self):
-		super().build_index()
-
 	def get_search_filters(self):
 		return {}
 
@@ -194,19 +183,3 @@ class LearningSearch(SQLiteSearch):
 
 class LearningSearchIndexMissingError(SQLiteSearchIndexMissingError):
 	pass
-
-
-def build_index():
-	search = LearningSearch()
-	search.build_index()
-
-
-def build_index_in_background():
-	if not frappe.cache().get_value("learning_search_indexing_in_progress"):
-		frappe.enqueue(build_index, queue="long")
-
-
-def build_index_if_not_exists():
-	search = LearningSearch()
-	if not search.index_exists():
-		build_index()
