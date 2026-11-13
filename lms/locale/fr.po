@@ -1088,7 +1088,7 @@ msgstr "De retour à la maison"
 
 #: frontend/src/pages/Forms/ProgrammingExerciseForm.vue:13
 msgid "Back to editing"
-msgstr ""
+msgstr "Retour à la modification"
 
 #: frontend/src/components/DiscussionReplies.vue:7
 msgid "Back to topics"
@@ -1339,7 +1339,7 @@ msgstr "Cohortes"
 
 #: frontend/src/components/Quiz.vue:128
 msgid "Before you start"
-msgstr ""
+msgstr "Avant de commencer"
 
 #: lms/templates/emails/batch_confirmation.html:33
 #: lms/templates/emails/batch_start_reminder.html:31
@@ -1409,7 +1409,7 @@ msgstr "Paramètres de marque"
 #: frontend/src/components/Assessment/AssessmentBlockPreview.vue:71
 #: frontend/src/components/Assignment.vue:43
 msgid "Brief"
-msgstr ""
+msgstr "Consigne"
 
 #: frontend/src/pages/Forms/PersonaForm.vue:154
 msgid "Bring your learners into a batch."
@@ -1483,7 +1483,7 @@ msgstr "Impossible de rechercher les rôles : {0}"
 
 #: lms/lms/permissions.py:1703
 msgid "Cannot submit for another user"
-msgstr ""
+msgstr "Impossible de soumettre pour un autre utilisateur"
 
 #: frontend/src/pages/Forms/PersonaForm.vue:114
 msgid "Canvas"
@@ -1931,7 +1931,7 @@ msgstr "Fermer ou actualiser la page soumettra automatiquement votre quiz."
 
 #: frontend/src/components/Quiz.vue:1200
 msgid "Closing, refreshing or leaving this page will submit your quiz automatically."
-msgstr ""
+msgstr "Fermer, actualiser ou quitter cette page envoie automatiquement votre quiz."
 
 #. Option for the 'Auto Recording' (Select) field in DocType 'LMS Live Class'
 #: lms/lms/doctype/lms_live_class/lms_live_class.json:138
@@ -2309,12 +2309,12 @@ msgstr "Correct"
 
 #: frontend/src/components/Quiz.vue:390
 msgid "Correct answer"
-msgstr ""
+msgstr "Bonne réponse"
 
 #: frontend/src/pages/Forms/QuizForm.vue:691
 #, python-brace-format
 msgid "Could not copy the link: {0}"
-msgstr ""
+msgstr "Impossible de copier le lien : {0}"
 
 #: frontend/src/components/Layouts/ListPage.vue:221
 msgid "Could not count the list"
@@ -3108,7 +3108,7 @@ msgstr "Suppression des quiz…"
 
 #: frontend/src/components/Submissions/SubmissionsPage.vue:215
 msgid "Deleting submissions…"
-msgstr ""
+msgstr "Suppression des soumissions…"
 
 #: frontend/src/pages/Courses/CourseForm.vue:261
 msgid "Deleting the course will also delete all its chapters and lessons. Are you sure you want to delete this course?"
@@ -4060,7 +4060,7 @@ msgstr "Résultat attendu"
 #: lms/lms/api.py:2962
 #, python-brace-format
 msgid "Expected {0} outputs, got {1}"
-msgstr ""
+msgstr "{0} sorties attendues, {1} reçues"
 
 #. Label of the expiration_date (Data) field in DocType 'Certification'
 #: lms/lms/doctype/certification/certification.json:49
@@ -4762,7 +4762,7 @@ msgstr "Caché"
 #. Description of the 'Hidden' (Check) field in DocType 'LMS Test Case'
 #: lms/lms/doctype/lms_test_case/lms_test_case.json:35
 msgid "Hidden cases count toward the score but are not shown to the learner."
-msgstr ""
+msgstr "Les cas cachés comptent dans le score, mais ne sont pas montrés à l'apprenant."
 
 #. Label of the hide_private (Check) field in DocType 'User'
 #: lms/fixtures/custom_field.json:592
@@ -4850,7 +4850,7 @@ msgstr "Identifier la catégorie d'utilisateur"
 
 #: lms/lms/user.py:106
 msgid "If this email can be used, you will get an email with the next step."
-msgstr ""
+msgstr "Si cette adresse e-mail peut être utilisée, vous recevrez un e-mail avec la prochaine étape."
 
 #: lms/templates/emails/mentor_request_creation_email.html:5
 msgid "If you are not any more interested to mentor the course"
@@ -5779,7 +5779,7 @@ msgstr "Partir"
 
 #: frontend/src/components/Quiz.vue:794
 msgid "Leave and submit"
-msgstr ""
+msgstr "Quitter et envoyer"
 
 #: frontend/src/components/Quiz.vue:790
 msgid "Leave the quiz?"
@@ -6171,7 +6171,7 @@ msgstr "Marquez la bonne réponse"
 
 #: frontend/src/components/Quiz.vue:468
 msgid "Marked by your instructor"
-msgstr ""
+msgstr "Noté par votre formateur"
 
 #. Label of the marks (Int) field in DocType 'LMS Question'
 #. Label of the marks (Int) field in DocType 'LMS Quiz Question'
@@ -6907,7 +6907,7 @@ msgstr "Aucune évaluation ajoutée à cette session"
 
 #: frontend/src/components/Quiz.vue:1542
 msgid "No attempts left."
-msgstr ""
+msgstr "Aucune tentative restante."
 
 #: lms/templates/certificates_section.html:23
 msgid "No certificates"
@@ -7151,7 +7151,7 @@ msgstr "Non autorisé"
 
 #: lms/lms/doctype/lms_batch_feedback/lms_batch_feedback.py:23
 msgid "Not enrolled in batch"
-msgstr ""
+msgstr "Non inscrit au lot"
 
 #: frontend/src/components/Settings/Raven/RavenSettings.vue:42
 msgid "Not installed"
@@ -7188,7 +7188,7 @@ msgstr "Remarques"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseConsole.vue:58
 msgid "Nothing to show yet — run your code"
-msgstr ""
+msgstr "Rien à afficher pour l'instant : exécutez votre code"
 
 #. Label of the notification_sent (Check) field in DocType 'LMS Batch'
 #. Label of the notification_sent (Check) field in DocType 'LMS Course'
@@ -7325,7 +7325,7 @@ msgstr "N'afficher que les cours qui délivrent un certificat"
 
 #: frontend/src/components/Quiz.vue:707
 msgid "Only students in a course or batch that uses this quiz can take it. Ask your instructor to add you."
-msgstr ""
+msgstr "Seuls les étudiants d'un cours ou d'un lot qui utilise ce quiz peuvent le passer. Demandez à votre formateur de vous ajouter."
 
 #: frontend/src/pages/Forms/AssignmentForm.vue:18
 msgid "Only the authors of this assignment can edit it."
@@ -7349,7 +7349,7 @@ msgstr "Seuls les formateurs de la cohorte peuvent programmer des cours en direc
 
 #: lms/lms/api.py:414
 msgid "Only the job's poster can email an applicant."
-msgstr ""
+msgstr "Seul l'auteur de l'offre peut envoyer un e-mail à un candidat."
 
 #: frontend/src/pages/Forms/ChapterForm.vue:319
 msgid "Only zip files are allowed"
@@ -7648,7 +7648,7 @@ msgstr "Réussi"
 
 #: frontend/src/components/Assessment/QuizStats.vue:19
 msgid "Pass mark"
-msgstr ""
+msgstr "Seuil de réussite"
 
 #. Option for the 'Status' (Select) field in DocType 'LMS Programming Exercise
 #. Submission'
@@ -7979,7 +7979,7 @@ msgstr "Connectez-vous pour poursuivre le paiement."
 
 #: frontend/src/components/Assessment/AssessmentBlock.vue:8
 msgid "Please login to continue."
-msgstr ""
+msgstr "Veuillez vous connecter pour continuer."
 
 #: lms/lms/utils.py:3628
 msgid "Please login to view program details."
@@ -8229,11 +8229,11 @@ msgstr "Lieu souhaité"
 #. Exercise'
 #: lms/lms/doctype/lms_programming_exercise/lms_programming_exercise.json:35
 msgid "Prefills the learner's editor. Falls back to the language boilerplate when empty."
-msgstr ""
+msgstr "Pré-remplit l'éditeur de l'apprenant. Si le champ est vide, le modèle de départ du langage est utilisé."
 
 #: frontend/src/pages/Forms/ProgrammingExerciseForm.vue:105
 msgid "Prefills the learner’s editor. Leave empty for the language default."
-msgstr ""
+msgstr "Pré-remplit l'éditeur de l'apprenant. Laissez vide pour le modèle par défaut du langage."
 
 #. Label of the prevent_skipping_videos (Check) field in DocType 'LMS Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json:422
@@ -8258,7 +8258,7 @@ msgstr "Vidéo de présentation"
 
 #: frontend/src/components/Assessment/AssessmentCardHeader.vue:31
 msgid "Preview only"
-msgstr ""
+msgstr "Aperçu seul"
 
 #: frontend/src/components/Courses/CourseDetailsSection.vue:77
 msgid "Preview video"
@@ -8600,12 +8600,12 @@ msgstr "Question {0} sur {1}"
 #: frontend/src/components/Quiz.vue:629
 #, python-brace-format
 msgid "Question {0}, answered"
-msgstr ""
+msgstr "Question {0}, répondue"
 
 #: frontend/src/components/Quiz.vue:630
 #, python-brace-format
 msgid "Question {0}, not answered"
-msgstr ""
+msgstr "Question {0}, sans réponse"
 
 #. Label of the questions (Table) field in DocType 'LMS Quiz'
 #: frontend/src/components/Assessment/QuizStats.vue:7
@@ -8683,11 +8683,11 @@ msgstr ""
 
 #: frontend/src/components/Quiz.vue:301
 msgid "Quiz progress"
-msgstr ""
+msgstr "Progression du quiz"
 
 #: frontend/src/components/Quiz.vue:517
 msgid "Quiz result"
-msgstr ""
+msgstr "Résultat du quiz"
 
 #: frontend/src/components/CourseCardOverlay.vue:135
 msgid "Quiz topic"
@@ -8732,7 +8732,7 @@ msgstr "Q{0} :"
 #: frontend/src/components/ProgrammingExercises/ExerciseTestCases.vue:95
 #, python-brace-format
 msgid "Ran in {0}s"
-msgstr ""
+msgstr "Exécuté en {0} s"
 
 #: frontend/src/pages/Forms/QuizForm.vue:307
 msgid "Randomize the order of questions for each attempt."
@@ -8764,7 +8764,7 @@ msgstr "Consulter la documentation"
 #. Description of the 'Expected Output' (Data) field in DocType 'LMS Test Case'
 #: lms/lms/doctype/lms_test_case/lms_test_case.json:25
 msgid "Readable only at permlevel 1, so a learner is scored against it server-side and never receives it."
-msgstr ""
+msgstr "Lisible uniquement au niveau de permission 1 : l'apprenant est noté côté serveur et ne le reçoit jamais."
 
 #: frontend/src/components/ProctoringMonitor.vue:56
 #: frontend/src/components/ProctoringMonitor.vue:165
@@ -8904,7 +8904,7 @@ msgstr "Supprimer la ligne"
 #: frontend/src/components/Controls/ChildTable.vue:208
 #, python-brace-format
 msgid "Remove row {0}"
-msgstr ""
+msgstr "Supprimer la ligne {0}"
 
 #: frontend/src/components/Assignment.vue:93
 msgid "Remove submission"
@@ -8936,7 +8936,7 @@ msgstr "Remplacer"
 
 #: lms/lms/utils.py:3923
 msgid "Replies can only be posted under a lesson or a batch."
-msgstr ""
+msgstr "Les réponses ne peuvent être publiées que sous une leçon ou un lot."
 
 #: frontend/src/pages/Forms/AnnouncementForm.vue:122
 msgid "Reply To"
@@ -9085,11 +9085,11 @@ msgstr "Les lignes {0} contiennent des questions en double."
 #: frontend/src/components/ProgrammingExercises/ExerciseWorkspace.vue:25
 #: frontend/src/components/ProgrammingExercises/ExerciseWorkspace.vue:29
 msgid "Run code"
-msgstr ""
+msgstr "Exécuter le code"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseTestCases.vue:92
 msgid "Run your code to check the test cases"
-msgstr ""
+msgstr "Exécutez votre code pour vérifier les cas de test"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseWorkspace.vue:25
 msgid "Running"
@@ -9097,7 +9097,7 @@ msgstr "En cours d'exécution"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseConsole.vue:37
 msgid "Running your code…"
-msgstr ""
+msgstr "Exécution de votre code…"
 
 #. Option for the 'Language' (Select) field in DocType 'LMS Programming
 #. Exercise'
@@ -9913,7 +9913,7 @@ msgstr "Adresse de départ"
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:491
 msgid "Start again?"
-msgstr ""
+msgstr "Recommencer ?"
 
 #: frontend/src/components/CourseEditorEmptyState.vue:137
 msgid "Start building your course"
@@ -9933,7 +9933,7 @@ msgstr ""
 #: frontend/src/pages/Forms/ProgrammingExerciseForm.vue:97
 #: lms/lms/doctype/lms_programming_exercise/lms_programming_exercise.json:38
 msgid "Starter Code"
-msgstr ""
+msgstr "Code de départ"
 
 #. Option for the 'Company Type' (Select) field in DocType 'User'
 #: lms/fixtures/custom_field.json:1889
@@ -10155,11 +10155,11 @@ msgstr "Rendu le"
 #: frontend/src/components/Quiz.vue:1519
 #, python-brace-format
 msgid "Submitted automatically after {0} of {0} violations. If you wish to try again, reach out to the instructor."
-msgstr ""
+msgstr "Quiz envoyé automatiquement après {0} infractions sur {0}. Si vous souhaitez refaire le quiz, contactez votre formateur."
 
 #: frontend/src/components/Quiz.vue:1524
 msgid "Submitted automatically when the time ran out."
-msgstr ""
+msgstr "Quiz envoyé automatiquement à l'expiration du temps imparti."
 
 #: lms/templates/signup-form.html:185
 msgid "Success"
@@ -10335,7 +10335,7 @@ msgstr "Tester le quiz"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseWorkspace.vue:45
 msgid "Test cases"
-msgstr ""
+msgstr "Cas de test"
 
 #. Option for the 'Submission Type' (Select) field in DocType 'LMS Assignment'
 #. Option for the 'Type' (Select) field in DocType 'LMS Assignment Submission'
@@ -10381,7 +10381,7 @@ msgstr "La session à laquelle vous êtes inscrit commence demain. Préparez-vou
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:183
 msgid "The code runner could not be loaded, so this exercise cannot be run."
-msgstr ""
+msgstr "L'environnement d'exécution du code n'a pas pu être chargé : cet exercice ne peut pas être exécuté."
 
 #: frontend/src/components/Settings/Raven/MassRemovalConfirmDialog.vue:81
 msgid "The conditions on {0} could not be worked out, so there is no telling who this change adds or removes. It usually means the app that supplies a condition type is no longer installed. Saving applies the change anyway."
@@ -10410,7 +10410,7 @@ msgstr "Le délai pour fixer une évaluation est passé. Contactez le formateur.
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:77
 msgid "The evaluator is assigned by the course or batch."
-msgstr ""
+msgstr "L'évaluateur est attribué par le cours ou le lot."
 
 #: lms/lms/doctype/lms_certificate_request/lms_certificate_request.py:104
 msgid "The evaluator of this course is unavailable from {0} to {1}. Please select a date after {1}"
@@ -10458,7 +10458,7 @@ msgstr "Le quiz sera validé automatiquement à la fin du minuteur."
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:472
 msgid "The run could not be scored. Please try again."
-msgstr ""
+msgstr "L'exécution n'a pas pu être notée. Veuillez réessayer."
 
 #: frontend/src/components/Assignment.vue:583
 msgid "The schedule for this assignment has ended."
@@ -10494,7 +10494,7 @@ msgstr "Le {0} enregistré de cette leçon n'a pas pu être lu, l'éditeur l'aff
 
 #: frontend/src/components/Quiz.vue:1208
 msgid "The timer starts as soon as you begin."
-msgstr ""
+msgstr "Le minuteur démarre dès que vous commencez."
 
 #: frontend/src/components/Sidebar/UserDropdown.vue:177
 msgid "Theme"
@@ -10654,7 +10654,7 @@ msgstr "Cette image apparaîtra sur les listes et les pages qui n'en ont pas"
 
 #: frontend/src/components/Quiz.vue:813
 msgid "This is a proctored quiz. Leaving this page submits it now with the answers you have given so far."
-msgstr ""
+msgstr "Ce quiz est surveillé. En quittant cette page, il est envoyé immédiatement avec les réponses données jusqu'ici."
 
 #: lms/lms/schedule_utils.py:67
 msgid "This item"
@@ -10735,7 +10735,7 @@ msgstr "Ce quiz accepte des réponses pour {0} questions au maximum."
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:492
 msgid "This replaces what is in the editor with the starting code. Your run results are cleared too."
-msgstr ""
+msgstr "Cette action remplace le contenu de l'éditeur par le code de départ. Vos résultats d'exécution sont aussi effacés."
 
 #: lms/lms/api.py:2564
 msgid "This site has no contact address. Ask a moderator to set one in LMS Settings."
@@ -10836,7 +10836,7 @@ msgstr "La position indiquée dépasse la durée de la vidéo."
 
 #: frontend/src/components/Assessment/QuizStats.vue:13
 msgid "Time limit"
-msgstr ""
+msgstr "Durée limite"
 
 #: frontend/src/pages/Forms/LiveClassForm.vue:41
 msgid "Time must be in 24 hour format (HH:mm). Example 11:30 or 22:00"
@@ -11748,7 +11748,7 @@ msgstr "Écrivez votre réponse ici"
 
 #: frontend/src/components/Quiz.vue:329
 msgid "Written response"
-msgstr ""
+msgstr "Réponse rédigée"
 
 #: frontend/src/components/Quiz.vue:1217
 msgid "Wrong answers deduct {0} {1}."
@@ -11926,7 +11926,7 @@ msgstr ""
 #: lms/lms/permissions.py:1699
 #, python-brace-format
 msgid "You can only submit a {0} for yourself, not for {1}."
-msgstr ""
+msgstr "Vous ne pouvez remettre un {0} que pour vous-même, et non pour {1}."
 
 #: lms/lms/doctype/lms_assignment_submission/lms_assignment_submission.py:92
 msgid "You can only submit assignments for your own account."
@@ -11962,7 +11962,7 @@ msgstr "Vous ne pouvez pas modifier vos créneaux pendant la mise à jour du sit
 
 #: lms/lms/doctype/lms_enrollment/lms_enrollment.py:27
 msgid "You cannot enroll another user."
-msgstr ""
+msgstr "Vous ne pouvez pas inscrire un autre utilisateur."
 
 #: lms/lms/doctype/lms_enrollment/lms_enrollment.py:120
 msgid "You cannot enroll in an unpublished course."
@@ -11994,7 +11994,7 @@ msgstr "Vous ne pouvez pas démarrer ce cours en direct."
 
 #: lms/lms/doctype/lms_assignment_submission/lms_assignment_submission.py:85
 msgid "You do not have access to this assignment."
-msgstr ""
+msgstr "Vous n'avez pas accès à cette attribution."
 
 #: lms/lms/utils.py:3956
 msgid "You do not have access to this batch."
@@ -12006,7 +12006,7 @@ msgstr "Vous n'avez pas accès à ce cours."
 
 #: lms/lms/api.py:1174
 msgid "You do not have access to this discussion."
-msgstr ""
+msgstr "Vous n'avez pas accès à cette discussion."
 
 #: lms/lms/api.py:3063
 msgid "You do not have access to this lesson."
@@ -12082,7 +12082,7 @@ msgstr "Vous n'avez pas le droit de supprimer cette leçon."
 
 #: lms/lms/utils.py:3114
 msgid "You do not have permission to edit this course."
-msgstr ""
+msgstr "Vous n'êtes pas autorisé à modifier ce cours."
 
 #: frontend/src/pages/Forms/BatchStudentForm.vue:97
 msgid "You do not have permission to enroll students in this batch."
@@ -12289,15 +12289,15 @@ msgstr "Votre compte a bien été créé !"
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:48
 msgid "Your Code"
-msgstr ""
+msgstr "Votre code"
 
 #: frontend/src/components/Quiz.vue:381
 msgid "Your answer, correct"
-msgstr ""
+msgstr "Votre réponse, correcte"
 
 #: frontend/src/components/Quiz.vue:399
 msgid "Your answer, incorrect"
-msgstr ""
+msgstr "Votre réponse, incorrecte"
 
 #: frontend/src/components/Modals/JobApplicationModal.vue:121
 msgid "Your application has been submitted successfully"
@@ -12432,7 +12432,7 @@ msgstr "tentatives"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseWorkspace.vue:144
 msgid "autosaved"
-msgstr ""
+msgstr "enregistré automatiquement"
 
 #: lms/templates/emails/payment_reminder.html:4
 msgid "but didn’t complete your payment"
@@ -12539,7 +12539,7 @@ msgstr "évaluations"
 
 #: lms/lms/api.py:2923 lms/lms/api.py:2954
 msgid "exercise must be a string"
-msgstr ""
+msgstr "exercise doit être une chaîne de caractères"
 
 #: lms/lms/doctype/course_lesson/course_lesson.py:402
 #: lms/lms/doctype/lms_question/lms_question.py:273
@@ -12647,7 +12647,7 @@ msgstr "autres"
 
 #: lms/lms/api.py:2956
 msgid "outputs must be a list"
-msgstr ""
+msgstr "outputs doit être une liste"
 
 #: frontend/src/pages/LessonForm.vue:96
 msgid "private"
@@ -12791,7 +12791,7 @@ msgstr "{0} devoirs"
 #: frontend/src/pages/Batches/Batches.vue:324
 #, python-brace-format
 msgid "{0} Batches"
-msgstr ""
+msgstr "{0} lots"
 
 #: frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue:4
 msgid "{0} Exercises"
@@ -12822,7 +12822,7 @@ msgstr ""
 #: frontend/src/components/Quiz.vue:1499
 #, python-brace-format
 msgid "{0} correct"
-msgstr ""
+msgstr "{0} correctes"
 
 #: lms/templates/emails/job_application.html:2
 msgid "{0} has applied for the job position {1}"
@@ -12905,7 +12905,7 @@ msgstr ""
 #: lms/lms/doctype/lms_batch_feedback/lms_batch_feedback.py:19
 #, python-brace-format
 msgid "{0} is not enrolled in batch {1}, so cannot give feedback on it."
-msgstr ""
+msgstr "{0} n'est pas inscrit au lot {1} : il ne peut donc pas le noter."
 
 #: lms/lms/notification/certificate_request_reminder/certificate_request_reminder.html:5
 msgid "{0} is your evaluator"
@@ -12940,7 +12940,7 @@ msgstr "{0} doit être une chaîne"
 #: frontend/src/components/Quiz.vue:1504
 #, python-brace-format
 msgid "{0} not answered"
-msgstr ""
+msgstr "{0} sans réponse"
 
 #: lms/lms/api.py:1750
 #, python-brace-format
@@ -12955,13 +12955,13 @@ msgstr "{0} leçons sur {1} terminées"
 #: frontend/src/components/Quiz.vue:540
 #, python-brace-format
 msgid "{0} of {1} marks"
-msgstr ""
+msgstr "{0} sur {1} points"
 
 #: frontend/src/components/ProgrammingExercises/ExerciseTestCases.vue:13
 #: frontend/src/components/ProgrammingExercises/ExerciseWorkspace.vue:141
 #, python-brace-format
 msgid "{0} of {1} passed"
-msgstr ""
+msgstr "{0} sur {1} réussis"
 
 #: frontend/src/pages/Questions.vue:252
 msgid "{0} of {1} questions deleted; the rest remain selected: {2}"
@@ -13017,7 +13017,7 @@ msgstr "{0} jusqu'à {1}, le {2}"
 #: frontend/src/components/Quiz.vue:1502
 #, python-brace-format
 msgid "{0} wrong"
-msgstr ""
+msgstr "{0} fausses"
 
 #: frontend/src/pages/Jobs.vue:4
 msgid "{0} {1} Jobs"
@@ -13026,7 +13026,7 @@ msgstr "{0} offres {1}"
 #: frontend/src/components/Assessment/AssessmentBlockPreview.vue:23
 #, python-brace-format
 msgid "{0} {1} could not be loaded."
-msgstr ""
+msgstr "{0} {1} n'a pas pu être chargé."
 
 #: frontend/src/components/Controls/ChildTable.vue:211
 #, python-brace-format
@@ -13966,3 +13966,1356 @@ msgstr "{0} cours publié"
 #, python-brace-format
 msgid "{0} published courses"
 msgstr "{0} cours publiés"
+
+#: frontend/src/components/Enrollment/enrollment.ts:369
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "1 student"
+msgstr "1 étudiant"
+
+#: frontend/src/components/Enrollment/enrollment.ts:135
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "1 student could not be enrolled"
+msgstr "1 étudiant n'a pas pu être inscrit"
+
+#: frontend/src/components/Enrollment/enrollment.ts:126
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "1 student enrolled"
+msgstr "1 étudiant inscrit"
+
+#: frontend/src/components/Enrollment/EnrollSelectionBanner.vue:104
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "1 student selected"
+msgstr "1 étudiant sélectionné"
+
+#: frontend/src/components/Enrollment/enrollment.ts:130
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "1 student upgraded to certificate"
+msgstr "1 étudiant est passé à la version avec certificat"
+
+#: frontend/src/pages/Programs/Programs.vue:296
+#: lms/public/frontend/assets/Programs-CGY1N0k3.js:1
+msgid "A program puts courses in order, like a path for new hires or a full certification track."
+msgstr "Un programme organise les cours dans un ordre, comme un parcours pour les nouvelles recrues ou un cursus de certification complet."
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:548
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Add a billing address for {0}"
+msgstr "Ajoutez une adresse de facturation pour {0}"
+
+#: lms/lms/day1_email.py:112
+msgid "Add learners"
+msgstr "Ajouter des apprenants"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:122
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:152
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Add new address"
+msgstr "Ajouter une nouvelle adresse"
+
+#: frontend/src/pages/Batches/components/Assessments.vue:52
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Add quizzes, assignments or programming exercises for students to complete during this batch."
+msgstr "Ajoutez des quiz, des attributions ou des exercices de programmation que les étudiants doivent réaliser pendant ce lot."
+
+#: frontend/src/components/Profile/ProfileEvaluatorDay.vue:75
+#, python-brace-format
+msgid "Add slot for {0}"
+msgstr "Ajouter un créneau pour {0}"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:557
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Add students to enroll"
+msgstr "Ajouter des étudiants à inscrire"
+
+#: frontend/src/tests/childTable.test.ts:3
+msgid "Add Test Case"
+msgstr "Ajouter un cas de test"
+
+#: frontend/src/pages/Forms/ProgramForm.vue:108
+#: lms/public/frontend/assets/ProgramForm-vPqrXhZk.js:1
+msgid "Add the courses learners take in this program, in the order they should take them."
+msgstr "Ajoutez les cours que suivront les apprenants de ce programme, dans l'ordre où ils doivent les suivre."
+
+#: frontend/src/pages/Batches/components/BatchCourses.vue:40
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Add the courses this batch works through. Students get access to each one when they enroll."
+msgstr "Ajoutez les cours que suit ce lot. Les étudiants accèdent à chacun dès leur inscription."
+
+#: lms/lms/day1_email.py:89
+#, python-brace-format
+msgid "Add the first lesson to {0}"
+msgstr "Ajoutez la première leçon à {0}"
+
+#: frontend/src/pages/Forms/ProgramForm.vue:167
+#: lms/public/frontend/assets/ProgramForm-vPqrXhZk.js:1
+msgid "Add the people who should take this program. They get every course in it."
+msgstr "Ajoutez les personnes qui doivent suivre ce programme. Elles reçoivent tous les cours qu'il contient."
+
+#: frontend/src/components/Enrollment/enrollment.ts:194
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Address line 2"
+msgstr "Complément d'adresse"
+
+#: lms/lms/bulk_enrollment.py:105
+#, python-brace-format
+msgid "Address must be an Address name or an object with only these keys: {0}."
+msgstr "L'adresse doit être le nom d'une adresse ou un objet ne contenant que ces clés : {0}."
+
+#: frontend/src/components/DiscussionReplies.vue:39
+#: lms/public/frontend/assets/Discussions-D_7lJ7Md.js:1
+msgid "Ask a question or share something useful. Everyone in this batch can read and reply here."
+msgstr "Posez une question ou partagez quelque chose d'utile. Toutes les personnes de ce lot peuvent lire et répondre ici."
+
+#: frontend/src/pages/Assignments.vue:116
+#: lms/public/frontend/assets/Assignments-BfkgXWdO.js:1
+msgid "Ask learners to upload a file, write an answer or share a link, then grade their work."
+msgstr "Demandez aux apprenants de téléverser un fichier, de rédiger une réponse ou de partager un lien, puis notez leur travail."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:268
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Ask your site administrator to set up Google in Google Settings. Until then, evaluations are booked without a calendar event or meeting link."
+msgstr "Demandez à votre administrateur de site de configurer Google dans les paramètres Google. D'ici là, les évaluations sont réservées sans événement d'agenda ni lien de réunion."
+
+#: frontend/src/pages/ProfileEvaluator.vue:252
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Availability saved"
+msgstr "Disponibilités enregistrées"
+
+#: frontend/src/pages/Batches/components/AdminBatchDashboard.vue:148
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Bars show up here as students finish the courses and assessments in this batch."
+msgstr "Les barres apparaissent ici au fur et à mesure que les étudiants terminent les cours et les évaluations de ce lot."
+
+#: frontend/src/components/Enrollment/enrollment.ts:90
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Batch price {0}."
+msgstr "Prix du lot : {0}."
+
+#: frontend/src/pages/Batches/Batches.vue:387
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "Batches move here once they start, so you can look back at each group."
+msgstr "Les lots passent ici une fois commencés, pour que vous puissiez revoir chaque groupe."
+
+#: frontend/src/components/Enrollment/enrollment.ts:184
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Billing name"
+msgstr "Nom de facturation"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:238
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Booked evaluations aren't added to this calendar while it's disabled."
+msgstr "Les évaluations réservées ne sont pas ajoutées à cet agenda tant qu'il est désactivé."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:252
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Booked evaluations aren't added to this calendar. Contact a Moderator to turn them on."
+msgstr "Les évaluations réservées ne sont pas ajoutées à cet agenda. Contactez un modérateur pour les activer."
+
+#: frontend/src/pages/DataImport/List.vue:182
+#: lms/public/frontend/assets/DataImport-lRJC5oLx.js:2
+msgid "Bring in courses, batches or categories from a spreadsheet instead of adding them one by one."
+msgstr "Importez des cours, des lots ou des catégories depuis un tableur plutôt que de les ajouter un par un."
+
+#: frontend/src/pages/Questions.vue:130
+#: lms/public/frontend/assets/Questions-CrUHu-vQ.js:1
+msgid "Build your question bank"
+msgstr "Constituez votre banque de questions"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:379
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Calendar renamed"
+msgstr "Agenda renommé"
+
+#: lms/lms/api.py:3688
+#, python-brace-format
+msgid "Certificate already purchased by {0}."
+msgstr "Certificat déjà acheté par {0}."
+
+#: frontend/src/components/Enrollment/enrollment.ts:83
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Certificate price {0}."
+msgstr "Prix du certificat : {0}."
+
+#: frontend/src/pages/Statistics.vue:108
+#: lms/public/frontend/assets/Statistics-CdzFmYQo.js:1
+msgid "Certificates your learners earn show up here, day by day."
+msgstr "Les certificats obtenus par vos apprenants apparaissent ici, jour après jour."
+
+#: frontend/src/pages/Quizzes.vue:104
+#: lms/public/frontend/assets/Quizzes-VcJ4azG0.js:1
+msgid "Check what learners understood with multiple choice, short answer or open ended questions."
+msgstr "Vérifiez ce que les apprenants ont compris avec des questions à choix multiple, à réponse courte ou ouverte."
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:556
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Checking the selected students"
+msgstr "Vérification des étudiants sélectionnés"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:524
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Choose a payment to link for {0}"
+msgstr "Choisissez un paiement à lier pour {0}"
+
+#: frontend/src/pages/Batches/components/LiveClass.vue:312
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Classes your instructors schedule show up here, with a link to join."
+msgstr "Les cours que vos formateurs planifient apparaissent ici, avec un lien pour les rejoindre."
+
+#: frontend/src/pages/ProfileEvaluator.vue:77
+msgid "Clear time off"
+msgstr "Supprimer l'absence"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:25
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Close details"
+msgstr "Fermer le détail"
+
+#: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue:132
+#: lms/public/frontend/assets/ProgrammingExerciseSubmissions-qL9lkC6U.js:1
+msgid "Code that learners submit for your programming exercises shows up here, with test results."
+msgstr "Le code que les apprenants soumettent à vos exercices de programmation apparaît ici, avec les résultats des tests."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:259
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Connect your Google Calendar"
+msgstr "Connecter votre Google Agenda"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:700
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Could not enroll students"
+msgstr "Impossible d'inscrire les étudiants"
+
+#: frontend/src/pages/ProfileEvaluationSchedule.vue:12
+#: lms/public/frontend/assets/ProfileEvaluationSchedule-DjNoEzvT.js:1
+msgid "Could not load evaluations"
+msgstr "Impossible de charger les évaluations"
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:18
+msgid "Could not load hours"
+msgstr "Impossible de charger les heures"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:626
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Could not load students"
+msgstr "Impossible de charger les étudiants"
+
+#: frontend/src/pages/Statistics.vue:126
+#: lms/public/frontend/assets/Statistics-CdzFmYQo.js:1
+msgid "Course Completion"
+msgstr "Achèvement des cours"
+
+#: frontend/src/components/Enrollment/enrollment.ts:89
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Course price {0}."
+msgstr "Prix du cours : {0}."
+
+#: frontend/src/pages/Batches/components/BatchDashboard.vue:41
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Courses for this batch show up here once your instructors add them."
+msgstr "Les cours de ce lot apparaîtront ici une fois que vos formateurs les auront ajoutés."
+
+#: frontend/src/pages/Courses/Courses.vue:394
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "Courses marked as upcoming show up here, so learners can see what is coming next."
+msgstr "Les cours marqués comme à venir apparaissent ici, pour que les apprenants voient ce qui arrive."
+
+#: frontend/src/pages/Courses/Courses.vue:401
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "Courses you create or teach show up here, for your team, students or customers."
+msgstr "Les cours que vous créez ou enseignez apparaissent ici, pour votre équipe, vos étudiants ou vos clients."
+
+#: lms/lms/day1_email.py:80
+msgid "Create your course"
+msgstr "Créez votre cours"
+
+#: frontend/src/pages/Assignments.vue:115
+#: lms/public/frontend/assets/Assignments-BfkgXWdO.js:1
+msgid "Create your first assignment"
+msgstr "Créez votre première attribution"
+
+#: frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue:118
+#: lms/public/frontend/assets/ProgrammingExercises-D0TxCymI.js:1
+msgid "Create your first programming exercise"
+msgstr "Créez votre premier exercice de programmation"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:382
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Details for all {0} students"
+msgstr "Détails pour les {0} étudiants"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:381
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Details for {0} students"
+msgstr "Détails pour {0} étudiants"
+
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Different addresses for these {0} students"
+msgstr "Adresses différentes pour ces {0} étudiants"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:388
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Disconnect Google Calendar?"
+msgstr "Déconnecter Google Agenda ?"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:285
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Each booked evaluation is added to it with a Google Meet link. Without it, evaluations are still booked, with no meeting link."
+msgstr "Chaque évaluation réservée y est ajoutée avec un lien Google Meet. Sans lui, les évaluations sont tout de même réservées, sans lien de réunion."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:243
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Each booked evaluation is added to this calendar with a Google Meet link."
+msgstr "Chaque évaluation réservée est ajoutée à cet agenda avec un lien Google Meet."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:496
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Each student's name"
+msgstr "Nom de chaque étudiant"
+
+#: frontend/src/pages/Statistics.vue:86
+#: lms/public/frontend/assets/Statistics-CdzFmYQo.js:1
+msgid "Each time a learner joins one of your courses, it shows up here."
+msgstr "Chaque fois qu'un apprenant rejoint l'un de vos cours, cela apparaît ici."
+
+#: frontend/src/pages/QuizSubmissions.vue:232
+#: lms/public/frontend/assets/QuizSubmissions-DOlEGl1h.js:1
+msgid "Each time a learner takes a quiz, their answers and score show up here."
+msgstr "Chaque fois qu'un apprenant passe un quiz, ses réponses et son score apparaissent ici."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:386
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Empty fields use the details for all."
+msgstr "Les champs vides reprennent les détails pour tous."
+
+#: frontend/src/utils/evaluatorAvailability.ts:135
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "End time must be after the start time."
+msgstr "L'heure de fin doit être postérieure à l'heure de début."
+
+#. Label of a Check field in DocType 'LMS Settings'
+#: lms/lms/doctype/lms_settings/lms_settings.json:578
+msgid "Enforce Assignment Passing"
+msgstr "Exiger la réussite des attributions"
+
+#. Label of a Check field in DocType 'LMS Settings'
+#: lms/lms/doctype/lms_settings/lms_settings.json:572
+msgid "Enforce Open-ended Quiz Passing"
+msgstr "Exiger la réussite des quiz ouverts"
+
+#. Label of a Check field in DocType 'LMS Settings'
+#: lms/lms/doctype/lms_settings/lms_settings.json:560
+msgid "Enforce Programming Exercise Completion"
+msgstr "Exiger l'achèvement des exercices de programmation"
+
+#. Label of a Check field in DocType 'LMS Settings'
+#: lms/lms/doctype/lms_settings/lms_settings.json:585
+msgid "Enforce Programming Exercise Passing"
+msgstr "Exiger la réussite des exercices de programmation"
+
+#. Label of a Check field in DocType 'LMS Settings'
+#: lms/lms/doctype/lms_settings/lms_settings.json:566
+msgid "Enforce Quiz Passing"
+msgstr "Exiger la réussite des quiz"
+
+#: frontend/src/components/Enrollment/enrollment.ts:159
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Enroll 1 student"
+msgstr "Inscrire 1 étudiant"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:3
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:41
+#: frontend/src/pages/Batches/components/AdminBatchDashboard.vue:45
+#: frontend/src/pages/Batches/components/Announcements.vue:42
+#: frontend/src/pages/Courses/CourseDashboard.vue:42
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Enroll Students"
+msgstr "Inscrire des étudiants"
+
+#: frontend/src/pages/Batches/components/Announcements.vue:96
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Enroll students in the batch, then send them messages like a schedule change or a class reminder."
+msgstr "Inscrivez des étudiants au lot, puis envoyez-leur des messages, par exemple pour un changement d'horaire ou un rappel de cours."
+
+#: frontend/src/pages/Batches/components/AdminBatchDashboard.vue:37
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Enroll students to follow how each one moves through the courses and assessments in this batch."
+msgstr "Inscrivez des étudiants pour suivre la progression de chacun dans les cours et les évaluations de ce lot."
+
+#: frontend/src/pages/Courses/CourseDashboard.vue:34
+msgid "Enroll students to follow how far each one gets through the lessons and quizzes in this course."
+msgstr "Inscrivez des étudiants pour suivre la progression de chacun dans les leçons et les quiz de ce cours."
+
+#: frontend/src/components/Enrollment/enrollment.ts:159
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Enroll {0} students"
+msgstr "Inscrire {0} étudiants"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:467
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Enter details for all"
+msgstr "Saisissez les détails pour tous"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:462
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Enter details for {0}"
+msgstr "Saisissez les détails pour {0}"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:465
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Enter details for {0} students"
+msgstr "Saisissez les détails pour {0} étudiants"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:20
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Evaluation invites are off on this site"
+msgstr "Les invitations aux évaluations sont désactivées sur ce site"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:281
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Evaluation invites are off on this site. Booked evaluations won't be added to your calendar until a Moderator turns them on."
+msgstr "Les invitations aux évaluations sont désactivées sur ce site. Les évaluations réservées ne seront pas ajoutées à votre agenda tant qu'un modérateur ne les aura pas activées."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:248
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Evaluation invites are off, so booked evaluations aren't added to this calendar. Turn on Send calendar invite for evaluations in Settings > General."
+msgstr "Les invitations aux évaluations sont désactivées, donc les évaluations réservées ne sont pas ajoutées à cet agenda. Activez « Envoyer une invitation d'agenda pour les évaluations » dans Paramètres > Général."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:276
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Evaluation invites are off, so booked evaluations won't be added to your calendar. Turn on Send calendar invite for evaluations in Settings > General."
+msgstr "Les invitations aux évaluations sont désactivées, donc les évaluations réservées ne seront pas ajoutées à votre agenda. Activez « Envoyer une invitation d'agenda pour les évaluations » dans Paramètres > Général."
+
+#: frontend/src/pages/ProfileEvaluationSchedule.vue:146
+#: lms/public/frontend/assets/ProfileEvaluationSchedule-DjNoEzvT.js:1
+msgid "Evaluations students book with this evaluator will show up here."
+msgstr "Les évaluations réservées par cet évaluateur apparaîtront ici."
+
+#: frontend/src/pages/ProfileEvaluationSchedule.vue:145
+#: lms/public/frontend/assets/ProfileEvaluationSchedule-DjNoEzvT.js:1
+msgid "Evaluations students book with you will show up here."
+msgstr "Les évaluations que les étudiants réservent avec vous apparaîtront ici."
+
+#: lms/lms/bulk_enrollment.py:110
+msgid "Every address value must be text."
+msgstr "Chaque valeur d'adresse doit être un texte."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:114
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Existing address"
+msgstr "Adresse existante"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:545
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Fill in the missing details for {0}"
+msgstr "Renseignez les informations manquantes pour {0}"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:550
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Fill in {0} for {1}"
+msgstr "Renseignez {0} pour {1}"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:528
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Fill in {0} in the details for all"
+msgstr "Renseignez {0} dans les détails pour tous"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:333
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Google Calendar disabled"
+msgstr "Google Agenda désactivé"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:308
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Google Calendar disconnected"
+msgstr "Google Agenda déconnecté"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:333
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Google Calendar enabled"
+msgstr "Google Agenda activé"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:260
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Google Calendar isn't set up on this site"
+msgstr "Google Agenda n'est pas configuré sur ce site"
+
+#: frontend/src/pages/ProfileEvaluator.vue:268
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Google did not finish connecting your calendar. Try again."
+msgstr "Google n'a pas terminé la connexion de votre agenda. Réessayez."
+
+#: frontend/src/pages/Programs/Programs.vue:295
+#: lms/public/frontend/assets/Programs-CGY1N0k3.js:1
+msgid "Group courses into a program"
+msgstr "Regrouper des cours dans un programme"
+
+#: lms/lms/day1_email.py:78
+msgid "I noticed you set up Frappe Learning yesterday. The next step is your first course: give it a name and add a lesson, and it starts taking shape."
+msgstr "J'ai vu que vous avez configuré Frappe Learning hier. La prochaine étape est votre premier cours : donnez-lui un nom et ajoutez-y une leçon, et il commencera à prendre forme."
+
+#: lms/lms/day1_email.py:91
+#, python-brace-format
+msgid "I noticed you started {0}. The next step is its first lesson: add a video, a document or a quiz."
+msgstr "J'ai vu que vous avez commencé {0}. La prochaine étape est sa première leçon : ajoutez une vidéo, un document ou un quiz."
+
+#: lms/lms/day1_email.py:100
+#, python-brace-format
+msgid "I noticed {0} has lessons now. Publish it so learners can find it and start."
+msgstr "J'ai vu que {0} contient maintenant des leçons. Publiez-le pour que les apprenants puissent le trouver et commencer."
+
+#: lms/lms/day1_email.py:110
+#, python-brace-format
+msgid "I noticed {0} is live. The next step is your first learners, so you can follow their progress as they go."
+msgstr "J'ai vu que {0} est en ligne. La prochaine étape consiste à accueillir vos premiers apprenants, pour suivre leur progression."
+
+#: lms/templates/emails/lms_day1_next_step.html:10
+msgid "If you get stuck, just reply to this email and I will help you."
+msgstr "Si vous bloquez, répondez simplement à cet e-mail, et je vous aiderai."
+
+#: lms/lms/api.py:3754
+msgid "Include enrolled must be true or false."
+msgstr "« Include enrolled » doit être vrai ou faux."
+
+#: frontend/src/components/Enrollment/enrollment.ts:72
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Include paid certificate"
+msgstr "Inclure le certificat payant"
+
+#: lms/lms/api.py:3729 lms/lms/api.py:3749 lms/lms/bulk_enrollment.py:401
+msgid "Invalid course or batch."
+msgstr "Cours ou lot invalide."
+
+#: lms/lms/api.py:3641
+msgid "Invalid course."
+msgstr "Cours invalide."
+
+#: lms/lms/day1_email.py:108
+#, python-brace-format
+msgid "Invite your first learners to {0}"
+msgstr "Invitez vos premiers apprenants à {0}"
+
+#: frontend/src/pages/Jobs.vue:288
+#: lms/public/frontend/assets/Jobs-DOpIyQnG.js:1
+msgid "Jobs you close move here, so you keep a record of past openings."
+msgstr "Les postes que vous fermez passent ici, pour garder une trace des offres passées."
+
+#: lms/lms/api.py:1243
+#, python-brace-format
+msgid "Keep the schedule under {0} time ranges."
+msgstr "Gardez l'horaire sous {0} plages horaires."
+
+#: frontend/src/pages/ProfileEvaluator.vue:220
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Learners can't book this evaluator during time off."
+msgstr "Les apprenants ne peuvent pas réserver cet évaluateur pendant une absence."
+
+#: frontend/src/pages/ProfileEvaluator.vue:219
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Learners can't book you during time off."
+msgstr "Les apprenants ne peuvent pas vous réserver pendant une absence."
+
+#: frontend/src/pages/CertifiedParticipants.vue:151
+#: lms/public/frontend/assets/CertifiedParticipants-CQi5K7Ul.js:1
+msgid "Learners who finish a course with a certificate show up here. Add one to a course to begin."
+msgstr "Les apprenants qui terminent un cours avec un certificat apparaissent ici. Ajoutez-en un à un cours pour commencer."
+
+#: frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue:119
+#: lms/public/frontend/assets/ProgrammingExercises-D0TxCymI.js:1
+msgid "Learners write and run code in the browser, and test cases check their answers."
+msgstr "Les apprenants écrivent et exécutent du code dans le navigateur, et des cas de test vérifient leurs réponses."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:354
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Link existing"
+msgstr "Lier un paiement existant"
+
+#: lms/lms/bulk_enrollment.py:216
+msgid "Linked payments"
+msgstr "Paiements liés"
+
+#: lms/lms/bulk_enrollment.py:220
+msgid "Linked payments must map each user email to an LMS Payment name."
+msgstr "Les paiements liés doivent associer chaque e-mail d'utilisateur à un nom de paiement LMS."
+
+#: lms/lms/bulk_enrollment.py:148
+msgid "Member payment details"
+msgstr "Détails de paiement du membre"
+
+#: lms/lms/bulk_enrollment.py:153
+#, python-brace-format
+msgid "Member payment details can cover at most {0} students."
+msgstr "Les détails de paiement du membre ne peuvent couvrir que {0} étudiants au maximum."
+
+#: lms/lms/bulk_enrollment.py:150
+msgid "Member payment details must map each user email to an object."
+msgstr "Les détails de paiement du membre doivent associer chaque e-mail d'utilisateur à un objet."
+
+#: lms/lms/bulk_enrollment.py:163
+#, python-brace-format
+msgid "Member payment details name {0} more than once."
+msgstr "Le détail de paiement du membre désigne {0} plus d'une fois."
+
+#: lms/lms/bulk_enrollment.py:161
+#, python-brace-format
+msgid "Member payment details name {0}, who is not in the members list."
+msgstr "Le détail de paiement du membre désigne {0}, qui ne figure pas dans la liste des membres."
+
+#: lms/lms/bulk_enrollment.py:46
+msgid "Members must be a list of user emails. Remove empty entries and try again."
+msgstr "Les membres doivent être une liste d'e-mails d'utilisateurs. Retirez les entrées vides et réessayez."
+
+#: frontend/src/pages/Batches/components/Announcements.vue:90
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Messages from your instructors about this batch show up here."
+msgstr "Les messages de vos formateurs sur ce lot apparaissent ici."
+
+#: lms/lms/api.py:3758
+msgid "Names must be a list of users."
+msgstr "Les noms doivent être une liste d'utilisateurs."
+
+#: frontend/src/pages/Statistics.vue:64
+#: lms/public/frontend/assets/Statistics-CdzFmYQo.js:1
+msgid "New accounts on your site show up here, day by day, as people join."
+msgstr "Les nouveaux comptes de votre site apparaissent ici, jour après jour, à mesure que les gens s'inscrivent."
+
+#: frontend/src/pages/Batches/Batches.vue:394
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "New batches wait here until you publish them, so learners never see a half-ready batch."
+msgstr "Les nouveaux lots attendent ici jusqu'à leur publication, pour que les apprenants ne voient jamais un lot à moitié prêt."
+
+#: frontend/src/pages/Courses/Courses.vue:408
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "New courses wait here while you build them. Publish one when it is ready."
+msgstr "Les nouveaux cours attendent ici pendant leur création. Publiez-en un lorsqu'il est prêt."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:389
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "New evaluations will be booked without a calendar event or Google Meet link. Events already on your calendar stay there."
+msgstr "Les nouvelles évaluations seront réservées sans événement d'agenda ni lien Google Meet. Les événements déjà présents dans votre agenda y restent."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:353
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "New payment"
+msgstr "Nouveau paiement"
+
+#: frontend/src/pages/Programs/Programs.vue:303
+#: lms/public/frontend/assets/Programs-CGY1N0k3.js:1
+msgid "New programs wait here until you publish them, so learners only see finished paths."
+msgstr "Les nouveaux programmes attendent ici jusqu'à leur publication, pour que les apprenants ne voient que des parcours achevés."
+
+#: frontend/src/pages/Batches/components/Announcements.vue:36
+msgid "No announcements yet"
+msgstr "Aucune annonce pour l'instant"
+
+#: frontend/src/pages/JobApplications.vue:264
+#: lms/public/frontend/assets/JobApplications-CQDqnclz.js:1
+msgid "No applications yet"
+msgstr "Aucune candidature pour l'instant"
+
+#: frontend/src/pages/Batches/Batches.vue:386
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "No archived batches"
+msgstr "Aucun lot archivé"
+
+#: frontend/src/pages/AssignmentSubmissions.vue:117
+#: lms/public/frontend/assets/AssignmentSubmissions-Ca_xhBfW.js:1
+msgid "No assignment submissions yet"
+msgstr "Aucune soumission d'attribution pour l'instant"
+
+#: frontend/src/pages/Jobs.vue:287
+#: lms/public/frontend/assets/Jobs-DOpIyQnG.js:1
+msgid "No closed jobs"
+msgstr "Aucune offre fermée"
+
+#: frontend/src/pages/Courses/Courses.vue:400
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "No courses created by you"
+msgstr "Aucun cours créé par vous"
+
+#: frontend/src/pages/ProfileEvaluationSchedule.vue:33
+#: lms/public/frontend/assets/ProfileEvaluationSchedule-DjNoEzvT.js:1
+msgid "No evaluations yet"
+msgstr "Aucune évaluation pour l'instant"
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:123
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "No hours set"
+msgstr "Aucune heure définie"
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:123
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "No hours yet"
+msgstr "Aucune heure pour l'instant"
+
+#: frontend/src/pages/DataImport/List.vue:181
+#: lms/public/frontend/assets/DataImport-lRJC5oLx.js:2
+msgid "No imports yet"
+msgstr "Aucun import pour l'instant"
+
+#: frontend/src/pages/Batches/components/LiveClass.vue:304
+#: frontend/src/pages/Batches/components/LiveClass.vue:311
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "No live classes yet"
+msgstr "Aucun cours en direct pour l'instant"
+
+#: frontend/src/pages/CertifiedParticipants.vue:150
+#: lms/public/frontend/assets/CertifiedParticipants-CQi5K7Ul.js:1
+msgid "No one is certified yet"
+msgstr "Personne n'est encore certifié"
+
+#: lms/lms/api.py:3618 lms/lms/api.py:3694
+#, python-brace-format
+msgid "No payment was given for {0}. Add a payment for this student."
+msgstr "Aucun paiement n'a été donné pour {0}. Ajoutez un paiement pour cet étudiant."
+
+#: frontend/src/pages/QuizSubmissions.vue:231
+#: lms/public/frontend/assets/QuizSubmissions-DOlEGl1h.js:1
+msgid "No quiz attempts yet"
+msgstr "Aucune tentative de quiz pour l'instant"
+
+#: frontend/src/components/Enrollment/StudentPicker.vue:69
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "No students added"
+msgstr "Aucun étudiant ajouté"
+
+#: frontend/src/pages/Batches/components/AdminBatchDashboard.vue:35
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "No students in this batch yet"
+msgstr "Aucun étudiant dans ce lot pour l'instant"
+
+#: frontend/src/pages/Courses/CourseDashboard.vue:32
+msgid "No students in this course yet"
+msgstr "Aucun étudiant dans ce cours pour l'instant"
+
+#: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue:131
+#: lms/public/frontend/assets/ProgrammingExerciseSubmissions-qL9lkC6U.js:1
+msgid "No submissions yet"
+msgstr "Aucune soumission pour l'instant"
+
+#: frontend/src/pages/ProfileEvaluator.vue:69
+msgid "No time off"
+msgstr "Aucune absence"
+
+#: frontend/src/pages/Batches/Batches.vue:393
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "No unpublished batches"
+msgstr "Aucun lot non publié"
+
+#: frontend/src/pages/Courses/Courses.vue:407
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "No unpublished courses"
+msgstr "Aucun cours non publié"
+
+#: frontend/src/pages/Programs/Programs.vue:302
+#: lms/public/frontend/assets/Programs-CGY1N0k3.js:1
+msgid "No unpublished programs"
+msgstr "Aucun programme non publié"
+
+#: frontend/src/pages/Batches/Batches.vue:379
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "No upcoming batches"
+msgstr "Aucun lot à venir"
+
+#: frontend/src/pages/Courses/Courses.vue:393
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "No upcoming courses"
+msgstr "Aucun cours à venir"
+
+#: lms/lms/bulk_enrollment.py:280
+#, python-brace-format
+msgid "No user found with the email {0}."
+msgstr "Aucun utilisateur trouvé avec l'e-mail {0}."
+
+#: lms/lms/api.py:1075
+msgid "Not an evaluator"
+msgstr "Pas un évaluateur"
+
+#: frontend/src/components/Enrollment/enrollment.ts:361
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Not selected"
+msgstr "Non sélectionné"
+
+#: frontend/src/components/Layouts/ListPage.vue:232
+#: lms/public/frontend/assets/ListPage-DfKbcuX9.js:1
+#, python-brace-format
+msgid "Nothing matches \"{0}\". Try another search or clear the filters."
+msgstr "Aucun résultat pour « {0} ». Essayez une autre recherche ou effacez les filtres."
+
+#: frontend/src/components/Layouts/ListPage.vue:237
+#: lms/public/frontend/assets/ListPage-DfKbcuX9.js:1
+msgid "Nothing matches the filters applied. Try changing or clearing them."
+msgstr "Aucun résultat pour les filtres appliqués. Essayez de les modifier ou de les effacer."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:154
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Open Google Settings"
+msgstr "Ouvrir les paramètres Google"
+
+#: frontend/src/utils/evaluatorAvailability.ts:145
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+#, python-brace-format
+msgid "Overlaps with {0}."
+msgstr "Chevauche {0}."
+
+#: lms/lms/api.py:3756
+msgid "Page length must be a number."
+msgstr "La longueur de page doit être un nombre."
+
+#: frontend/src/utils/quizSummary.ts:18
+#: lms/public/frontend/assets/quizSummary-CvI3lKpf.js:1
+#, python-brace-format
+msgid "pass at {0}%"
+msgstr "réussite dès {0} %"
+
+#: lms/lms/bulk_enrollment.py:71
+msgid "Payment amount must be a number that is zero or more."
+msgstr "Le montant du paiement doit être un nombre égal ou supérieur à zéro."
+
+#: lms/lms/api.py:3599 lms/lms/api.py:3652
+msgid "Payment arguments must be JSON objects."
+msgstr "Les arguments de paiement doivent être des objets JSON."
+
+#: lms/lms/bulk_enrollment.py:127
+msgid "Payment details"
+msgstr "Détails du paiement"
+
+#: lms/lms/bulk_enrollment.py:175
+#, python-brace-format
+msgid "Payment details for {0} must be an object with only these keys: {1}."
+msgstr "Les détails du paiement pour {0} doivent être un objet ne contenant que ces clés : {1}."
+
+#: lms/lms/bulk_enrollment.py:130
+msgid "Payment details must have amount and currency, and may add source and address."
+msgstr "Les détails du paiement doivent comporter le montant et la devise, et peuvent ajouter la source et l'adresse."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:50
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Payment for {0}"
+msgstr "Paiement pour {0}"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:40
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "Payment mode for {0}"
+msgstr "Mode de paiement pour {0}"
+
+#: lms/lms/bulk_enrollment.py:385
+#, python-brace-format
+msgid "Payment {0} cannot be linked to {1} for {2}. Link a received payment made by this user for this {3}."
+msgstr "Le paiement {0} ne peut pas être lié à {1} pour {2}. Liez un paiement reçu, effectué par cet utilisateur pour ce {3}."
+
+#: lms/lms/bulk_enrollment.py:393
+#, python-brace-format
+msgid "Payment {0} is already used by an enrollment. Link a payment that is not yet used."
+msgstr "Le paiement {0} est déjà utilisé par une inscription. Liez un paiement qui n'est pas encore utilisé."
+
+#: lms/lms/api.py:3606
+msgid "Payments can only be recorded for a paid batch."
+msgstr "Les paiements ne peuvent être enregistrés que pour un lot payant."
+
+#: lms/lms/api.py:3667
+msgid "Payments can only be recorded for a paid course or a purchased certificate."
+msgstr "Les paiements ne peuvent être enregistrés que pour un cours payant ou un certificat acheté."
+
+#: frontend/src/pages/JobApplications.vue:265
+#: lms/public/frontend/assets/JobApplications-CQDqnclz.js:1
+msgid "People who apply to this job show up here. Share the job link to reach more applicants."
+msgstr "Les personnes qui postulent à cette offre apparaissent ici. Partagez le lien de l'offre pour toucher davantage de candidats."
+
+#: lms/lms/bulk_enrollment.py:209
+msgid "Per-student payment details need the common payment details too."
+msgstr "Les détails de paiement par étudiant ont aussi besoin des détails de paiement communs."
+
+#: frontend/src/pages/Batches/components/LiveClass.vue:297
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Pick Zoom or Google Meet for this batch in Settings, then schedule classes your students join from here."
+msgstr "Choisissez Zoom ou Google Meet pour ce lot dans les paramètres, puis planifiez les cours auxquels vos étudiants se connectent depuis ici."
+
+#: frontend/src/pages/Jobs.vue:280
+#: lms/public/frontend/assets/Jobs-DOpIyQnG.js:1
+msgid "Post a job"
+msgstr "Publier une offre"
+
+#: lms/templates/emails/lms_day1_next_step.html:15
+msgid "Product Engineer, Frappe"
+msgstr "Ingénieur produit, Frappe"
+
+#: lms/lms/day1_email.py:103
+msgid "Publish your course"
+msgstr "Publiez votre cours"
+
+#: frontend/src/pages/Courses/Courses.vue:386
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "Publish your first course"
+msgstr "Publiez votre premier cours"
+
+#: frontend/src/pages/Batches/Batches.vue:380
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "Published batches that start later show up here, so you can open sign-ups early."
+msgstr "Les lots publiés qui commencent plus tard apparaissent ici, pour que vous puissiez ouvrir les inscriptions à l'avance."
+
+#: lms/lms/api.py:3645 lms/lms/api.py:3734
+msgid "Purchased certificate must be true or false."
+msgstr "Le certificat acheté doit être vrai ou faux."
+
+#: frontend/src/components/Enrollment/enrollment.ts:73
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Record payments"
+msgstr "Enregistrer des paiements"
+
+#: frontend/src/components/Discussions.vue:89
+#: lms/public/frontend/assets/Discussions-D_7lJ7Md.js:1
+msgid "Reload to try again. If it still does not load, ask your site administrator to check the error log."
+msgstr "Rechargez pour réessayer. Si la page ne se charge toujours pas, demandez à votre administrateur de site de consulter le journal des erreurs."
+
+#: frontend/src/components/Enrollment/EnrollSelectionBanner.vue:98
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Remove selected students"
+msgstr "Retirer les étudiants sélectionnés"
+
+#: frontend/src/components/Profile/ProfileEvaluatorDay.vue:58
+#, python-brace-format
+msgid "Remove {0} on {1}"
+msgstr "Supprimer {0} le {1}"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:81
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Rename calendar"
+msgstr "Renommer l'agenda"
+
+#: frontend/src/components/Enrollment/EnrollStudentTable.vue:80
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Requires address"
+msgstr "Adresse requise"
+
+#: frontend/src/components/Enrollment/EnrollSelectionBanner.vue:99
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Reset details for selected students"
+msgstr "Réinitialiser les détails des étudiants sélectionnés"
+
+#: lms/lms/api.py:1220
+#, python-brace-format
+msgid "Row {0} of the schedule is not a time range."
+msgstr "La ligne {0} de l'horaire n'est pas une plage horaire."
+
+#: lms/lms/api.py:1224
+#, python-brace-format
+msgid "Row {0}: {1} is not a valid day."
+msgstr "Ligne {0} : {1} n'est pas un jour valide."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:58
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Save name"
+msgstr "Enregistrer le nom"
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:129
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Save your changes first"
+msgstr "Enregistrez d'abord vos modifications"
+
+#: lms/lms/doctype/lms_programming_exercise_submission/lms_programming_exercise_submission.py:28
+msgid "Save your code from the exercise page, which runs it and records the result."
+msgstr "Enregistrez votre code depuis la page de l'exercice : cela l'exécute et enregistre le résultat."
+
+#: frontend/src/pages/Batches/components/LiveClass.vue:142
+msgid "Schedule a Class"
+msgstr "Planifier un cours"
+
+#: frontend/src/pages/Batches/components/LiveClass.vue:305
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Schedule a class on Zoom or Google Meet. Students get a reminder and join from here."
+msgstr "Planifiez un cours sur Zoom ou Google Meet. Les étudiants reçoivent un rappel et se connectent depuis ici."
+
+#: lms/lms/api.py:1241
+msgid "Schedule must be a list of time ranges."
+msgstr "L'horaire doit être une liste de plages horaires."
+
+#: frontend/src/components/Enrollment/StudentPicker.vue:14
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Search by name or email, or paste emails"
+msgstr "Rechercher par nom ou e-mail, ou coller des e-mails"
+
+#: lms/lms/api.py:1408 lms/lms/api.py:3752
+msgid "Search text must be text."
+msgstr "Le texte de recherche doit être du texte."
+
+#: frontend/src/pages/ProfileEvaluator.vue:69
+msgid "Select dates"
+msgstr "Sélectionner les dates"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:51
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Select payment"
+msgstr "Choisir le paiement"
+
+#: frontend/src/components/Enrollment/EnrollSelectionBanner.vue:17
+#: frontend/src/components/Enrollment/EnrollStudentTable.vue:13
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Selected students"
+msgstr "Étudiants sélectionnés"
+
+#: frontend/src/pages/Batches/components/Announcements.vue:93
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Send everyone in this batch a message, like a schedule change or a reminder before a live class."
+msgstr "Envoyez un message à tous les participants de ce lot, par exemple pour un changement d'horaire ou un rappel avant un cours en direct."
+
+#: frontend/src/utils/evaluatorAvailability.ts:133
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Set both a start and an end time."
+msgstr "Indiquez l'heure de début et l'heure de fin."
+
+#: lms/lms/api.py:1249
+msgid "Set both dates of the time off, or clear it."
+msgstr "Indiquez les deux dates du congé, ou effacez-le."
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:45
+msgid "Set day by day"
+msgstr "Définir jour par jour"
+
+#: frontend/src/pages/Batches/components/LiveClass.vue:296
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Set up live classes"
+msgstr "Configurer les cours en direct"
+
+#: frontend/src/pages/Jobs.vue:281
+#: lms/public/frontend/assets/Jobs-DOpIyQnG.js:1
+msgid "Share openings with the people who learn on your site, from internships to full-time roles."
+msgstr "Partagez vos offres avec les personnes qui apprennent sur votre site, des stages aux postes à plein temps."
+
+#: lms/lms/doctype/lms_payment/lms_payment.py:21
+msgid "Source is required."
+msgstr "La source est obligatoire."
+
+#: frontend/src/components/DiscussionReplies.vue:35
+#: lms/public/frontend/assets/Discussions-D_7lJ7Md.js:1
+msgid "Start the conversation"
+msgstr "Lancer la discussion"
+
+#: frontend/src/pages/Batches/components/BatchFeedback.vue:80
+#: lms/public/frontend/assets/BatchDetail-Cs1x5ztx.js:1
+msgid "Students can rate this batch and leave a note. Their average ratings show up here."
+msgstr "Les étudiants peuvent noter ce lot et laisser un commentaire. Leurs notes moyennes apparaissent ici."
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:128
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Students can't book an evaluation with this evaluator yet."
+msgstr "Les étudiants ne peuvent pas encore réserver une évaluation avec cet évaluateur."
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:127
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Students can't book an evaluation with you until you add hours."
+msgstr "Les étudiants ne peuvent pas réserver d'évaluation avec vous tant que vous n'avez pas ajouté d'heures de disponibilité."
+
+#: frontend/src/components/Enrollment/enrollment.ts:80
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Students get the certificate and a payment is recorded for each."
+msgstr "Les étudiants reçoivent le certificat et un paiement est enregistré pour chacun."
+
+#: frontend/src/components/Enrollment/StudentPicker.vue:70
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Students you add will be listed here."
+msgstr "Les étudiants que vous ajoutez apparaîtront ici."
+
+#: lms/lms/doctype/lms_programming_exercise_submission/lms_programming_exercise_submission.py:30
+msgid "Submission not saved"
+msgstr "Rendu non enregistré"
+
+#: frontend/src/pages/Batches/Batches.vue:373
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "Take a group through your courses on a schedule, with live classes and a certificate at the end."
+msgstr "Accompagnez un groupe dans vos cours selon un calendrier, avec des cours en direct et un certificat à la fin."
+
+#: frontend/src/pages/Batches/Batches.vue:372
+#: lms/public/frontend/assets/Batches-alIo7Uxa.js:1
+msgid "Teach people together in a batch"
+msgstr "Former des personnes ensemble, dans un lot"
+
+#: lms/lms/bulk_enrollment.py:199
+#, python-brace-format
+msgid "The address for {0}"
+msgstr "L'adresse de {0}"
+
+#: lms/lms/api.py:3659
+msgid "The certificate cannot be bought separately on a paid course. Turn off the certificate switch and try again."
+msgstr "Le certificat ne peut pas être acheté séparément pour un cours payant. Désactivez l'option « Certificat » et réessayez."
+
+#: frontend/src/pages/ProgrammingExercises/liveCode.ts:75
+#: lms/public/frontend/assets/utils-B8os3NqM.js:4
+msgid "The code runner did not answer within 20 seconds. It may be unreachable."
+msgstr "L'environnement d'exécution du code n'a pas répondu dans les 20 secondes. Il est peut-être injoignable."
+
+#: lms/lms/bulk_enrollment.py:137
+msgid "The common address"
+msgstr "L'adresse commune"
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:19
+#: frontend/src/pages/ProfileEvaluationSchedule.vue:13
+#: lms/public/frontend/assets/ProfileEvaluationSchedule-DjNoEzvT.js:1
+msgid "The request did not get through. Try again."
+msgstr "La demande n'a pas abouti. Veuillez réessayer."
+
+#: frontend/src/utils/unknownBlock.ts:24
+#: lms/public/frontend/assets/utils-B8os3NqM.js:20
+msgid "This content is not available"
+msgstr "Ce contenu n'est pas disponible"
+
+#: frontend/src/components/Discussions.vue:87
+#: lms/public/frontend/assets/Discussions-D_7lJ7Md.js:1
+msgid "This discussion did not load"
+msgstr "Cette discussion n'a pas pu être chargée"
+
+#: lms/lms/api.py:1249
+msgid "Time off incomplete"
+msgstr "Congé incomplet"
+
+#: lms/lms/doctype/lms_quiz/lms_quiz.py:75
+#, python-brace-format
+msgid "Title must be {0} characters or fewer."
+msgstr "Le titre doit compter {0} caractères au maximum."
+
+#: frontend/src/components/Enrollment/enrollment.ts:85
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Turn off to enroll without a payment record."
+msgstr "Désactivez pour inscrire sans enregistrer de paiement."
+
+#: frontend/src/components/Profile/ProfileEvaluatorCalendar.vue:265
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+msgid "Turn on Google in Google Settings and add a client ID and secret. Until then, evaluations are booked without a calendar event or meeting link."
+msgstr "Activez Google dans les paramètres Google et renseignez un ID client et une clé secrète. D'ici là, les évaluations sont réservées sans événement de calendrier ni lien de rencontre."
+
+#: frontend/src/pages/Courses/Courses.vue:387
+#: lms/public/frontend/assets/Courses-C1zRufTv.js:1
+msgid "Turn what you know into lessons, quizzes and a certificate people can take at their own pace."
+msgstr "Transformez vos connaissances en leçons, quiz et certificat, que chacun peut suivre à son rythme."
+
+#: lms/public/frontend/assets/index-DCdF5rjc.js:6
+msgid "Unable to add category"
+msgstr "Impossible d'ajouter la catégorie"
+
+#: lms/public/frontend/assets/index-DCdF5rjc.js:6
+msgid "Unable to delete category"
+msgstr "Impossible de supprimer la catégorie"
+
+#: lms/public/frontend/assets/index-DCdF5rjc.js:6
+msgid "Unable to update category"
+msgstr "Impossible de modifier la catégorie"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:222
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Use existing address"
+msgstr "Utiliser une adresse existante"
+
+#: frontend/src/components/Profile/ProfileEvaluatorHours.vue:41
+msgid "Use Mon–Fri, 09:00–17:00"
+msgstr "Utiliser lun.–ven., 09:00–17:00"
+
+#: lms/lms/bulk_enrollment.py:282
+#, python-brace-format
+msgid "User {0} is disabled."
+msgstr "L'utilisateur {0} est désactivé."
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:534
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+msgid "Varies"
+msgstr "Variable"
+
+#: frontend/src/components/Enrollment/EnrollPaymentPanel.vue:388
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "What you enter applies to these {0}. Empty fields use the details for all."
+msgstr "Ce que vous saisissez s'applique à ces {0}. Les champs vides reprennent les informations de tous."
+
+#: frontend/src/pages/Statistics.vue:128
+#: lms/public/frontend/assets/Statistics-CdzFmYQo.js:1
+msgid "When learners finish a course, you will see how many completed out of everyone enrolled."
+msgstr "Lorsque les apprenants terminent un cours, vous voyez combien l'ont achevé parmi l'ensemble des inscrits."
+
+#: frontend/src/pages/AssignmentSubmissions.vue:118
+#: lms/public/frontend/assets/AssignmentSubmissions-Ca_xhBfW.js:1
+msgid "Work that learners hand in for your assignments shows up here, ready for you to grade."
+msgstr "Les travaux remis par les apprenants pour vos attributions apparaissent ici, prêts à être notés."
+
+#: frontend/src/pages/Questions.vue:131
+#: lms/public/frontend/assets/Questions-CrUHu-vQ.js:1
+msgid "Write a question once and reuse it in any quiz you build."
+msgstr "Rédigez une question une seule fois et réutilisez-la dans n'importe quel quiz."
+
+#: lms/lms/bulk_enrollment.py:57
+#, python-brace-format
+msgid "You can enroll at most {0} students at a time. Remove {1} and try again."
+msgstr "Vous pouvez inscrire au maximum {0} étudiants à la fois. Retirez {1} et réessayez."
+
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "You can enroll up to {0} students at a time."
+msgstr "Vous pouvez inscrire jusqu'à {0} étudiants à la fois."
+
+#: lms/lms/api.py:1087
+msgid "You can only change your own availability."
+msgstr "Vous ne pouvez modifier que vos propres disponibilités."
+
+#: frontend/src/pages/ProfileEvaluator.vue:32
+msgid "You can't change your availability while the site is updating."
+msgstr "Vous ne pouvez pas modifier vos disponibilités pendant la mise à jour du site."
+
+#: lms/lms/api.py:3643
+msgid "You cannot enroll students in this course."
+msgstr "Vous ne pouvez pas inscrire d'étudiants à ce cours."
+
+#: lms/lms/bulk_enrollment.py:403
+#, python-brace-format
+msgid "You cannot enroll students in this {0}."
+msgstr "Vous ne pouvez pas inscrire d'étudiants dans ce {0}."
+
+#: lms/lms/api.py:3604
+msgid "You cannot record payments for this batch."
+msgstr "Vous ne pouvez pas enregistrer de paiements pour ce lot."
+
+#: lms/lms/api.py:3665
+msgid "You cannot record payments for this course."
+msgstr "Vous ne pouvez pas enregistrer de paiements pour ce cours."
+
+#: lms/lms/api.py:960
+msgid "You have no Google Calendar to disconnect."
+msgstr "Vous n'avez aucun Google Agenda à déconnecter."
+
+#: lms/lms/day1_email.py:76
+msgid "Your first course is one step away"
+msgstr "Votre premier cours n'est plus qu'à une étape"
+
+#: lms/lms/api.py:1071
+#, python-brace-format
+msgid "{0} doesn't have the Batch Evaluator role, so they have no availability to set."
+msgstr "{0} n'a pas le rôle d'évaluateur de lot : il n'a donc aucune disponibilité à définir."
+
+#: frontend/src/components/Profile/ProfileEvaluatorDay.vue:44
+#, python-brace-format
+msgid "{0} end time"
+msgstr "Heure de fin ({0})"
+
+#: lms/lms/bulk_enrollment.py:193
+#, python-brace-format
+msgid "{0} for {1} cannot be empty."
+msgstr "{0} pour {1} ne peut pas être vide."
+
+#: lms/lms/bulk_enrollment.py:188
+#, python-brace-format
+msgid "{0} for {1} must be text."
+msgstr "{0} pour {1} doit être du texte."
+
+#: lms/lms/bulk_enrollment.py:166
+#, python-brace-format
+msgid "{0} has a linked payment, so their payment details cannot be changed."
+msgstr "{0} a un paiement lié : ses coordonnées de paiement ne peuvent donc pas être modifiées."
+
+#: lms/lms/bulk_enrollment.py:115
+#, python-brace-format
+msgid "{0} is missing {1}. Fill these in, or clear the address to record none."
+msgstr "Il manque {1} à {0}. Renseignez-les, ou effacez l'adresse pour n'en enregistrer aucune."
+
+#: lms/lms/bulk_enrollment.py:39
+#, python-brace-format
+msgid "{0} is not valid JSON. Send it as a JSON value and try again."
+msgstr "{0} n'est pas un JSON valide. Envoyez-le sous forme de valeur JSON et réessayez."
+
+#: lms/lms/day1_email.py:99
+#, python-brace-format
+msgid "{0} is ready to publish"
+msgstr "{0} est prêt à être publié"
+
+#: lms/lms/bulk_enrollment.py:100
+#, python-brace-format
+msgid "{0} names an address that does not exist. Choose an existing address."
+msgstr "{0} désigne une adresse qui n'existe pas. Choisissez une adresse existante."
+
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0} seats left, {1} selected"
+msgstr "{0} places restantes, {1} sélectionné(s)"
+
+#: frontend/src/components/Profile/ProfileEvaluatorDay.vue:31
+#, python-brace-format
+msgid "{0} start time"
+msgstr "Heure de début ({0})"
+
+#: frontend/src/components/Enrollment/EnrollStudentsForm.vue:514
+#: frontend/src/components/Enrollment/enrollment.ts:369
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0} students"
+msgstr "{0} étudiants"
+
+#: frontend/src/components/Enrollment/enrollment.ts:136
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0} students could not be enrolled"
+msgstr "{0} étudiants n'ont pas pu être inscrits"
+
+#: frontend/src/components/Enrollment/enrollment.ts:126
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0} students enrolled"
+msgstr "{0} étudiants inscrits"
+
+#: frontend/src/components/Enrollment/EnrollSelectionBanner.vue:105
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0} students selected"
+msgstr "{0} étudiants sélectionnés"
+
+#: frontend/src/components/Enrollment/enrollment.ts:131
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0} students upgraded to certificate"
+msgstr "{0} étudiants passés à l'option certificat"
+
+#: frontend/src/pages/Forms/QuizForm.vue:1012
+#: lms/public/frontend/assets/QuizForm-ha-yByCA.js:1
+#, python-brace-format
+msgid "{0} Your changes are not saved."
+msgstr "{0} Vos modifications ne sont pas enregistrées."
+
+#: frontend/src/utils/quizSummary.ts:32
+#: lms/public/frontend/assets/quizSummary-CvI3lKpf.js:1
+#, python-brace-format
+msgid "{0} {1} allowed"
+msgstr "{0} {1} autorisé(s)"
+
+#: lms/lms/bulk_enrollment.py:76
+#, python-brace-format
+msgid "{0} {1} does not exist. Choose an existing {0}."
+msgstr "{0} {1} n'existe pas. Choisissez un {0} existant."
+
+#: frontend/src/utils/quizSummary.ts:26
+#: lms/public/frontend/assets/quizSummary-CvI3lKpf.js:1
+#, python-brace-format
+msgid "{0} {1} left"
+msgstr "{0} {1} restant(s)"
+
+#: frontend/src/components/Enrollment/enrollment.ts:149
+#: lms/public/frontend/assets/EnrollStudentsForm-CHOBAVYX.js:1
+#, python-brace-format
+msgid "{0}: {1}, and {2} more"
+msgstr "{0} : {1}, et {2} de plus"
+
+#: frontend/src/utils/evaluatorAvailability.ts:123
+#: lms/public/frontend/assets/ProfileEvaluator-DdeY3wbA.js:1
+#, python-brace-format
+msgid "{0}h"
+msgstr "{0} h"
