@@ -1,0 +1,1 @@
+var e=/^(https?:|\/(?![/\\])|#|mailto:)/i,t=/[\u0000-\u0020]/g,n=/^data:image\/(jpeg|png|webp);base64,/i,r=(r,i={})=>{if(!r)return;let a=r.replace(t,``);return e.test(a)||i.inlineImage&&n.test(a)?r:void 0};export{r as t};

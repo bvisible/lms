@@ -1,0 +1,1 @@
+import{t as e}from"./safeUrl-CdIuKdYt.js";var t=t=>{let n=e(t);n&&window.open(n,`_blank`,`noopener`)};export{t};

@@ -1,1 +1,0 @@
-throw Error(`Could not resolve "@codemirror/lang-python" imported by "frappe-ui". Is it installed?`);
