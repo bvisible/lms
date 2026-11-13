@@ -23,7 +23,17 @@ export default function translationPlugin(app) {
 	if (!window.translatedMessages) fetchTranslations()
 }
 
-function translate(message) {
+//// Neoffice — backport of upstream develop 3179f026c (15 October 2026): `__` also takes its values the Desk way,
+//// __('{0} students', [n]), and returns a string. The version-15 line's bulk-enrollment screens call it so, while its
+//// translate() ignored the list and returned the `{ format }` object: the dialog's count and its Enroll button read "{}".
+//// Remove when upstream's version-15 line carries the same change.
+function fill(message, args) {
+	return message.replace(/{(\d+)}/g, function (match, number) {
+		return typeof args[number] != 'undefined' ? args[number] : match
+	})
+}
+
+function translate(message, replace) {
 	//// Neoffice — read the ref here, so every render and every computed that translates depends on it and runs again
 	//// when the dictionary lands. Without it a cold visit kept the labels of the first render in English (« Courses »,
 	//// « New Course » under a page already titled « Cours »), neoffice-maintenance#1250. Harmless outside a render.
@@ -31,20 +41,15 @@ function translate(message) {
 	let translatedMessages = window.translatedMessages || {}
 	let translatedMessage = translatedMessages[message] || message
 
+	if (Array.isArray(replace)) return fill(translatedMessage, replace) //// Neoffice — see fill() above
+
 	const hasPlaceholders = /{\d+}/.test(message)
 	if (!hasPlaceholders) {
 		return translatedMessage
 	}
 	return {
 		format: function (...args) {
-			return translatedMessage.replace(
-				/{(\d+)}/g,
-				function (match, number) {
-					return typeof args[number] != 'undefined'
-						? args[number]
-						: match
-				}
-			)
+			return fill(translatedMessage, args) //// Neoffice — see fill() above
 		},
 	}
 }
