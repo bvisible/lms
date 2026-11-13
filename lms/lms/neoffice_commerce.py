@@ -1262,17 +1262,19 @@ CART_DOCTYPES = ("Quotation Item", "Sales Order Item", "Sales Invoice Item")
 
 
 def setup_cart_fields():
-    """Le marquage qui dit « cette ligne est une offre de cours », et laquelle.
+    """The marking that says "this line is a course offer", and which one.
 
-    🔑 Deux champs et pas un : `lms_offer` porte le libellé — ce que le client a
-    choisi, lisible sur sa facture — et `lms_months` porte la durée, qui est ce
-    qui accorde réellement l'accès. Un seul entier ne suffirait pas : **zéro
-    signifie permanent**, on ne pourrait donc pas distinguer « offre permanente »
-    de « pas d'offre du tout ». Le libellé sert de présence.
+    Two fields, not one: `lms_offer` carries the label (what the customer chose, readable
+    on the invoice) and `lms_months` the duration, which is what actually grants access.
+    A single integer would not do: **zero means permanent**, so "permanent offer" could not
+    be told from "no offer at all". The label is the presence.
 
-    La durée est FIGÉE sur la ligne, pas relue au moment du paiement : entre
-    l'achat et l'encaissement, la table des offres a pu changer, et le client a
-    droit à ce qu'il a acheté.
+    The duration is FROZEN on the line, not read again at payment: between the purchase and
+    the payment the offer table may have changed, and the customer is owed what they bought.
+
+    Both fields show only on a line that carries an offer (maintenance#1469): read-only, and
+    `lms_months` an Int, so every invoice, order and quotation line showed « Mois d'accès » at
+    0, whatever it sold. Run at every migrate, so the condition reaches the sites with it.
     """
     from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
@@ -1287,6 +1289,7 @@ def setup_cart_fields():
                     "read_only": 1,
                     "no_copy": 0,
                     "print_hide": 0,
+                    "depends_on": "eval:doc.lms_offer",
                 },
                 {
                     "fieldname": "lms_months",
@@ -1295,6 +1298,7 @@ def setup_cart_fields():
                     "insert_after": "lms_offer",
                     "read_only": 1,
                     "print_hide": 1,
+                    "depends_on": "eval:doc.lms_offer",
                 },
             ]
             for dt in CART_DOCTYPES
