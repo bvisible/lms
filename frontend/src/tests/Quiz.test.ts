@@ -659,12 +659,27 @@ describe('Quiz closed while submitting', () => {
 		return () => vi.useRealTimers()
 	})
 
-	it('submits by beacon when the page closes on an idle attempt', async () => {
+	//// Neoffice — upstream beacons an idle attempt (nothing answered); ours sends nothing then (Quiz.vue).
+	//// The beacon is proven on an attempt with an answer, recorded the way a closing page records it
+	//// (beforeunload, then pagehide), and the idle case by the test after it.
+	it('submits by beacon when the page closes on an answered attempt', async () => {
 		const wrapper = await startAttempt()
+		await wrapper.findAll('input[type="radio"]')[0].trigger('change')
+		window.dispatchEvent(new Event('beforeunload'))
 		window.dispatchEvent(new Event('pagehide'))
 
 		expect(sendBeacon).toHaveBeenCalledTimes(1)
 		expect(beaconReason()).toBe('browser_closed')
+		wrapper.unmount()
+	})
+
+	//// Neoffice — added: opening a quiz and leaving spends no attempt.
+	it('sends nothing when the page closes on an idle attempt', async () => {
+		const wrapper = await startAttempt()
+		window.dispatchEvent(new Event('beforeunload'))
+		window.dispatchEvent(new Event('pagehide'))
+
+		expect(sendBeacon).not.toHaveBeenCalled()
 		wrapper.unmount()
 	})
 

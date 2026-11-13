@@ -1095,7 +1095,10 @@ const updateVideoWatchDuration = () => {
 const attachVideoEndedListeners = () => {
 	const onVideoEnded = () => {
 		//// Neoffice — a lesson with several films is validated at the end of the last one, not of the first (upstream: any film).
-		if (allFilmsWatched(pageFilms())) markProgress()
+		//// The films are the page's <video> elements: a lesson whose players are all iframes (YouTube, Vimeo, Bunny Stream)
+		//// has none, and the end of its player completes it, as upstream does.
+		const films = pageFilms()
+		if (!films.length || allFilmsWatched(films)) markProgress()
 		trackVideoWatchDuration()
 	}
 

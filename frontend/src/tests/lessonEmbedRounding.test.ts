@@ -176,9 +176,10 @@ describe('markdown lesson embeds', () => {
 		"{{ Embed('https://example.com/widget') }}",
 	].join('\n\n')
 
+	//// Neoffice — the film keeps the look validated on 10 October 2026 (LessonContent.vue): no card, 24px above
+	//// and below, rounded corners on the film itself. It is proven by the test after this one.
 	it.each([
 		['YouTube', '.video-player'],
-		['video', 'video'],
 		['PDF', 'iframe[type="application/pdf"]'],
 		['audio', 'audio'],
 		['embed', 'iframe[title="Embedded content"]'],
@@ -189,6 +190,20 @@ describe('markdown lesson embeds', () => {
 		})
 
 		expectCard(wrapper.find(selector).element.parentElement)
+		wrapper.unmount()
+	})
+
+	//// Neoffice — added: the film's own look (see above).
+	it('rounds the video itself, with the lesson spacing', () => {
+		const wrapper = mount(LessonContent, {
+			props: { content },
+			global: { mocks: { __: (text: string) => text } },
+		})
+
+		const video = wrapper.find('video').element as HTMLVideoElement
+		expect(video.style.borderRadius).toBe('10px')
+		expect(video.style.marginTop).toBe('24px')
+		expect(video.style.marginBottom).toBe('24px')
 		wrapper.unmount()
 	})
 })

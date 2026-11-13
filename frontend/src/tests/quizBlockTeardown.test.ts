@@ -106,18 +106,35 @@ import { Quiz } from '@/utils/quiz'
 const sendBeacon = vi.fn(() => true)
 let tools: Quiz[] = []
 
+//// Neoffice — the lesson shows a card and the quiz runs in a window teleported to <body> (QuizBlock.vue):
+//// the block is opened ("Take the quiz") before the quiz itself is reached, and its controls are found in the
+//// document, not in the block's wrapper.
 const renderQuizBlock = async (): Promise<Quiz> => {
 	const tool = new Quiz({ data: { quiz: 'quiz-a' }, readOnly: true })
 	document.body.append(tool.render())
 	tools.push(tool)
 	await flushPromises()
+	//// Neoffice — open the quiz window (see above).
+	Array.from(tool.wrapper.querySelectorAll('button'))
+		.find((button) => button.textContent?.trim() === 'Take the quiz')!
+		.click()
+	await flushPromises()
 	return tool
 }
 
-const startButton = (tool: Quiz) =>
-	Array.from(tool.wrapper.querySelectorAll('button')).find(
+//// Neoffice — "Start Quiz" is in the window, in <body> (see above).
+const startButton = (_tool: Quiz) =>
+	Array.from(document.querySelectorAll('button')).find(
 		(button) => button.textContent?.trim() === 'Start Quiz'
 	)
+
+//// Neoffice — an answer is recorded the way a closing page records it (beforeunload, then pagehide): the
+//// beacon goes out only for an attempt with an answer (Quiz.vue, "nothing answered, nothing sent").
+const answerFirstQuestion = (): void => {
+	const choice = document.querySelector<HTMLInputElement>('input[type="radio"]')!
+	choice.checked = true
+	choice.dispatchEvent(new Event('change'))
+}
 
 const CSRF_TOKEN = 'test-csrf-token'
 
@@ -125,6 +142,8 @@ const beaconOnPageHide = async (): Promise<[string, URLSearchParams]> => {
 	const tool = await renderQuizBlock()
 	startButton(tool)!.click()
 	await flushPromises()
+	answerFirstQuestion() //// Neoffice — see answerFirstQuestion
+	window.dispatchEvent(new Event('beforeunload'))
 
 	window.dispatchEvent(new Event('pagehide'))
 
@@ -163,7 +182,8 @@ describe('tearing down an inline quiz keeps the completion gate shut', () => {
 		const tool = await renderQuizBlock()
 		startButton(tool)!.click()
 		await flushPromises()
-		const choice = tool.wrapper.querySelector<HTMLInputElement>(
+		//// Neoffice — the quiz is in its window, in <body>, not in the block's wrapper.
+		const choice = document.querySelector<HTMLInputElement>(
 			'input[type="radio"]'
 		)!
 		choice.checked = true
@@ -197,6 +217,18 @@ describe('tearing down an inline quiz keeps the completion gate shut', () => {
 		expect(body.has('csrf_token')).toBe(false)
 	})
 
+	//// Neoffice — added: leaving a started quiz nobody answered spends no attempt (Quiz.vue).
+	it('sends nothing on pagehide when no question was answered', async () => {
+		const tool = await renderQuizBlock()
+		startButton(tool)!.click()
+		await flushPromises()
+		window.dispatchEvent(new Event('beforeunload'))
+		window.dispatchEvent(new Event('pagehide'))
+
+		expect(sendBeacon).not.toHaveBeenCalled()
+		expect(submitted).not.toContain(SUBMIT_URL)
+	})
+
 	it('starts a remounted quiz from the beginning, with no result to show', async () => {
 		const first = await renderQuizBlock()
 		startButton(first)!.click()
@@ -207,7 +239,7 @@ describe('tearing down an inline quiz keeps the completion gate shut', () => {
 		const second = await renderQuizBlock()
 
 		expect(startButton(second)).toBeDefined()
-		expect(second.wrapper.textContent).not.toContain('Quiz result')
+		expect(document.body.textContent).not.toContain('Quiz result') //// Neoffice — the window is in <body>
 		expect(submitted).not.toContain(SUBMIT_URL)
 	})
 })
