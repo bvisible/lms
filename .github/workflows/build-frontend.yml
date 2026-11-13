@@ -35,9 +35,11 @@ jobs:
       # //// Neoffice — the SPA depends on `@framework/ui`, linked to ../../frappe/ui from
       # //// frontend/ (upstream 2.62+). The repository therefore has to sit at apps/lms with
       # //// frappe's `ui` directory beside it at apps/frappe/ui, as upstream's own build
-      # //// (build-and-commit-assets.yml) lays it out. Upstream takes frappe `develop`; this build
-      # //// pins the commit the committed assets were last built and tested with, so a rebuild of
-      # //// the same sources gives the same assets. Move the pin only with a build checked on osiris.
+      # //// (build-and-commit-assets.yml) lays it out. Upstream's version-15 line tests against frappe
+      # //// `version-16`'s `ui`; this build pins the commit the committed assets were last built and
+      # //// tested with, so a rebuild of the same sources gives the same assets: since 2026-11-13,
+      # //// frappe v16.55.2 (`3d1284c5`), the `version-16` commit lms v15.0.0 was released against.
+      # //// Move the pin only with a build checked on osiris.
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +49,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: frappe/frappe
-          ref: 969af6156332e21603b8cee79671e38edba232c0
+          ref: 3d1284c5fdb52207a516a49bbf2fd186cb43b3ab
           path: apps/frappe
           sparse-checkout: ui
 

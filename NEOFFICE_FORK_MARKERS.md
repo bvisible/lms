@@ -10,12 +10,35 @@ inside an opening tag). The checker (`bvisible/neoffice-ci` → `scripts/fork_ma
 reads this file and treats a not-commentable path named here as marked.
 
 ```bash
-python3 fork_markers.py check --base c51661b164acd7df87e54a6d8d47a4e67985ff68 --head HEAD
+python3 fork_markers.py check --base 8db37c3fb9baa094315a5fa343b6aff5e7b7b56b --head HEAD
 ```
 
 ## lms
 
 ### The true base (do not trust the branch name)
+
+> **2026-11-13 — the fork follows upstream's `version-15` line.** `frappe/lms` now maintains a
+> `version-15` branch (tags `v15.x`, first `v15.0.0`), the line for frappe v15:
+> `[tool.bench.frappe-dependencies]` is `>=15.121.0,<16.0.0`. `develop` requires frappe 17, and `main`
+> (v2.x) promises nothing about v15 any more. **The base is the upstream tag `v15.0.0`**
+> (`8db37c3fb9baa094315a5fa343b6aff5e7b7b56b`, 2026-11-04, which contains `v2.69.0`); the checker is run
+> with `--base 8db37c3f`. Merge from `upstream/version-15` (`git fetch upstream version-15`), never from
+> `main` or `develop` again. The `version-15` line backports `main`'s fixes as other commits, so the first
+> merge from it cost 20 conflicts instead of 12; later ones follow that line only.
+> What the 2026-11-13 merge changed in our code: upstream's `version-15` line made its own fixes for
+> frappe v15, and they replace ours — `add_students_to_batch` refuses a missing member (`require_user`),
+> `LearningSearch.build_index` no longer wraps errors, the File hook defers to core's check
+> (`core_file_has_permission`, where ours returned `None`), `get_frappe_version` comes from `frappe.utils`
+> again (frappe >=15.95), the tests use `FrappeTestCase`, `enforce_role_gates` (the `before_tests` hook)
+> makes `only_for` refuse under the test runner as our `guards_enforced()` does, and seven tests we skipped
+> on v15 run again (two skips remain: a PNG fixture, `set_value(None)` on a datetime). `markdown` and `lxml`
+> left the dependencies (upstream uses frappe's `markdown2`); our `beautifulsoup4<5` stays for suite.
+> The SPA moved to TypeScript: `Quiz.vue`, `QuizBlock.vue`, `LessonContent.vue` and `Lesson.vue` carry our
+> quiz window, "Check Answer", protected video and instance link on upstream's typed components; "nothing
+> answered, nothing sent" on leaving the page no longer applies to a proctored quiz. `build-frontend.yml`
+> builds beside frappe `v16.55.2`'s `ui` (`3d1284c5`), the `version-16` commit upstream's `v15.0.0` was
+> released against (upstream's own tests check out frappe `version-16`). `upstream-preview.yml` runs our
+> code on upstream frappe: it names no lms branch.
 
 > **2026-10-24 — the base moved to the upstream tag `v2.67.1`** (`c51661b164acd7df87e54a6d8d47a4e67985ff68`,
 > branch `main`, the line that still accepts frappe v15: `[tool.bench.frappe-dependencies]` is
@@ -35,7 +58,7 @@ python3 fork_markers.py check --base c51661b164acd7df87e54a6d8d47a4e67985ff68 --
 | Fact | Value |
 |---|---|
 | Our branch | `origin/version-15` |
-| Upstream | `frappe/lms`, default branch `develop` |
+| Upstream | `frappe/lms`, default branch `develop` (since 2026-11-13 this fork follows its `version-15` branch, see above) |
 | **BASE** | **`8e3b5d8eb4d3f26dbf14c0bf4d6522702d20ffbc`** — 2026-07-29, "Merge pull request #2621 from Bowrna/fix_link_open_in_newtab" |
 | How it was found | `git merge-base origin/version-15 upstream/develop` **and** `… upstream/main` both answer this same commit; it is an ancestor of both (`git merge-base --is-ancestor` → yes for `develop` and for `main`) |
 | Is upstream's tip contained in ours? | **No.** `git merge-base --is-ancestor upstream/develop origin/version-15` → no. (The webshop fork did contain it; this one does not — the branch name is not the base.) |
