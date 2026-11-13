@@ -20,7 +20,17 @@ UNSCOPED_ROLES = ("Moderator", "Batch Evaluator")
 
 class LMSBatchEnrollment(Document):
 	def after_insert(self):
-		send_confirmation_email(self)
+		# //// Neoffice — the confirmation mail is queued once the enrolment is committed, not sent from here. Our frappe
+		# //// fork sends a mail at once and its send commits (frappe.sendmail; upstream frappe queues it): sent from
+		# //// after_insert it committed in the middle of a bulk enrolment and ended its per-member savepoint
+		# //// (bulk_enrollment.enroll_each, "SAVEPOINT bulk_enroll_member does not exist"): the first student was
+		# //// enrolled, the request answered 500 and the others were never tried. Queued after the commit, an
+		# //// enrolment that is rolled back sends no mail either. Remove if our fork stops committing in sendmail.
+		frappe.enqueue(
+			"lms.lms.doctype.lms_batch_enrollment.lms_batch_enrollment.send_confirmation_email_job",
+			enrollment=self.name,
+			enqueue_after_commit=True,
+		)
 		from lms.lms.doctype.lms_live_class.lms_live_class import add_learner_to_live_classes
 
 		add_learner_to_live_classes(self.batch)
@@ -155,6 +165,13 @@ def send_confirmation_email(doc: Document | str):
 		if not doc.confirmation_email_sent and (outgoing_email_account or frappe.conf.get("mail_login")):
 			send_mail(doc)
 			frappe.db.set_value(doc.doctype, doc.name, "confirmation_email_sent", 1)
+
+
+# //// Neoffice — added function (no upstream equivalent), queued by LMSBatchEnrollment.after_insert (see there). It runs
+# //// as the user who enrolled, so send_confirmation_email asks the same question as before.
+def send_confirmation_email_job(enrollment: str):
+	if frappe.db.exists("LMS Batch Enrollment", enrollment):
+		send_confirmation_email(frappe.get_doc("LMS Batch Enrollment", enrollment))
 
 
 def send_mail(doc):
