@@ -276,7 +276,11 @@ doc_events = {
 	# Neoffice: le prix annoncé par le cours doit être celui qu'on paiera, et un
 	# cours payant que personne ne peut acheter doit le dire.
 	"LMS Course": {
-		"validate": "lms.lms.neoffice_commerce.keep_the_course_price_honest",
+		# //// Neoffice — a list now: the second guard is « one item, one offer » seen from the course (its Article field), maintenance#1074.
+		"validate": [
+			"lms.lms.neoffice_commerce.keep_the_course_price_honest",
+			"lms.lms.neoffice_commerce.refuse_a_bookable_item_on_a_course",
+		],
 		# Neoffice: publishing or withdrawing a course moves the « Our courses » menu entry, and
 		# deleting one puts it right once the course is gone (maintenance#1860).
 		# //// Neoffice — course_saved now also syncs the "Our courses" menu entry on every course save (0ae090e19 "feat(courses): the public courses page has an English address, the SPA list closes to a guest on a site with no course, the menu follows the publication (maintenance#1860)")

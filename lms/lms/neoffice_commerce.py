@@ -592,6 +592,35 @@ def refuse_course_on_a_bookable_item(doc, method=None):
     )
 
 
+def refuse_a_bookable_item_on_a_course(doc, method=None):
+    """L'autre ordre de « un article, une offre » : un cours dont l'Article est déjà réservable.
+
+    🔴 Le lien vit sur le COURS (`LMS Course.neo_item`, voir `_the_selling_item`), et
+    `Item.lms_course`, que lit `refuse_course_on_a_bookable_item`, reste vide sur tout
+    site qui est passé à ce modèle : le garde-fou d'un côté ne voyait plus rien, et
+    celui de `Booking Profile` non plus (maintenance#1074, mesuré sur osiris : quatre
+    cours publiés, quatre articles désignés, aucun refus en créant une prestation
+    réservable sur l'un d'eux). Le même refus, côté cours : le message est celui de
+    l'article, pour le même cas.
+    """
+    item = doc.get("neo_item")
+    if not item or not frappe.db.exists("DocType", "Booking Profile"):
+        return
+
+    profil = frappe.db.get_value("Booking Profile", {"item": item}, "name")
+    if not profil:
+        return
+
+    frappe.throw(
+        _(
+            "{0} is already bookable ({1}), so it cannot also sell a course: an item "
+            "carries one price, and a class and a filmed programme are rarely worth "
+            "the same. Create a second item for the course."
+        ).format(item, profil),
+        title=_("One item, one offer"),
+    )
+
+
 def _put_the_section_back_where_it_belongs():
     """Remettre la section au bon endroit sur ce qui est déjà installé.
 
