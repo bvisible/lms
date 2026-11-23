@@ -52,35 +52,6 @@ main#main-content {
 	z-index: 1;
 }
 
-/* //// Neoffice — 322dc266 « blue accent -> clay (Neoffice Design System) ». Upstream
-   //// ships frappe-ui's blue as the accent; blue is not a Neoffice brand colour (it is
-   //// only the muted "info" status), so the semantic --*-blue-* tokens are re-pointed at
-   //// clay #D68A59. Nothing upstream is deleted — the token values are overridden after
-   //// frappe-ui's, which is why this block must stay BELOW the framework import.
-   //// At the merge: keep ours; re-check only if frappe-ui renames these tokens. */
-/* === Neoffice Design System — recolor the frappe-ui blue accent to clay
-   #D68A59. Override the semantic --*-blue-* tokens so links/active/focus/
-   accent surfaces become warm clay instead of frappe blue (light + dark).
-   Primary buttons stay ink (frappe-ui solid = gray-900). */
-:root {
-	--outline-blue-1: 221 164 121;
-	--outline-blue-2: 214 138 89;
-	--surface-blue-1: 243 222 204;
-	--surface-blue-2: 214 138 89;
-	--text-ink-blue-1: 250 239 230;
-	--text-ink-blue-2: 194 114 63;
-	--text-ink-blue-3: 161 90 46;
-	--text-ink-blue-4: 126 69 35;
-}
-[data-theme="dark"] {
-	--outline-blue-1: 194 114 63;
-	--outline-blue-2: 194 114 63;
-	--surface-blue-1: 126 69 35;
-	--surface-blue-2: 214 138 89;
-	--text-ink-blue-2: 221 164 121;
-	--text-ink-blue-3: 233 197 164;
-}
-
 /* A tall dropdown menu otherwise overflows the viewport and clips its last rows. */
 .menu-content[data-slot='content'] {
 	max-height: var(--reka-popper-available-height);
