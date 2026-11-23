@@ -252,7 +252,19 @@
 		<meta name="twitter:title" content="{{ meta.title | e }}" />
 		<meta name="twitter:image" content="{{ meta.image | e }}" />
 		<meta name="twitter:description" content="{{ meta.description | e }}" />
-		<script type="module" crossorigin src="/assets/lms/frontend/assets/index-Bs96cnwa.js"></script>
+		<!-- //// Neoffice — the accent of frappe-ui (its blue scale) is repainted with the Neoffice signal by one sheet
+		     //// that neoffice_theme serves to every Vue app. It replaces the block each app copied into src/index.css,
+		     //// which set RGB triplets where frappe-ui reads colours and so never applied (measured 23.11.2026).
+		     //// A script and not a <link>: the build would try to resolve a sheet another app serves. -->
+		<script>
+			(function () {
+				var l = document.createElement("link");
+				l.rel = "stylesheet";
+				l.href = "/assets/neoffice_theme/css/spa_accent.css";
+				document.head.appendChild(l);
+			})();
+		</script>
+		<script type="module" crossorigin src="/assets/lms/frontend/assets/index-TlYoI2cc.js"></script>
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/rolldown-runtime-BCiCTKAo.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/vue.runtime.esm-bundler-CI86Q_Gg.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/Button-BXmKaeFF.js">
@@ -299,7 +311,7 @@
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/composables-DwBsWYzB.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/ResponsiveListView-D1FR1Cri.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/EmptyStateLayout-C-KnD2t3.js">
-		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/Quiz-Co4gBm7I.js">
+		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/Quiz-B91hSu5i.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/Tabs-C8F_6fUH.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/Rating-Cg2aTMMB.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/RatingField-BZwJxnbm.js">
@@ -316,7 +328,7 @@
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/dist-_JkR1-If.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/code-editor-BhfYwied.js">
 		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/ShortcutTooltip-DJKIhmOj.js">
-		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/utils-BrgEPTb6.js">
+		<link rel="modulepreload" crossorigin href="/assets/lms/frontend/assets/utils-BNxcfqoq.js">
 		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/Button-D5nhqcET.css">
 		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/DateTimePicker-DcmZpwSX.css">
 		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/Dropdown-B1tZgOiP.css">
@@ -325,7 +337,7 @@
 		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/Rating-DXFj9f7H.css">
 		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/code-editor-ZXBygZ8Q.css">
 		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/utils-CZHsSlk3.css">
-		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/index-pPqzYT7b.css">
+		<link rel="stylesheet" crossorigin href="/assets/lms/frontend/assets/index-5lmyI_r7.css">
 	<script id="vite-plugin-pwa:register-sw" src="/assets/lms/frontend/registerSW.js"></script></head>
 	<body class="sm:overscroll-y-none">
 		<div id="app">
