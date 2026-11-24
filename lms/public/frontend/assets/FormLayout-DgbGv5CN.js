@@ -1,0 +1,1 @@
+export{t as default}from"./AnnouncementForm-BQnb44nM.js";
