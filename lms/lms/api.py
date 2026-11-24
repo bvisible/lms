@@ -3368,8 +3368,9 @@ def get_progress_distribution(progressList: list):
 	return distribution
 
 
+# //// Neoffice — the reason our CI asks of a public method: a phone reads this file before anybody signs in.
 @frappe.whitelist(allow_guest=True)
-def get_pwa_manifest():
+def get_pwa_manifest():  # permission-check: ok the name and icons of the site's training page, public
 	"""Web app manifest for installing the LMS as a PWA."""
 	# //// Neoffice — the name without the brand, for a site that set none (upstream: « Frappe Learning »).
 	title = frappe.db.get_single_value("Website Settings", "app_name") or _("Learning")
