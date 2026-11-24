@@ -3371,7 +3371,8 @@ def get_progress_distribution(progressList: list):
 @frappe.whitelist(allow_guest=True)
 def get_pwa_manifest():
 	"""Web app manifest for installing the LMS as a PWA."""
-	title = frappe.db.get_single_value("Website Settings", "app_name") or "Frappe Learning"
+	# //// Neoffice — the name without the brand, for a site that set none (upstream: « Frappe Learning »).
+	title = frappe.db.get_single_value("Website Settings", "app_name") or _("Learning")
 	route = get_lms_route()
 
 	# `display` was absent, so it defaulted to "browser" and the installed app
@@ -3384,11 +3385,25 @@ def get_pwa_manifest():
 	# theme_color matches the light-mode `theme-color` meta in index.html. A
 	# manifest carries a single value, so the light one wins here and the meta
 	# tags keep handling the light/dark split.
+	# //// Neoffice — upstream's icons are its own mark: ours are rendered and served by neoffice_theme
+	# //// (neoffice_theme/home_screen.py), from the drawing the cockpit shows for this application.
+	icons = [
+		{
+			"src": f"/assets/neoffice_theme/icons/home_screen/lms/{name}-{size}.png",
+			"sizes": f"{size}x{size}",
+			"type": "image/png",
+			"purpose": purpose,
+		}
+		for name, purpose in (("icon", "any"), ("icon-maskable", "maskable"))
+		for size in (192, 512)
+	]
+
 	manifest = {
 		"id": route,
 		"name": title,
 		"short_name": title,
-		"description": "Easy to use, 100% open source Learning Management System",
+		# //// Neoffice — what the cockpit says of the application (upstream: its own slogan).
+		"description": _("E-learning platform"),
 		"start_url": route,
 		"scope": route,
 		"display": "standalone",
@@ -3403,26 +3418,7 @@ def get_pwa_manifest():
 		# Website Settings' banner_image is deliberately NOT a source here. It is
 		# a wide banner, and it was being declared as 192x192, so any site that
 		# set one got a squashed app icon.
-		"icons": [
-			{
-				"src": "/assets/lms/frontend/manifest/manifest-icon-192.maskable.png",
-				"sizes": "192x192",
-				"type": "image/png",
-				"purpose": "any",
-			},
-			{
-				"src": "/assets/lms/frontend/manifest/manifest-icon-512.maskable.png",
-				"sizes": "512x512",
-				"type": "image/png",
-				"purpose": "any",
-			},
-			{
-				"src": "/assets/lms/frontend/manifest/manifest-icon-512.maskable.png",
-				"sizes": "512x512",
-				"type": "image/png",
-				"purpose": "maskable",
-			},
-		],
+		"icons": icons,  # //// Neoffice — ours, above; upstream lists its own mark here.
 	}
 
 	return Response(json.dumps(manifest), status=200, content_type="application/manifest+json")

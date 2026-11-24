@@ -33,8 +33,13 @@ def get_context():
 	if guest_gets_page_not_found(app_path):
 		raise frappe.DoesNotExistError
 
-	favicon = frappe.db.get_single_value("Website Settings", "favicon") or "/assets/lms/frontend/favicon.png"
-	title = frappe.db.get_single_value("Website Settings", "app_name") or "Frappe Learning"
+	# //// Neoffice — a site that set no favicon and no name shows ours (neoffice_theme/home_screen.py), not upstream's mark
+	# //// and « Frappe Learning ».
+	favicon = (
+		frappe.db.get_single_value("Website Settings", "favicon")
+		or "/assets/neoffice_theme/icons/home_screen/lms/icon-96.png"
+	)
+	title = frappe.db.get_single_value("Website Settings", "app_name") or _("Learning")
 
 	context.meta = get_meta(app_path, title, favicon)
 	context.title = title
