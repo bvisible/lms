@@ -40,8 +40,9 @@ export const sessionStore = defineStore('lms-session', () => {
 		onSuccess(data) {
 			brand.name = data.app_name
 			brand.logo = data.app_logo
-			brand.favicon =
-				data.favicon?.file_url || '/assets/lms/frontend/learning.svg'
+			//// Neoffice — upstream falls back on its own mark, which replaced the icon of the page (the site's, or ours:
+			//// lms/www/_lms.py) on every screen without the cockpit, a phone's first. Without one, the page keeps its own.
+			brand.favicon = data.favicon?.file_url
 		},
 	})
 
