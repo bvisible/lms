@@ -53,8 +53,11 @@ class TestPWAManifest(BaseTestUtils):
 
 		sources = [icon["src"] for icon in _manifest()["icons"]]
 
+		# //// Neoffice — upstream served its own mark from /assets/lms/frontend/manifest/; our icons
+		# //// are rendered by neoffice_theme (d9bdb0878). The point of the test stays: never the banner.
 		for src in sources:
-			self.assertTrue(src.startswith("/assets/lms/frontend/manifest/"))
+			self.assertTrue(src.startswith("/assets/neoffice_theme/icons/home_screen/lms/"))
+			self.assertNotIn("wide-banner", src)
 
 	def test_name_follows_website_settings(self):
 		original = frappe.db.get_single_value("Website Settings", "app_name")
